@@ -10,9 +10,9 @@ using System.Windows.Forms;
 
 namespace CSharpGameServer
 {
-    public partial class MainForm : Form
+    public partial class ServerMainForm : Form
     {
-        public MainForm()
+        public ServerMainForm()
         {
             InitializeComponent();
         }
