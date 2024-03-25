@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
+﻿using System.Net;
 using System.Net.Sockets;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace CSharpGameServer.Core
 {
@@ -23,7 +19,7 @@ namespace CSharpGameServer.Core
         {
             get
             {
-                if(instance == null)
+                if (instance == null)
                 {
                     instance = new ServerCore();
                 }
@@ -64,23 +60,23 @@ namespace CSharpGameServer.Core
 
         private void StartAccept()
         {
-            SocketAsyncEventArgs socketAsyncEventArgs = new SocketAsyncEventArgs();
-            socketAsyncEventArgs.Completed += AcceptCompleted;
+            SocketAsyncEventArgs acceptEventArgs = new SocketAsyncEventArgs();
+            acceptEventArgs.Completed += AcceptCompleted;
 
             if (listenSocket == null)
             {
                 return;
             }
 
-            if (listenSocket.AcceptAsync(socketAsyncEventArgs) == false)
+            if (listenSocket.AcceptAsync(acceptEventArgs) == false)
             {
-                ProcessAccept(socketAsyncEventArgs);
+                ProcessAccept(acceptEventArgs);
             }
         }
 
-        private void ProcessAccept(SocketAsyncEventArgs socketAsyncEventArgs)
+        private void ProcessAccept(SocketAsyncEventArgs acceptEventArgs)
         {
-            Socket? clientSocket = socketAsyncEventArgs.AcceptSocket;
+            Socket? clientSocket = acceptEventArgs.AcceptSocket;
             if (clientSocket == null)
             {
                 return;
@@ -93,10 +89,10 @@ namespace CSharpGameServer.Core
                 return;
             }
 
-            // StartReceive()?
+            StartReceive(newClient);
 
             clientDict.Add(newSessionId, newClient);
-            socketAsyncEventArgs.Completed += (sender, args) =>
+            acceptEventArgs.Completed += (sender, args) =>
             {
                 if (args.SocketError != SocketError.Success)
                 {
@@ -104,22 +100,81 @@ namespace CSharpGameServer.Core
                 }
             };
 
-            socketAsyncEventArgs.AcceptSocket = null;
+            acceptEventArgs.AcceptSocket = null;
         }
 
-        private void AcceptCompleted(object? sender, SocketAsyncEventArgs socketAsyncEventArgs)
+        private void AcceptCompleted(object? sender, SocketAsyncEventArgs acceptEventArgs)
         {
-            ProcessAccept(socketAsyncEventArgs);
+            ProcessAccept(acceptEventArgs);
             StartAccept();
         }
 
-        private void CloseClient(ulong closeClientSessionid)
+        private void StartReceive(Client client)
         {
-            var closeClient = clientDict[closeClientSessionid];
+            var receiveEventArgs = new SocketAsyncEventArgs();
+            // bufferSize를 몇으로 정해야할지?
+            //receiveEventArgs.SetBuffer(new byte[bufferSize], 0, bufferSize);
+            receiveEventArgs.Completed += ReceiveCompleted;
+            receiveEventArgs.UserToken = client;
+
+            if (client.socket.ReceiveAsync(receiveEventArgs) == false)
+            {
+                ProcessReceive(receiveEventArgs);
+            }
+        }
+
+        private void ReceiveCompleted(object? sender, SocketAsyncEventArgs receiveEventArgs)
+        {
+            if (receiveEventArgs.UserToken == null)
+            {
+                return;
+            }
+
+            ProcessReceive(receiveEventArgs);
+            StartReceive((Client)receiveEventArgs.UserToken);
+        }
+
+        private void ProcessReceive(SocketAsyncEventArgs receiveEventArgs)
+        {
+            if (receiveEventArgs.UserToken == null)
+            {
+                return;
+            }
+
+            var receivedClient = (Client)receiveEventArgs.UserToken;
+            if (receiveEventArgs.SocketError == SocketError.Success && receiveEventArgs.BytesTransferred > 0)
+            {
+                if (receiveEventArgs.Buffer == null)
+                {
+                    return;
+                }
+
+                string receivedData = Encoding.ASCII.GetString(receiveEventArgs.Buffer, receiveEventArgs.Offset, receiveEventArgs.BytesTransferred);
+                receivedClient.OnReceived(receivedData);
+            }
+            else
+            {
+                CloseClient(receivedClient.clientSessionId);
+            }
+        }
+
+        public void Send(Client client, string inData)
+        {
+            byte[] data = Encoding.ASCII.GetBytes(inData);
+            var sendEventArgs = new SocketAsyncEventArgs();
+            sendEventArgs.SetBuffer(data, 0, data.Length);
+            sendEventArgs.UserToken = client;
+
+            client.socket.SendAsync(sendEventArgs);
+        }
+
+        private void CloseClient(ulong closedClientSessionid)
+        {
+            var closeClient = clientDict[closedClientSessionid];
             if (closeClient != null)
             {
                 closeClient.OnClosed();
-                clientDict.Remove(closeClientSessionid);
+                clientDict.Remove(closedClientSessionid);
             }
         }
     }

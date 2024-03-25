@@ -9,13 +9,18 @@ namespace CSharpGameServer.Core
 {
     public class Client
     {
-        private Socket socket;
-        private ulong clientSessionId;
+        public Socket socket { get; }
+        public ulong clientSessionId { get; }
 
         public Client(Socket inSocket, ulong inClientSessionId) 
         {
             socket = inSocket;
             clientSessionId = inClientSessionId;
+        }
+
+        public void OnReceived(string data)
+        {
+
         }
 
         public void OnClosed()
