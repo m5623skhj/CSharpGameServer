@@ -2,7 +2,7 @@
 
 namespace CSharpGameServer.Protocol
 {
-    public enum PacketType
+    public enum PacketType : int
     { 
         InvalidPacketType = 0,
     }
