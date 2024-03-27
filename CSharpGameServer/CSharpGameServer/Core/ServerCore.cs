@@ -1,4 +1,5 @@
-﻿using System.Net;
+﻿using CSharpGameServer.Protocol;
+using System.Net;
 using System.Net.Sockets;
 using System.Text;
 
@@ -12,6 +13,8 @@ namespace CSharpGameServer.Core
         private int port = 0;
         private int backlogSize = 0;
         private ulong atomicSessionId = 1;
+
+        private const int bufferSize = 2048;
 
         private Dictionary<ulong, Client> clientDict = new Dictionary<ulong, Client>();
 
@@ -112,8 +115,7 @@ namespace CSharpGameServer.Core
         private void StartReceive(Client client)
         {
             var receiveEventArgs = new SocketAsyncEventArgs();
-            // bufferSize를 몇으로 정해야할지?
-            //receiveEventArgs.SetBuffer(new byte[bufferSize], 0, bufferSize);
+            receiveEventArgs.SetBuffer(new byte[bufferSize], 0, bufferSize);
             receiveEventArgs.Completed += ReceiveCompleted;
             receiveEventArgs.UserToken = client;
 
@@ -142,20 +144,34 @@ namespace CSharpGameServer.Core
             }
 
             var receivedClient = (Client)receiveEventArgs.UserToken;
-            if (receiveEventArgs.SocketError == SocketError.Success && receiveEventArgs.BytesTransferred > 0)
-            {
-                if (receiveEventArgs.Buffer == null)
-                {
-                    return;
-                }
-
-                string receivedData = Encoding.ASCII.GetString(receiveEventArgs.Buffer, receiveEventArgs.Offset, receiveEventArgs.BytesTransferred);
-                receivedClient.OnReceived(receivedData);
-            }
-            else
+            if (receiveEventArgs.SocketError != SocketError.Success 
+                || receiveEventArgs.BytesTransferred <= 0
+                || receiveEventArgs.Buffer == null)
             {
                 CloseClient(receivedClient.clientSessionId);
+                return;
             }
+
+            string receivedData = Encoding.ASCII.GetString(receiveEventArgs.Buffer, receiveEventArgs.Offset, receiveEventArgs.BytesTransferred);
+            Packet? createdPacket = GetPacketFromReceivedData(receivedData);
+            if (createdPacket == null)
+            {
+                CloseClient(receivedClient.clientSessionId);
+                return;
+            }
+
+            createdPacket.HandlePacket(receivedClient);
+        }
+
+        private Packet? GetPacketFromReceivedData(string receivedData)
+        {
+            if (receivedData.Length < 4)
+            {
+                return null;
+            }
+
+            int.TryParse(receivedData.Substring(0, 4), out int packetType);
+            return PacketFactory.Instance.CreatePacket((PacketType)packetType);
         }
 
         public void Send(Client client, string inData)

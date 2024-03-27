@@ -1,4 +1,5 @@
-﻿using System.Net.Sockets;
+﻿using CSharpGameServer.Protocol;
+using System.Net.Sockets;
 
 namespace CSharpGameServer.Core
 {
@@ -11,11 +12,6 @@ namespace CSharpGameServer.Core
         {
             socket = inSocket;
             clientSessionId = inClientSessionId;
-        }
-
-        public void OnReceived(string data)
-        {
-
         }
 
         public void OnClosed()

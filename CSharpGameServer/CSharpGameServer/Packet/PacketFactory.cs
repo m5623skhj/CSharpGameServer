@@ -1,6 +1,6 @@
 ﻿using CSharpGameServer.Protocol;
 
-namespace CSharpGameServer.PacketHandler
+namespace CSharpGameServer
 {
     public class PacketFactory
     {
@@ -20,7 +20,7 @@ namespace CSharpGameServer.PacketHandler
             }
         }
 
-        public void RegisterHandler(PacketType packetType, Type packetObjectType)
+        public void RegisterPacket(PacketType packetType, Type packetObjectType)
         {
             packetTypeDict[packetType] = packetObjectType;
         }
