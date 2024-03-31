@@ -11,6 +11,6 @@ namespace CSharpGameServer.Protocol
     {
         public PacketType type = PacketType.InvalidPacketType;
 
-        public abstract void HandlePacket(Packet thisPacket, Client client);
+        public abstract void HandlePacket(Client client);
     }
 }
