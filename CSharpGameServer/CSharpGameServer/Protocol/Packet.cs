@@ -1,16 +1,47 @@
 ﻿using CSharpGameServer.Core;
+using System.Reflection.Metadata;
 
 namespace CSharpGameServer.Protocol
 {
-    public enum PacketType : int
-    { 
-        InvalidPacketType = 0,
-    }
-
-    public abstract class Packet
+    public abstract class PacketBase
     {
         public PacketType type = PacketType.InvalidPacketType;
+        public abstract void SetPacketType();
+    }
 
-        public abstract void HandlePacket(Client client);
+    public abstract class RequestPacket : PacketBase
+    {
+        protected abstract Action<Client, RequestPacket> GetHandler();
+
+        public bool RegisterPacket()
+        {
+            return PacketFactory.Instance.RegisterPacket(type, GetType()) || 
+                PacketHandlerManager.Instance.RegisterPacketHandler(type, GetHandler());
+        }
+    }
+
+    public partial class Ping : RequestPacket
+    {
+        public override void SetPacketType()
+        {
+            type = PacketType.Ping;
+        }
+
+        protected override Action<Client, RequestPacket> GetHandler()
+        {
+            return PacketHandlerManager.HandlePing;
+        }
+    }
+
+    public abstract class ReplyPacket : PacketBase
+    {
+    }
+
+    public class Pong : ReplyPacket
+    {
+        public override void SetPacketType()
+        {
+            type = PacketType.Pong;
+        }
     }
 }
