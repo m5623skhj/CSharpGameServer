@@ -1,6 +1,8 @@
 ﻿using CSharpGameServer.Protocol;
 using System.Net;
 using System.Net.Sockets;
+using System.Runtime.InteropServices;
+using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 
 namespace CSharpGameServer.Core
@@ -33,11 +35,16 @@ namespace CSharpGameServer.Core
 
         private ServerCore()
         {
+            Initialize();
         }
 
         public void Initialize()
         {
-
+            if (PacketRegisterList.RegisterAllPacket() == false)
+            {
+                Console.WriteLine("RegisterAllPacket failed");
+                return;
+            }
         }
 
         public void Run()
@@ -153,26 +160,42 @@ namespace CSharpGameServer.Core
             }
 
             string receivedData = Encoding.ASCII.GetString(receiveEventArgs.Buffer, receiveEventArgs.Offset, receiveEventArgs.BytesTransferred);
-            Packet? createdPacket = GetPacketFromReceivedData(receivedData);
+            RequestPacket? createdPacket = GetPacketFromReceivedData(receivedData);
             if (createdPacket == null)
             {
                 CloseClient(receivedClient.clientSessionId);
                 return;
             }
 
-            createdPacket.HandlePacket(receivedClient);
+            PacketHandlerManager.Instance.CallHandler(receivedClient, createdPacket);
         }
 
-        private Packet? GetPacketFromReceivedData(string receivedData)
+        private RequestPacket? GetPacketFromReceivedData(string receivedData)
         {
             return PacketFactory.Instance.CreatePacket(receivedData);
         }
 
-        public void Send(Client client, string inData)
+        public void SendPacket(Client client, ReplyPacket packet)
         {
-            byte[] data = Encoding.ASCII.GetBytes(inData);
+            SendStream(client, ReplyPacketToStream(packet));
+        }
+
+        private byte[] ReplyPacketToStream(ReplyPacket packet)
+        {
+            var packetSize = Marshal.SizeOf(packet);
+            var stream = new byte[packetSize];
+            var pointer = Marshal.AllocHGlobal(packetSize);
+            Marshal.StructureToPtr(packet, pointer, false);
+            Marshal.Copy(pointer, stream, 0, packetSize);
+            Marshal.FreeHGlobal(pointer);
+
+            return stream;
+        }
+
+        private void SendStream(Client client, byte[] inData)
+        {
             var sendEventArgs = new SocketAsyncEventArgs();
-            sendEventArgs.SetBuffer(data, 0, data.Length);
+            sendEventArgs.SetBuffer(inData, 0, inData.Length);
             sendEventArgs.UserToken = client;
 
             client.socket.SendAsync(sendEventArgs);

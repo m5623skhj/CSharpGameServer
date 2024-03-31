@@ -18,5 +18,10 @@ namespace CSharpGameServer.Core
         {
 
         }
+
+        public void Send(ReplyPacket packet)
+        {
+            ServerCore.Instance.SendPacket(this, packet);
+        }
     }
 }
