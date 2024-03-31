@@ -165,13 +165,7 @@ namespace CSharpGameServer.Core
 
         private Packet? GetPacketFromReceivedData(string receivedData)
         {
-            if (receivedData.Length < 4)
-            {
-                return null;
-            }
-
-            int.TryParse(receivedData.Substring(0, 4), out int packetType);
-            return PacketFactory.Instance.CreatePacket((PacketType)packetType);
+            return PacketFactory.Instance.CreatePacket(receivedData);
         }
 
         public void Send(Client client, string inData)

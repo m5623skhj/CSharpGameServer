@@ -1,4 +1,6 @@
 ﻿using CSharpGameServer.Protocol;
+using System.Runtime.InteropServices;
+using System.Text;
 
 namespace CSharpGameServer
 {
@@ -14,6 +16,7 @@ namespace CSharpGameServer
                 if (instance == null)
                 {
                     instance = new PacketFactory();
+                    instance.packetTypeDict.Clear();
                 }
 
                 return instance;
@@ -25,9 +28,15 @@ namespace CSharpGameServer
             packetTypeDict[packetType] = packetObjectType;
         }
 
-        public Packet? CreatePacket(PacketType packetType)
+        public Packet? CreatePacket(string receivedData)
         {
-            if (packetTypeDict.TryGetValue(packetType, out Type? packetObjectType) == false)
+            if (receivedData.Length < 4)
+            {
+                return null;
+            }
+
+            int.TryParse(receivedData.Substring(0, 4), out int packetType);
+            if (packetTypeDict.TryGetValue((PacketType)packetType, out Type? packetObjectType) == false)
             {
                 Console.WriteLine("Invalid packet type {0}", packetType);
                 return null;
@@ -39,7 +48,16 @@ namespace CSharpGameServer
                 return null;
             }
 
-            return Activator.CreateInstance(packetObjectType) as Packet;
+            byte[] recvStream = Encoding.UTF8.GetBytes(receivedData);
+            return ToStr(recvStream, packetObjectType) as Packet;
+        }
+
+        private object? ToStr(byte[] data, Type type)
+        {
+            GCHandle handle = GCHandle.Alloc(data, GCHandleType.Pinned);
+            object? result = Marshal.PtrToStructure(handle.AddrOfPinnedObject(), type);
+            handle.Free();
+            return result;
         }
     }
 }
