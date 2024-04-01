@@ -18,8 +18,6 @@ namespace CSharpGameServer.Core
 
         private const int bufferSize = 2048;
 
-        private Dictionary<ulong, Client> clientDict = new Dictionary<ulong, Client>();
-
         public static ServerCore Instance
         {
             get
@@ -101,7 +99,7 @@ namespace CSharpGameServer.Core
 
             StartReceive(newClient);
 
-            clientDict.Add(newSessionId, newClient);
+            ClientManager.Instance.InsertSessionIdToClient(newSessionId, newClient);
             acceptEventArgs.Completed += (sender, args) =>
             {
                 if (args.SocketError != SocketError.Success)
@@ -203,11 +201,11 @@ namespace CSharpGameServer.Core
 
         private void CloseClient(ulong closedClientSessionid)
         {
-            var closeClient = clientDict[closedClientSessionid];
+            var closeClient = ClientManager.Instance.FindBySessionId(closedClientSessionid);
             if (closeClient != null)
             {
                 closeClient.OnClosed();
-                clientDict.Remove(closedClientSessionid);
+                ClientManager.Instance.RemoveSessionidToClient(closedClientSessionid);
             }
         }
     }
