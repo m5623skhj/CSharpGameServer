@@ -35,7 +35,7 @@ namespace CSharpGameServer.Core
             Initialize();
         }
 
-        public void Initialize()
+        private void Initialize()
         {
             if (PacketRegisterList.RegisterAllPacket() == false)
             {
@@ -63,6 +63,11 @@ namespace CSharpGameServer.Core
             }
 
             StartAccept();
+        }
+
+        public void Stop()
+        {
+
         }
 
         private void StartAccept()

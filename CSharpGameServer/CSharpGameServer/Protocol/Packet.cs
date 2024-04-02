@@ -4,6 +4,11 @@ namespace CSharpGameServer.Protocol
 {
     public abstract class PacketBase
     {
+        public PacketBase() 
+        {
+            SetPacketType();
+        }
+
         public PacketType type = PacketType.InvalidPacketType;
         public abstract void SetPacketType();
     }
