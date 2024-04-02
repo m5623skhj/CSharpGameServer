@@ -21,8 +21,26 @@
 
         private ClientManager()
         {
+            ClearDict();
+        }
+
+        ~ClientManager()
+        {
+            ClearDict();
+        }
+
+        private void ClearDict()
+        {
             sessionIdToClientDict.Clear();
             pcIdToSessionIdDict.Clear();
+        }
+
+        public void CloseAllSession()
+        {
+            foreach (var client in sessionIdToClientDict.Values)
+            {
+                client.socket.Close();
+            }
         }
 
         public void InsertSessionIdToClient(ulong sessionId, Client client)

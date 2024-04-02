@@ -16,6 +16,7 @@ namespace CSharpGameServer.Core
         private ulong atomicSessionId = 1;
 
         private const int bufferSize = 2048;
+        private bool running = false;
 
         public static ServerCore Instance
         {
@@ -46,6 +47,8 @@ namespace CSharpGameServer.Core
 
         public void Run()
         {
+            running = true;
+
             listenSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             if (listenSocket == null) 
             {
@@ -67,7 +70,13 @@ namespace CSharpGameServer.Core
 
         public void Stop()
         {
+            running = false;
+            if (listenSocket != null)
+            {
+                listenSocket.Close();
+            }
 
+            ClientManager.Instance.CloseAllSession();
         }
 
         private void StartAccept()
@@ -75,7 +84,7 @@ namespace CSharpGameServer.Core
             SocketAsyncEventArgs acceptEventArgs = new SocketAsyncEventArgs();
             acceptEventArgs.Completed += AcceptCompleted;
 
-            if (listenSocket == null)
+            if (listenSocket == null || running == false)
             {
                 return;
             }

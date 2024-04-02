@@ -9,6 +9,7 @@ class Program
         ServerRunning();
 
         serverCore.Stop();
+        Console.WriteLine("------------  Server stopped ------------");
     }
 
     private static void ServerRunning()
