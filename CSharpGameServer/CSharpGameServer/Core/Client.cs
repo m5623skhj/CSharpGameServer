@@ -23,5 +23,10 @@ namespace CSharpGameServer.Core
         {
             ServerCore.Instance.SendPacket(this, packet);
         }
+
+        public void OnSend()
+        {
+
+        }
     }
 }
