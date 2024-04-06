@@ -6,6 +6,9 @@
         private Dictionary<ulong, Client> sessionIdToClientDict = new Dictionary<ulong, Client>();
         private Dictionary<ulong, ulong> pcIdToSessionIdDict = new Dictionary<ulong, ulong>();
 
+        object sessionIdToClientDictLock = new object();
+        object pcIdToSessionIdDictLock = new object();
+
         public static ClientManager Instance
         {
             get
@@ -31,53 +34,82 @@
 
         private void ClearDict()
         {
-            sessionIdToClientDict.Clear();
-            pcIdToSessionIdDict.Clear();
+            lock(sessionIdToClientDictLock)
+            {
+                sessionIdToClientDict.Clear();
+            }
+
+            lock(pcIdToSessionIdDictLock)
+            {
+                pcIdToSessionIdDict.Clear();
+            }
         }
 
         public void CloseAllSession()
         {
-            foreach (var client in sessionIdToClientDict.Values)
+            lock(sessionIdToClientDictLock)
             {
-                client.socket.Close();
+                foreach (var client in sessionIdToClientDict.Values)
+                {
+                    ServerCore.Instance.CloseClient(client.clientSessionId);
+                }
             }
         }
 
         public void InsertSessionIdToClient(ulong sessionId, Client client)
         {
-            sessionIdToClientDict.Add(sessionId, client);
+            lock(sessionIdToClientDictLock)
+            {
+                sessionIdToClientDict.Add(sessionId, client);
+            }
         }
 
         public void RemoveSessionidToClient(ulong sessionId)
         {
-            sessionIdToClientDict.Remove(sessionId);
+            lock (sessionIdToClientDictLock)
+            {
+                sessionIdToClientDict.Remove(sessionId);
+            }
         }
 
         public void InsertPCIdToSessionId(ulong pcId, ulong sessionId) 
         {
-            pcIdToSessionIdDict.Add(pcId, sessionId);
+            lock (pcIdToSessionIdDictLock)
+            {
+                pcIdToSessionIdDict.Add(pcId, sessionId);
+            }
         }
 
         public void RemovePCIdToSessionId(ulong pcId)
         {
-            pcIdToSessionIdDict.Remove(pcId);
+            lock (pcIdToSessionIdDictLock)
+            {
+                pcIdToSessionIdDict.Remove(pcId);
+            }
         }
 
         public Client? FindBySessionId(ulong sessionId)
         {
-            sessionIdToClientDict.TryGetValue(sessionId, out Client? client);
-            return client;
+            lock (sessionIdToClientDictLock)
+            {
+                sessionIdToClientDict.TryGetValue(sessionId, out Client? client);
+                return client;
+            }
         }
 
         public Client? FindByPCId(ulong pcId)
         {
-            bool isFinded = pcIdToSessionIdDict.TryGetValue(pcId, out ulong sessionid);
-            if (isFinded == false)
+            ulong sessionId = 0;
+            lock (pcIdToSessionIdDictLock)
             {
-                return null;
+                bool isFind = pcIdToSessionIdDict.TryGetValue(pcId, out sessionId);
+                if (isFind == false)
+                {
+                    return null;
+                }
             }
 
-            return FindBySessionId(sessionid);
+            return FindBySessionId(sessionId);
         }
     }
 }
