@@ -14,6 +14,11 @@ namespace CSharpGameServer.Core
             clientSessionId = inClientSessionId;
         }
 
+        public void CloseSession()
+        {
+            ServerCore.Instance.CloseClient(clientSessionId);
+        }
+
         public void OnClosed()
         {
 

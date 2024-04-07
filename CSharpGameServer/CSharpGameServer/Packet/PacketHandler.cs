@@ -14,6 +14,7 @@ namespace CSharpGameServer
             }
 
             Pong pong = new Pong();
+            client.Send(pong);
         }
     }
 }
