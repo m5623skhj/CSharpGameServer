@@ -1,4 +1,5 @@
-﻿using System.Net.Sockets;
+﻿using CSharpGameServer;
+using System.Net.Sockets;
 using System.Text;
 
 class Program
@@ -11,16 +12,23 @@ class Program
         TcpClient client = new TcpClient(ip, port);
         NetworkStream stream = client.GetStream();
 
-        string message = "testString";
-        byte[] sendData = Encoding.ASCII.GetBytes(message);
+        PacketType packetType = PacketType.Ping;
+        byte[] sendData = Encoding.ASCII.GetBytes(packetType.ToString());
+
         stream.Write(sendData, 0, sendData.Length);
 
         byte[] recvData = new byte[512];
-        StringBuilder builder = new StringBuilder();
         int recvBytes = stream.Read(recvData, 0, recvData.Length);
-        builder.Append(Encoding.ASCII.GetString(recvData, 0, recvBytes));
+        string packet = Encoding.ASCII.GetString(recvData, 0, recvBytes);
 
-        Console.WriteLine("Received : {0}", recvData.ToString());
+        if (Enum.TryParse(packet, out PacketType receivedPacketType))
+        {
+            Console.WriteLine("Received Packet Type : " + receivedPacketType);
+        }
+        else
+        {
+            Console.WriteLine("Failed to parse received packet type");
+        }
 
         stream.Close();
         client.Close();
