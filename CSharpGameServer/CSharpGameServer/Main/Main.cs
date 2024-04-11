@@ -6,6 +6,7 @@ class Program
     {
         ServerCore serverCore = ServerCore.Instance;
         serverCore.Run();
+        Console.WriteLine("------------  Server running  ------------");
         ServerRunning();
 
         serverCore.Stop();
@@ -14,8 +15,6 @@ class Program
 
     private static void ServerRunning()
     {
-        Console.WriteLine("------------  Server running  ------------");
-
         bool running = true;
         while (running)
         {
