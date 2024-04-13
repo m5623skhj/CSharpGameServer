@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace CSharpGameServer.Core
 {
@@ -35,9 +30,29 @@ namespace CSharpGameServer.Core
             buffer = new byte[inBufferSize];
         }
 
-        public bool PushData()
+        public bool PushData(byte[] inputData)
         {
+            uint inputSize = (uint)inputData.Length;
+            if (inputSize > GetUseSize() ||
+                inputSize == 0)
+            {
+                return false;
+            }
 
+            if (tail + inputSize > buffer.Length)
+            {
+                uint tailToBufferEnd = bufferSize - tail;
+                uint tailPos = inputSize - tailToBufferEnd;
+
+                Array.Copy(buffer, tail, inputData, 0, tailToBufferEnd);
+                Array.Copy(buffer, 0, inputData, tailToBufferEnd, tailPos);
+                tail = tailPos;
+            }
+            else
+            {
+                Array.Copy(buffer, tail, inputData, 0, inputSize);
+                tail += inputSize;
+            }
 
             return true;
         }
