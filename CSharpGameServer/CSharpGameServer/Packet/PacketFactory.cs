@@ -1,11 +1,36 @@
-﻿using CSharpGameServer.Protocol;
+﻿using CSharpGameServer.Core;
+using CSharpGameServer.Protocol;
 using System.Runtime.InteropServices;
 using System.Text;
 
 namespace CSharpGameServer
 {
+    public enum PacketResultType : short
+    {
+        Success = 0,
+        IncompleteReceived,
+        InvalidReceivedData,
+    }
+
+    public struct RequestPacketResult
+    {
+        public RequestPacketResult(RequestPacket? inPacket, PacketResultType inResultType, ushort inPacketSize = 0)
+        {
+            packet = inPacket;
+            resultType = inResultType;
+            packetLength = inPacketSize;
+        }
+
+        public RequestPacket? packet = null;
+        public PacketResultType resultType = PacketResultType.Success;
+        public ushort packetLength = 0;
+    }
+
     public class PacketFactory
     {
+        // Packet header : PacketType(4) + PacketSize(2)
+        private readonly int headerSize = 6;
+
         private static PacketFactory? instance = null;
         private Dictionary<PacketType, Type> packetTypeDict = new Dictionary<PacketType, Type>();
 
@@ -41,28 +66,45 @@ namespace CSharpGameServer
             return true;
         }
 
-        public RequestPacket? CreatePacket(string receivedData)
+        public RequestPacketResult CreatePacket(string receivedData)
         {
-            if (receivedData.Length < 4)
+            if (receivedData.Length < headerSize)
             {
-                return null;
+                return new RequestPacketResult(null, PacketResultType.IncompleteReceived);
             }
 
             int.TryParse(receivedData.Substring(0, 4), out int packetType);
             if (packetTypeDict.TryGetValue((PacketType)packetType, out Type? packetObjectType) == false)
             {
                 Console.WriteLine("Invalid packet type {0}", packetType);
-                return null;
+                return new RequestPacketResult(null, PacketResultType.InvalidReceivedData);
+            }
+
+            ushort.TryParse(receivedData.Substring(4, 2), out ushort packetLength);
+            if (packetLength > receivedData.Length)
+            {
+                return new RequestPacketResult(null, PacketResultType.IncompleteReceived);
+            }
+            else if (packetLength > StreamRingBuffer.defaultBufferSize)
+            {
+                return new RequestPacketResult(null, PacketResultType.InvalidReceivedData);
             }
 
             if (typeof(RequestPacket).IsAssignableFrom(packetObjectType) == false)
             {
                 Console.WriteLine("Packet type {0} is valid but is not assignable", packetType);
-                return null;
+                return new RequestPacketResult(null, PacketResultType.InvalidReceivedData);
             }
 
-            byte[] recvStream = Encoding.UTF8.GetBytes(receivedData);
-            return ToStr(recvStream, packetObjectType) as RequestPacket;
+            byte[] recvStream = Encoding.UTF8.GetBytes(receivedData.Substring(0, packetLength));
+            RequestPacket? packet = ToStr(recvStream, packetObjectType) as RequestPacket;
+            if (packet == null)
+            {
+                Console.WriteLine("Null RequestPacket / packet type {0}", packetType);
+                return new RequestPacketResult(null, PacketResultType.InvalidReceivedData);
+            }
+
+            return new RequestPacketResult(packet, PacketResultType.Success, packetLength);
         }
 
         private object? ToStr(byte[] data, Type type)

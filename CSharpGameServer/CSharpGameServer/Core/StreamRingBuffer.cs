@@ -86,6 +86,11 @@ namespace CSharpGameServer.Core
             return GetData(peekSize);
         }
 
+        public byte[] PeekAllData()
+        {
+            return GetData(GetUseSize());
+        }
+
         public bool EraseData(uint eraseSize)
         {
             if (GetUseSize() < eraseSize)

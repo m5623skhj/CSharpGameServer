@@ -181,20 +181,53 @@ namespace CSharpGameServer.Core
             }
 
             string receivedData = Encoding.ASCII.GetString(receiveEventArgs.Buffer, receiveEventArgs.Offset, receiveEventArgs.BytesTransferred);
-            RequestPacket? createdPacket = GetPacketFromReceivedData(receivedData);
-            if (createdPacket == null)
+            if (ProcessPacket(receivedClient, receivedData) == false)
             {
                 CloseClient(receivedClient.clientSessionId);
                 return false;
             }
 
-            PacketHandlerManager.Instance.CallHandler(receivedClient, createdPacket);
             return true;
         }
 
-        private RequestPacket? GetPacketFromReceivedData(string receivedData)
+        private bool ProcessPacket(Client receivedClient, string receivedData)
         {
-            return PacketFactory.Instance.CreatePacket(receivedData);
+            if (receivedClient.PushStreamData(Encoding.UTF8.GetBytes(receivedData)) == false)
+            {
+                return false;
+            }
+
+            byte[] storedStream = receivedClient.PeekAllStreamData();
+            int storedSize = storedStream.Length;
+            ushort bufferStartPoint = 0;
+
+            while (storedSize > 0)
+            {
+                var requestPacketResult = GetPacketFromReceivedData(bufferStartPoint, receivedData);
+                switch (requestPacketResult.resultType) 
+                {
+                    case PacketResultType.InvalidReceivedData:
+                        return false;
+                    case PacketResultType.IncompleteReceived:
+                        return true;
+                    case PacketResultType.Success:
+                        storedSize -= requestPacketResult.packetLength;
+                        bufferStartPoint += requestPacketResult.packetLength;
+                        receivedClient.RemoveStreamData(requestPacketResult.packetLength);
+
+                        // Since the null check is already performed in GetPacketFromReceivedData(),
+                        // it is not rechecked here.
+                        PacketHandlerManager.Instance.CallHandler(receivedClient, requestPacketResult.packet);
+                        break;
+                }
+            }
+
+            return true;
+        }
+
+        private RequestPacketResult GetPacketFromReceivedData(ushort bufferStartPoint, string receivedData)
+        {
+            return PacketFactory.Instance.CreatePacket(receivedData.Substring(bufferStartPoint));
         }
 
         public void SendPacket(Client client, ReplyPacket packet)

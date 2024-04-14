@@ -7,7 +7,7 @@ namespace CSharpGameServer.Core
     {
         public Socket socket { get; }
         public ulong clientSessionId { get; }
-        public StreamRingBuffer streamRingBuffer = new StreamRingBuffer();
+        private StreamRingBuffer streamRingBuffer = new StreamRingBuffer();
 
         public Client(Socket inSocket, ulong inClientSessionId) 
         {
@@ -35,9 +35,9 @@ namespace CSharpGameServer.Core
 
         }
 
-        public void PushStreamData(byte[] inputStreamData)
+        public bool PushStreamData(byte[] inputStreamData)
         {
-            streamRingBuffer.PushData(inputStreamData);
+            return streamRingBuffer.PushData(inputStreamData);
         }
 
         public byte[]? PopStreamData(uint popSize)
@@ -48,6 +48,21 @@ namespace CSharpGameServer.Core
         public byte[]? PeekStreamData(uint peekSize)
         {
             return streamRingBuffer.PeekData(peekSize);
+        }
+
+        public byte[] PeekAllStreamData()
+        {
+            return streamRingBuffer.PeekAllData();
+        }
+
+        public void RemoveStreamData(uint removeSize)
+        {
+            streamRingBuffer.EraseData(removeSize);
+        }
+
+        public uint GetStoredStreamBufferSize()
+        {
+            return streamRingBuffer.GetUseSize();
         }
     }
 }
