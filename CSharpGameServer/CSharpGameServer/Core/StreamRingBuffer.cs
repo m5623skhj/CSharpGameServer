@@ -87,6 +87,25 @@ namespace CSharpGameServer.Core
             return GetData(peekSize);
         }
 
+        public bool EraseData(uint eraseSize)
+        {
+            if (GetUseSize() < eraseSize)
+            {
+                return false;
+            }
+
+            if (head > tail)
+            {
+                head = head + eraseSize - bufferSize;
+            }
+            else
+            {
+                head += eraseSize;
+            }
+
+            return true;
+        }
+
         public uint GetUseSize()
         {
             if (head > tail)
