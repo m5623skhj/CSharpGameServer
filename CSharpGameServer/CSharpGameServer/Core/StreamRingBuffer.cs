@@ -4,7 +4,7 @@ namespace CSharpGameServer.Core
 {
     public class StreamRingBuffer
     {
-        private const uint defaultBufferSize = 8192;
+        static public readonly uint defaultBufferSize = 8192;
 
         private byte[] buffer;
         private uint bufferSize;
@@ -78,8 +78,7 @@ namespace CSharpGameServer.Core
 
         public byte[]? PeekData(uint peekSize)
         {
-            uint useSize = GetUseSize();
-            if (useSize < peekSize)
+            if (GetUseSize() < peekSize)
             {
                 return null;
             }
