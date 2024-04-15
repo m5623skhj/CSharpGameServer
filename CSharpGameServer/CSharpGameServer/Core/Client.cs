@@ -40,16 +40,6 @@ namespace CSharpGameServer.Core
             return streamRingBuffer.PushData(inputStreamData);
         }
 
-        public byte[]? PopStreamData(uint popSize)
-        {
-            return streamRingBuffer.PopData(popSize);
-        }
-
-        public byte[]? PeekStreamData(uint peekSize)
-        {
-            return streamRingBuffer.PeekData(peekSize);
-        }
-
         public byte[] PeekAllStreamData()
         {
             return streamRingBuffer.PeekAllData();
@@ -58,11 +48,6 @@ namespace CSharpGameServer.Core
         public void RemoveStreamData(uint removeSize)
         {
             streamRingBuffer.EraseData(removeSize);
-        }
-
-        public uint GetStoredStreamBufferSize()
-        {
-            return streamRingBuffer.GetUseSize();
         }
     }
 }

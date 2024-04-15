@@ -8,7 +8,7 @@ namespace CSharpGameServer
     public enum PacketResultType : short
     {
         Success = 0,
-        IncompleteReceived,
+        IncompletedReceived,
         InvalidReceivedData,
     }
 
@@ -70,7 +70,7 @@ namespace CSharpGameServer
         {
             if (receivedData.Length < headerSize)
             {
-                return new RequestPacketResult(null, PacketResultType.IncompleteReceived);
+                return new RequestPacketResult(null, PacketResultType.IncompletedReceived);
             }
 
             int.TryParse(receivedData.Substring(0, 4), out int packetType);
@@ -83,7 +83,7 @@ namespace CSharpGameServer
             ushort.TryParse(receivedData.Substring(4, 2), out ushort packetLength);
             if (packetLength > receivedData.Length)
             {
-                return new RequestPacketResult(null, PacketResultType.IncompleteReceived);
+                return new RequestPacketResult(null, PacketResultType.IncompletedReceived);
             }
             else if (packetLength > StreamRingBuffer.defaultBufferSize)
             {

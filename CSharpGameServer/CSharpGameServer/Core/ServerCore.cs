@@ -208,7 +208,7 @@ namespace CSharpGameServer.Core
                 {
                     case PacketResultType.InvalidReceivedData:
                         return false;
-                    case PacketResultType.IncompleteReceived:
+                    case PacketResultType.IncompletedReceived:
                         return true;
                     case PacketResultType.Success:
                         storedSize -= requestPacketResult.packetLength;
