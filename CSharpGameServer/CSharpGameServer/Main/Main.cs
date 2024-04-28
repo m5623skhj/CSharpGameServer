@@ -1,8 +1,4 @@
-﻿////////////////////////////
-// Server program template
-////////////////////////////
-/*
-using CSharpGameServer.Core;
+﻿using CSharpGameServer.Core;
 
 class Program
 {
@@ -40,4 +36,3 @@ class Program
         }
     }
 }
-*/

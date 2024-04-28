@@ -1,4 +1,5 @@
 ﻿using CSharpGameServer.Protocol;
+using CSharpGameServer.Packet;
 
 namespace CSharpGameServer
 {

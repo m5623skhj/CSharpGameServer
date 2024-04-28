@@ -24,28 +24,8 @@ namespace CSharpGameServer.Protocol
         }
     }
 
-    public partial class Ping : RequestPacket
-    {
-        public override void SetPacketType()
-        {
-            type = PacketType.Ping;
-        }
-
-        protected override Action<Client, RequestPacket> GetHandler()
-        {
-            return PacketHandlerManager.HandlePing;
-        }
-    }
-
     public abstract class ReplyPacket : PacketBase
     {
     }
 
-    public class Pong : ReplyPacket
-    {
-        public override void SetPacketType()
-        {
-            type = PacketType.Pong;
-        }
-    }
 }
