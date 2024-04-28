@@ -1,8 +1,4 @@
-﻿////////////////////////////
-// Server program template
-////////////////////////////
-/*
-using CSharpGameServer.Core;
+﻿using CSharpGameServer.Core;
 
 class Program
 {
@@ -22,7 +18,7 @@ class Program
         bool running = true;
         while (running)
         {
-            if(Console.KeyAvailable)
+            if (Console.KeyAvailable)
             {
                 ConsoleKeyInfo key = Console.ReadKey();
                 switch (key.Key)
@@ -30,7 +26,8 @@ class Program
                     case ConsoleKey.Escape:
                         {
                             running = false;
-                        }break;
+                        }
+                        break;
                     default:
                         break;
                 }
@@ -40,4 +37,3 @@ class Program
         }
     }
 }
-*/
