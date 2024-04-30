@@ -5,14 +5,13 @@ namespace CSharpGameServer.DB
     public class DBConnectionManager
     {
         private readonly string connectionString;
-        private readonly Queue<MySqlConnection> connectionPool;
         private readonly int maxPoolSize = 10;
-        private readonly object connectionPoolLock = new object();
+        private Queue<MySqlConnection> connectionPool = new Queue<MySqlConnection>();
+        private object connectionPoolLock = new object();
 
         public DBConnectionManager(string server, string db, string userId, string password)
         {
             connectionString = $"Server={server};Database={db};Uid={userId};Pwd={password};";
-            connectionPool = new Queue<MySqlConnection>();
         }
 
         public MySqlConnection GetConnection()
