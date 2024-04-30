@@ -44,7 +44,7 @@ namespace CSharpGameServer.DB
 
             lock (connectionPoolLock)
             {
-                if(connectionPool.Count < maxPoolSize)
+                if (connectionPool.Count < maxPoolSize)
                 {
                     connectionPool.Enqueue(connection);
                 }

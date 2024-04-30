@@ -63,7 +63,7 @@ namespace CSharpGameServer.Core
             if (data != null)
             {
                 uint headToBufferEnd = bufferSize - head;
-                if(headToBufferEnd < popSize)
+                if (headToBufferEnd < popSize)
                 {
                     head = popSize - headToBufferEnd;
                 }

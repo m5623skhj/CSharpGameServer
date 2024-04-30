@@ -132,13 +132,13 @@ namespace CSharpGameServer.Core
 
         private void StartReceive(object? inClient)
         {
-            if(inClient is null)
+            if (inClient is null)
             {
                 return;
             }
 
             Client? client = inClient as Client;
-            if(client == null)
+            if (client == null)
             {
                 return;
             }
