@@ -1,12 +1,10 @@
-﻿using MySql.Data.MySqlClient;
-
-namespace CSharpGameServer.DB
+﻿namespace CSharpGameServer.DB
 {
     public class DBConnectionManager
     {
         private readonly string connectionString;
         private readonly int maxPoolSize = 10;
-        private Queue<MySqlConnection> connectionPool = new Queue<MySqlConnection>();
+        private Queue<DBConnection> connectionPool = new Queue<DBConnection>();
         private object connectionPoolLock = new object();
 
         public DBConnectionManager(string server, string db, string userId, string password)
@@ -14,7 +12,7 @@ namespace CSharpGameServer.DB
             connectionString = $"Server={server};Database={db};Uid={userId};Pwd={password};";
         }
 
-        public MySqlConnection GetConnection()
+        public DBConnection GetConnection()
         {
             lock (connectionPoolLock)
             {
@@ -27,15 +25,15 @@ namespace CSharpGameServer.DB
             return CreateConnection();
         }
 
-        private MySqlConnection CreateConnection()
+        private DBConnection CreateConnection()
         {
-            var connection = new MySqlConnection(connectionString);
-            connection.Open();
+            var connection = new DBConnection();
+            connection.CreateConnection(connectionString);
 
             return connection;
         }
 
-        public void ReleaseConnection(MySqlConnection connection)
+        public void ReleaseConnection(DBConnection connection)
         {
             if (connection == null)
             {
@@ -50,7 +48,7 @@ namespace CSharpGameServer.DB
                 }
                 else
                 {
-                    connection.Close();
+                    connection.CloseConnection();
                 }
             }
         }
