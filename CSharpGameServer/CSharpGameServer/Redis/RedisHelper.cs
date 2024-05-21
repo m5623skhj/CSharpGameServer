@@ -1,31 +1,63 @@
 ﻿using StackExchange.Redis;
+using System.Diagnostics.Metrics;
 
 namespace CSharpGameServer.Redis
 {
     public class RedisHelper : IDisposable
     {
-        private readonly ConnectionMultiplexer redis;
-        private readonly IDatabase database;
+        private static RedisHelper? instance = null;
+        private static ConnectionMultiplexer? redis = null;
+        private static readonly object constructorLock = new object();
+        private readonly IDatabase? database = null;
 
-        public RedisHelper(string connectionString)
+        public static RedisHelper Instance(string connectionString)
         {
-            redis = ConnectionMultiplexer.Connect(connectionString);
-            database = redis.GetDatabase();
+            if (instance == null)
+            {
+                lock (constructorLock)
+                {
+                    if(instance == null)
+                    {
+                        instance = new RedisHelper(connectionString);
+                    }
+                }
+            }
+
+            return instance;
+        }
+
+        private RedisHelper(string connectionString)
+        {
+            var connection = ConnectionMultiplexer.Connect(connectionString);
+            database = connection.GetDatabase();
         }
 
         public void SetValue(string key, string value)
         {
-            database.StringAppend(key, value);
+            if (database != null)
+            {
+                database.StringAppend(key, value);
+            }
         }
 
-        public string GetValue(string key)
+        public string? GetValue(string key)
         {
-            return database.StringGet(key);
+            if (database != null)
+            {
+                return database.StringGet(key);
+            }
+
+            return null;
         }
 
         public bool DeleteKey(string key)
         {
-            return database.KeyDelete(key);
+            if (database != null)
+            {
+                return database.KeyDelete(key);
+            }
+
+            return false;
         }
 
         public void Dispose()
