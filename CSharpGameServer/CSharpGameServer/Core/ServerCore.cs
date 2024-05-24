@@ -1,4 +1,5 @@
-﻿using CSharpGameServer.Protocol;
+﻿using CSharpGameServer.Core.LogicWorkerThread;
+using CSharpGameServer.Protocol;
 using System.Net;
 using System.Net.Sockets;
 using System.Runtime.InteropServices;
@@ -17,6 +18,9 @@ namespace CSharpGameServer.Core
 
         private const int bufferSize = 2048;
         private bool running = false;
+
+        private LogicWorkerThreadManager logicWorkerThreadManager = new LogicWorkerThreadManager();
+        private readonly int logicThreadSize = 16;
 
         public static ServerCore Instance
         {
@@ -43,6 +47,8 @@ namespace CSharpGameServer.Core
                 Console.WriteLine("RegisterAllPacket failed");
                 return;
             }
+
+            logicWorkerThreadManager.MakeThreads(logicThreadSize);
         }
 
         public void Run()
@@ -77,6 +83,7 @@ namespace CSharpGameServer.Core
             }
 
             ClientManager.Instance.CloseAllSession();
+            logicWorkerThreadManager.StopAllLogicThreads();
         }
 
         private void StartAccept()
@@ -217,7 +224,8 @@ namespace CSharpGameServer.Core
 
                         // Since the null check is already performed in GetPacketFromReceivedData(),
                         // it is not rechecked here.
-                        PacketHandlerManager.Instance.CallHandler(receivedClient, requestPacketResult.packet);
+                        logicWorkerThreadManager.PushPacket(receivedClient, requestPacketResult.packet);
+                        logicWorkerThreadManager.DoWork(receivedClient.clientSessionId);
                         break;
                 }
             }

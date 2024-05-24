@@ -1,4 +1,7 @@
-﻿namespace CSharpGameServer.Core.LogicWorkerThread
+﻿using CSharpGameServer.Protocol;
+using System.Diagnostics;
+
+namespace CSharpGameServer.Core.LogicWorkerThread
 {
     internal class LogicWorker
     {
@@ -6,6 +9,8 @@
         private ManualResetEvent stopThreadEvent = new ManualResetEvent(false);
         private Thread? thread = null;
         private int threadId;
+        private Queue<Tuple<Client, RequestPacket>> ItemStoreQueue = new Queue<Tuple<Client, RequestPacket>>();
+        private object itemStoreQueueLock = new object();
 
         public LogicWorker(int inThreadId)
         {
@@ -17,6 +22,8 @@
         private void StartWorkerThread()
         {
             WaitHandle[] threadEventes = new WaitHandle[] { doWorkThreadEvent, stopThreadEvent };
+            List<Tuple<Client, RequestPacket>> processList = new List<Tuple<Client, RequestPacket>>();
+
             while (true)
             {
                 int eventIndex = WaitHandle.WaitAny(threadEventes);
@@ -25,7 +32,29 @@
                     break;
                 }
 
-                // do something
+                lock (itemStoreQueueLock)
+                {
+                    foreach(var packet in ItemStoreQueue)
+                    {
+                        processList.Add(packet);
+                    }
+
+                    ItemStoreQueue.Clear();
+                }
+
+                foreach(var processItem in processList)
+                {
+                    PacketHandlerManager.Instance.CallHandler(processItem.Item1, processItem.Item2);
+                }
+                processList.Clear();
+            }
+        }
+
+        public void PushPacket(Client targetClient, RequestPacket packet)
+        {
+            lock (itemStoreQueueLock)
+            {
+                ItemStoreQueue.Enqueue(Tuple.Create(targetClient, packet));
             }
         }
 
@@ -48,36 +77,24 @@
 
             stopThreadEvent.Set();
             thread.Join();
+
+            Console.WriteLine("Thread {0} is stopped", threadId);
         }
     }
 
     public class LogicWorkerThreadManager
     {
-        private static LogicWorkerThreadManager? instance = null;
-        private static readonly object constructorLock = new object();
         private List<LogicWorker> workerThreadList;
         private int threadSize;
 
-        public static LogicWorkerThreadManager Instance(int inThreadSize)
+        public LogicWorkerThreadManager()
         {
-            if (instance == null)
-            {
-                lock (constructorLock)
-                {
-                    if (instance == null)
-                    {
-                        instance = new LogicWorkerThreadManager(inThreadSize);
-                    }
-                }
-            }
-
-            return instance;
+            workerThreadList = new List<LogicWorker>();
         }
 
-        public LogicWorkerThreadManager(int inThreadSize)
+        public void MakeThreads(int inThreadSize)
         {
             threadSize = inThreadSize;
-            workerThreadList = new List<LogicWorker>();
 
             for (int threadId = 0; threadId < inThreadSize; threadId++)
             {
@@ -85,12 +102,30 @@
             }
         }
 
+        public void PushPacket(Client targetClient, RequestPacket packet)
+        {
+            workerThreadList[GetThreadId(targetClient.clientSessionId)].PushPacket(targetClient, packet);
+        }
+
         public void DoWork(ulong ownerId)
         {
-            ulong devided = (ownerId / (ulong)threadSize);
-            int logicThreadId = (int)(ownerId - (devided * (ulong)(threadSize)));
+            workerThreadList[GetThreadId(ownerId)].DoWork();
+        }
 
-            workerThreadList[logicThreadId].DoWork();
+        public void StopAllLogicThreads()
+        {
+            foreach (LogicWorker workerThread in workerThreadList)
+            {
+                workerThread.StopThread();
+            }
+            workerThreadList.Clear();
+            Console.WriteLine("All logic threads are stopped");
+        }
+
+        private int GetThreadId(ulong ownerId)
+        {
+            ulong devided = (ownerId / (ulong)threadSize);
+            return (int)(ownerId - (devided * (ulong)(threadSize)));
         }
     }
 }
