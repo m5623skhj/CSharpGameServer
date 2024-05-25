@@ -42,8 +42,7 @@ namespace CSharpGameServer
 
         public void CallHandler(Client client, RequestPacket packet)
         {
-            packetHandlerDict.TryGetValue(packet.type, out Action<Client, RequestPacket>? action);
-            if (action == null) 
+            if (packetHandlerDict.TryGetValue(packet.type, out Action<Client, RequestPacket>? action) == false)
             {
                 // add client info
                 Console.WriteLine("Invalid packet type {0} / {1}", client.clientSessionId, packet.type);
