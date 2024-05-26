@@ -40,11 +40,29 @@ namespace CSharpGameServer.Redis
             }
         }
 
-        public string? GetValue(string key)
+        public async Task SetValueAsync(string key, string value)
+        {
+            if(database != null)
+            {
+                await database.StringAppendAsync(key, value);
+            }
+        }
+
+        public RedisValue? GetValue(string key)
         {
             if (database != null)
             {
                 return database.StringGet(key);
+            }
+
+            return null;
+        }
+
+        public async Task<RedisValue?> GetValueAsync(string key)
+        {
+            if (database != null)
+            {
+                return await database.StringGetAsync(key);
             }
 
             return null;
@@ -55,6 +73,56 @@ namespace CSharpGameServer.Redis
             if (database != null)
             {
                 return database.KeyDelete(key);
+            }
+
+            return false;
+        }
+
+        public async Task<bool> DeleteKeyAsync(string key)
+        {
+            if (database != null)
+            {
+                return await database.KeyDeleteAsync(key);
+            }
+
+            return false;
+        }
+
+        public bool SetKeyExpiry(string key, TimeSpan time)
+        {
+            if (database != null)
+            {
+                return database.KeyExpire(key, time);
+            }
+
+            return false;
+        }
+
+        public async Task<bool> SetKeyExpiryAsync(string key, TimeSpan expiry)
+        {
+            if (database != null)
+            {
+                return await database.KeyExpireAsync(key, expiry);
+            }
+
+            return false;
+        }
+
+        public bool RefreshKeyExpiry(string key, TimeSpan time)
+        {
+            if (database != null)
+            {
+                return database.KeyExpire(key, time);
+            }
+
+            return false;
+        }
+
+        public async Task<bool> RefreshKeyExpiryAsync(string key, TimeSpan expiry)
+        {
+            if (database != null)
+            {
+                return await database.KeyExpireAsync(key, expiry);
             }
 
             return false;
