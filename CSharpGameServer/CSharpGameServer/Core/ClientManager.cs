@@ -32,7 +32,7 @@
 
         private void ClearDict()
         {
-            lock(sessionIdToClientDictLock)
+            lock (sessionIdToClientDictLock)
             {
                 sessionIdToClientDict.Clear();
             }
@@ -40,7 +40,7 @@
 
         public void CloseAllSession()
         {
-            lock(sessionIdToClientDictLock)
+            lock (sessionIdToClientDictLock)
             {
                 foreach (var client in sessionIdToClientDict.Values)
                 {
@@ -51,7 +51,7 @@
 
         public void InsertSessionIdToClient(ulong sessionId, Client client)
         {
-            lock(sessionIdToClientDictLock)
+            lock (sessionIdToClientDictLock)
             {
                 sessionIdToClientDict.Add(sessionId, client);
             }

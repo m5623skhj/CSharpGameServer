@@ -16,7 +16,7 @@ namespace CSharpGameServer.Redis
             {
                 lock (constructorLock)
                 {
-                    if(instance == null)
+                    if (instance == null)
                     {
                         instance = new RedisHelper(connectionString);
                     }

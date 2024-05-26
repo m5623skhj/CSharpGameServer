@@ -27,7 +27,7 @@ namespace CSharpGameServer.Core.LogicWorkerThread
             while (true)
             {
                 int eventIndex = WaitHandle.WaitAny(threadEventes);
-                if(eventIndex == 1)
+                if (eventIndex == 1)
                 {
                     break;
                 }
@@ -42,7 +42,7 @@ namespace CSharpGameServer.Core.LogicWorkerThread
                     ItemStoreQueue.Clear();
                 }
 
-                foreach(var processItem in processList)
+                foreach (var processItem in processList)
                 {
                     PacketHandlerManager.Instance.CallHandler(processItem.Item1, processItem.Item2);
                 }
