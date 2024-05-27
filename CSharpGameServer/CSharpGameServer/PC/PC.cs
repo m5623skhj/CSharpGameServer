@@ -1,11 +1,4 @@
-﻿using CSharpGameServer.Core;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace TestGameServer.PC
+﻿namespace TestGameServer.PC
 {
     public class PC
     {
@@ -17,9 +10,17 @@ namespace TestGameServer.PC
             sessionId = inSessionId;
         }
 
-        public void OnPCIdCompleted(ulong inPCId)
+        public void OnPCIdLoadCompleted(ulong inPCId)
         {
             pcId = inPCId;
+            PCInitializeFromDB();
+
+            PCManager.Instance.FindPC(inPCId);
+        }
+
+        private void PCInitializeFromDB()
+        {
+
         }
     }
 }
