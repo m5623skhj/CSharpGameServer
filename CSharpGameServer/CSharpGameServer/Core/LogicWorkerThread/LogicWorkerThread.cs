@@ -11,6 +11,9 @@ namespace CSharpGameServer.Core.LogicWorkerThread
         private int threadId;
         private Queue<Tuple<Client, RequestPacket>> ItemStoreQueue = new Queue<Tuple<Client, RequestPacket>>();
         private object itemStoreQueueLock = new object();
+        private int isRunning = 0;
+        private readonly int isTrue = 1;
+        private readonly int isFalse = 0;
 
         public LogicWorker(int inThreadId)
         {
@@ -23,6 +26,7 @@ namespace CSharpGameServer.Core.LogicWorkerThread
         {
             WaitHandle[] threadEventes = new WaitHandle[] { doWorkThreadEvent, stopThreadEvent };
             List<Tuple<Client, RequestPacket>> processList = new List<Tuple<Client, RequestPacket>>();
+            SetIsRunning(isTrue);
 
             while (true)
             {
@@ -34,12 +38,13 @@ namespace CSharpGameServer.Core.LogicWorkerThread
 
                 lock (itemStoreQueueLock)
                 {
-                    foreach(var packet in ItemStoreQueue)
+                    foreach (var packet in ItemStoreQueue)
                     {
                         processList.Add(packet);
                     }
 
                     ItemStoreQueue.Clear();
+                    SetIsRunning(isFalse);
                 }
 
                 foreach (var processItem in processList)
@@ -54,6 +59,11 @@ namespace CSharpGameServer.Core.LogicWorkerThread
         {
             lock (itemStoreQueueLock)
             {
+                if (IsRunningThread() == true)
+                {
+                    return;
+                }
+
                 ItemStoreQueue.Enqueue(Tuple.Create(targetClient, packet));
             }
         }
@@ -80,6 +90,16 @@ namespace CSharpGameServer.Core.LogicWorkerThread
 
             Console.WriteLine("Thread {0} is stopped", threadId);
         }
+
+        private void SetIsRunning(int setValue)
+        {
+            Interlocked.Exchange(ref isRunning, setValue);
+        }
+
+        public bool IsRunningThread()
+        {
+            return Interlocked.CompareExchange(ref isRunning, 0, 0) == 1;
+        }
     }
 
     public class LogicWorkerThreadManager
@@ -104,7 +124,11 @@ namespace CSharpGameServer.Core.LogicWorkerThread
 
         public void PushPacket(Client targetClient, RequestPacket packet)
         {
-            workerThreadList[GetThreadId(targetClient.clientSessionId)].PushPacket(targetClient, packet);
+            var threadId = GetThreadId(targetClient.clientSessionId);
+            if (workerThreadList[threadId].IsRunningThread() == true)
+            {
+                workerThreadList[threadId].PushPacket(targetClient, packet);
+            }
         }
 
         public void DoWork(ulong ownerId)
