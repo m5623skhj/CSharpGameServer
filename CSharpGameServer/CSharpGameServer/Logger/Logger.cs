@@ -2,14 +2,14 @@
 using Serilog.Core;
 using Serilog.Events;
 
-namespace CSharpGameServer.Core.Logger
+namespace CSharpGameServer.Logger
 {
-    public class Logger
+    public class LoggerManager
     {
-        private static Logger? instance = null;
+        public static LoggerManager? instance = null;
         private LoggingLevelSwitch loggerLevel = new LoggingLevelSwitch(LogEventLevel.Debug);
 
-        private Logger()
+        private LoggerManager()
         {
             Log.Logger = new LoggerConfiguration()
                 .MinimumLevel.ControlledBy(loggerLevel)
@@ -18,7 +18,7 @@ namespace CSharpGameServer.Core.Logger
                 .CreateLogger();
         }
 
-        ~Logger()
+        ~LoggerManager()
         {
             Log.CloseAndFlush();
         }
@@ -28,47 +28,47 @@ namespace CSharpGameServer.Core.Logger
             loggerLevel.MinimumLevel = inLevel;
         }
 
-        public static Logger Instance
+        public static LoggerManager Instance
         {
             get
             {
                 if (instance == null)
                 {
-                    instance = new Logger();
+                    instance = new LoggerManager();
                 }
 
                 return instance;
             }
         }
 
-        public void WriteLogVerb(string log)
+        public void WriteLogVerb(string log, params object[] objects)
         {
-            Log.Verbose(log);
+            Log.Verbose(log, objects);
         }
 
-        public void WriteLogDebug(string log)
+        public void WriteLogDebug(string log, params object[] objects)
         {
-            Log.Debug(log);
+            Log.Debug(log, objects);
         }
 
-        public void WriteLogInfo(string log)
+        public void WriteLogInfo(string log, params object[] objects)
         {
-            Log.Information(log);
+            Log.Information(log, objects);
         }
 
-        public void WriteLogWarn(string log)
+        public void WriteLogWarn(string log, params object[] objects)
         {
-            Log.Warning(log);
+            Log.Warning(log, objects);
         }
 
-        public void WriteLogError(string log)
+        public void WriteLogError(string log, params object[] objects)
         {
-            Log.Error(log);
+            Log.Error(log, objects);
         }
 
-        public void WriteLogFatal(string log)
+        public void WriteLogFatal(string log, params object[] objects)
         {
-            Log.Fatal(log);
+            Log.Fatal(log, objects);
         }
     }
 }

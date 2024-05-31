@@ -1,4 +1,5 @@
 ﻿using CSharpGameServer.Core;
+using CSharpGameServer.Logger;
 using CSharpGameServer.Protocol;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -52,13 +53,13 @@ namespace CSharpGameServer
         {
             if (packetType == PacketType.InvalidPacketType)
             {
-                Console.WriteLine("Invalid packet type {0}", packetObjectType.GetType());
+                LoggerManager.instance.WriteLogFatal("Invalid packet type {packetType}", packetObjectType.GetType());
                 return false;
             }
 
             if (packetTypeDict.ContainsKey(packetType))
             {
-                Console.WriteLine("Duplicated packet type {0} / {1}", packetType, packetObjectType);
+                LoggerManager.instance.WriteLogFatal("Duplicated packet type {packetType} / {packetObjectType}", packetType, packetObjectType);
                 return false;
             }
 
@@ -76,7 +77,7 @@ namespace CSharpGameServer
             int.TryParse(receivedData.Substring(0, 4), out int packetType);
             if (packetTypeDict.TryGetValue((PacketType)packetType, out Type? packetObjectType) == false)
             {
-                Console.WriteLine("Invalid packet type {0}", packetType);
+                LoggerManager.Instance.WriteLogError("Invalid packet type {packetType}", packetType);
                 return new RequestPacketResult(null, PacketResultType.InvalidReceivedData);
             }
 
@@ -92,7 +93,7 @@ namespace CSharpGameServer
 
             if (typeof(RequestPacket).IsAssignableFrom(packetObjectType) == false)
             {
-                Console.WriteLine("Packet type {0} is valid but is not assignable", packetType);
+                LoggerManager.instance.WriteLogError("Packet type {packetType} is valid but is not assignable", packetType);
                 return new RequestPacketResult(null, PacketResultType.InvalidReceivedData);
             }
 
@@ -100,7 +101,7 @@ namespace CSharpGameServer
             RequestPacket? packet = ToStr(recvStream, packetObjectType) as RequestPacket;
             if (packet == null)
             {
-                Console.WriteLine("Null RequestPacket / packet type {0}", packetType);
+                LoggerManager.instance.WriteLogError("Null RequestPacket / packet type {packetType}", packetType);
                 return new RequestPacketResult(null, PacketResultType.InvalidReceivedData);
             }
 

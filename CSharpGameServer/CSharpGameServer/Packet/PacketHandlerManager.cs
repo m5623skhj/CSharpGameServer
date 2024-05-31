@@ -1,4 +1,5 @@
 ﻿using CSharpGameServer.Core;
+using CSharpGameServer.Logger;
 using CSharpGameServer.Protocol;
 
 namespace CSharpGameServer
@@ -26,13 +27,13 @@ namespace CSharpGameServer
         {
             if (packetType == PacketType.InvalidPacketType)
             {
-                Console.WriteLine("Invalid packet type {0}", handler.Method.Name);
+                LoggerManager.instance.WriteLogError("Invalid packet type {handler.Method.Name}", handler.Method.Name);
                 return false;
             }
 
             if (packetHandlerDict.ContainsKey(packetType))
             {
-                Console.WriteLine("Duplicated packet type {0} / {1}", packetType, handler.Method.Name);
+                LoggerManager.instance.WriteLogError("Duplicated packet type {pakcetType} / {handler.Method.Name}", packetType, handler.Method.Name);
                 return false;
             }
 
@@ -45,7 +46,7 @@ namespace CSharpGameServer
             if (packetHandlerDict.TryGetValue(packet.type, out Action<Client, RequestPacket>? action) == false)
             {
                 // add client info
-                Console.WriteLine("Invalid packet type {0} / {1}", client.clientSessionId, packet.type);
+                LoggerManager.instance.WriteLogError("Invalid packet type {client.clientSessionId} / {packet.type}", client.clientSessionId, packet.type);
                 return;
             }
 

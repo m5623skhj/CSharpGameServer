@@ -1,4 +1,5 @@
 ﻿using CSharpGameServer.Core.LogicWorkerThread;
+using CSharpGameServer.Logger;
 using CSharpGameServer.Protocol;
 using System.Net;
 using System.Net.Sockets;
@@ -44,7 +45,7 @@ namespace CSharpGameServer.Core
         {
             if (PacketRegisterList.RegisterAllPacket() == false)
             {
-                Console.WriteLine("RegisterAllPacket failed");
+                LoggerManager.instance.WriteLogError("RegisterAllPacket falied");
                 return;
             }
 

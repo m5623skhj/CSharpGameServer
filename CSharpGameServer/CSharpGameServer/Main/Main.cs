@@ -1,4 +1,5 @@
 ﻿using CSharpGameServer.Core;
+using CSharpGameServer.Logger;
 
 class Program
 {
@@ -6,11 +7,11 @@ class Program
     {
         ServerCore serverCore = ServerCore.Instance;
         serverCore.Run();
-        Console.WriteLine("------------  Server running  ------------");
+        LoggerManager.Instance.WriteLogDebug("------------  Server running  ------------");
         ServerRunning();
 
         serverCore.Stop();
-        Console.WriteLine("------------  Server stopped ------------");
+        LoggerManager.Instance.WriteLogDebug("------------  Server stopped ------------");
     }
 
     private static void ServerRunning()

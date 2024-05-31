@@ -1,5 +1,5 @@
-﻿using CSharpGameServer.Protocol;
-using System.Diagnostics;
+﻿using CSharpGameServer.Logger;
+using CSharpGameServer.Protocol;
 
 namespace CSharpGameServer.Core.LogicWorkerThread
 {
@@ -88,7 +88,7 @@ namespace CSharpGameServer.Core.LogicWorkerThread
             stopThreadEvent.Set();
             thread.Join();
 
-            Console.WriteLine("Thread {0} is stopped", threadId);
+            LoggerManager.instance.WriteLogDebug("Thread {threadId} is stopped", threadId);
         }
 
         private void SetIsRunning(int setValue)
@@ -143,7 +143,7 @@ namespace CSharpGameServer.Core.LogicWorkerThread
                 workerThread.StopThread();
             }
             workerThreadList.Clear();
-            Console.WriteLine("All logic threads are stopped");
+            LoggerManager.instance.WriteLogDebug("All logic threads are stopped");
         }
 
         private int GetThreadId(ulong ownerId)
