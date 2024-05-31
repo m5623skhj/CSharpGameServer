@@ -1,10 +1,12 @@
 ﻿using CSharpGameServer.Core.LogicWorkerThread;
 using CSharpGameServer.Logger;
 using CSharpGameServer.Protocol;
+using Serilog.Events;
 using System.Net;
 using System.Net.Sockets;
 using System.Runtime.InteropServices;
 using System.Text;
+
 
 namespace CSharpGameServer.Core
 {
@@ -22,6 +24,7 @@ namespace CSharpGameServer.Core
 
         private LogicWorkerThreadManager logicWorkerThreadManager = new LogicWorkerThreadManager();
         private readonly int logicThreadSize = 16;
+        private Config.Config config = new Config.Config();
 
         public static ServerCore Instance
         {
@@ -43,6 +46,10 @@ namespace CSharpGameServer.Core
 
         private void Initialize()
         {
+            if (InitializeConfig() == false)
+            {
+                return;
+            }
             if (PacketRegisterList.RegisterAllPacket() == false)
             {
                 LoggerManager.instance.WriteLogError("RegisterAllPacket falied");
@@ -50,6 +57,18 @@ namespace CSharpGameServer.Core
             }
 
             logicWorkerThreadManager.MakeThreads(logicThreadSize);
+        }
+
+        private bool InitializeConfig()
+        {
+            if (config.ReadConfig() == false)
+            {
+                return false;
+            }
+            
+            LoggerManager.instance.SetLogLevel(config.conf.LogLevel);
+
+            return true;
         }
 
         public void Run()
