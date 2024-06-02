@@ -1,10 +1,18 @@
 ﻿using CSharpGameServer.Core;
+using CSharpGameServer.DB.Migration;
 using CSharpGameServer.Logger;
 
 class Program
 {
     static void Main(string[] args)
     {
+        Console.WriteLine("------------ Try migration ------------");
+        if (MigrationRunner.Instance.RunMigration() == false)
+        {
+            Console.WriteLine("------------ Migration failed ------------");
+        }
+        Console.WriteLine("------------ Migration succeded ------------");
+
         ServerCore serverCore = ServerCore.Instance;
         serverCore.Run();
         LoggerManager.Instance.WriteLogDebug("------------  Server running  ------------");
