@@ -50,6 +50,7 @@ namespace CSharpGameServer
                 return;
             }
 
+            client.RefreshRecvTime();
             action(client, packet);
         }
     }
