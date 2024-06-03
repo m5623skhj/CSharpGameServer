@@ -1,0 +1,6 @@
+﻿{
+  "DBServer" : ".",
+  "DBName": "test",
+  "UID": "my_test",
+  "password": "1234"
+}
