@@ -20,8 +20,9 @@ namespace CSharpGameServer.DB.Migration
             }
         }
 
-        public bool RunMigration()
+        public int RunMigration()
         {
+            int migrationResult = 0;
             ProcessStartInfo startInfo = new ProcessStartInfo();
             startInfo.FileName = migratorFilePath;
             try
@@ -29,17 +30,21 @@ namespace CSharpGameServer.DB.Migration
                 Process? process = Process.Start(startInfo);
                 if(process == null)
                 {
-                    return false;
+                    return migrationResult;
                 }
+
+                process.WaitForExit();
+                migrationResult = process.ExitCode;
+
                 Logger.LoggerManager.instance.WriteLogInfo("Migration succeeded");
             }
             catch (Exception e)
             {
                 Logger.LoggerManager.instance.WriteLogFatal("Migration failed with {exception}", e.Message);
-                return false;
+                return migrationResult;
             }
 
-            return true;
+            return migrationResult;
         }
     }
 }

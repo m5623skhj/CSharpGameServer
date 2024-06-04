@@ -4,10 +4,15 @@ using CSharpGameServer.Logger;
 
 class Program
 {
+    private static bool IsMigrationSuccess(int migrationResult)
+    {
+        return migrationResult == 1;
+    }
+
     static void Main(string[] args)
     {
         Console.WriteLine("------------ Try migration ------------");
-        if (MigrationRunner.Instance.RunMigration() == false)
+        if (IsMigrationSuccess(MigrationRunner.Instance.RunMigration()) == false)
         {
             Console.WriteLine("------------ Migration failed ------------");
         }
