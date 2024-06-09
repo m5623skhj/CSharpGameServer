@@ -1,7 +1,6 @@
 ﻿using CSharpGameServer.Core.LogicWorkerThread;
 using CSharpGameServer.Logger;
 using CSharpGameServer.Protocol;
-using Serilog.Events;
 using System.Net;
 using System.Net.Sockets;
 using System.Runtime.InteropServices;

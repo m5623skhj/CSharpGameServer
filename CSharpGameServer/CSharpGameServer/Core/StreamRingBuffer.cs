@@ -1,6 +1,4 @@
-﻿using static System.Runtime.InteropServices.JavaScript.JSType;
-
-namespace CSharpGameServer.Core
+﻿namespace CSharpGameServer.Core
 {
     public class StreamRingBuffer
     {
