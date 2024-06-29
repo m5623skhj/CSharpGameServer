@@ -15,7 +15,7 @@ namespace CSharpGameServer.DB.SPObjects
             for (int i = 0; i < properties.Length; i++)
             {
                 object? value = properties[i].GetValue(paramObject);
-                if(value == null)
+                if (value == null)
                 {
                     return false;
                 }
@@ -28,13 +28,18 @@ namespace CSharpGameServer.DB.SPObjects
 
         public bool GenerateSPQuery(params object[] values)
         {
-            if(query == null)
+            if (query == null)
             {
                 return false;
             }
 
             query = string.Format(query, values);
             return true;
+        }
+
+        public string? GetQueryString()
+        {
+            return query;
         }
     }
 }
