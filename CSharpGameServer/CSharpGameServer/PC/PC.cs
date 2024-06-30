@@ -18,8 +18,6 @@ namespace TestGameServer.PC
         {
             pcId = inPCId;
             PCInitializeFromDB();
-
-            PCManager.Instance.FindPC(inPCId);
         }
 
         private void PCInitializeFromDB()

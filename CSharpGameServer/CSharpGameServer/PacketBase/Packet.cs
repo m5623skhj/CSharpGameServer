@@ -27,5 +27,4 @@ namespace CSharpGameServer.Protocol
     public abstract class ReplyPacket : PacketBase
     {
     }
-
 }
