@@ -9,7 +9,10 @@ namespace CSharpGameServer.Core
         public ulong clientSessionId { get; }
         private StreamRingBuffer streamRingBuffer = new StreamRingBuffer();
         public DateTime lastRecvedTime { get; private set; } = DateTime.Now;
-        
+
+        public virtual void OnClosed() {}
+        public virtual void OnSend() {}
+
         public Client(Socket inSocket, ulong inClientSessionId) 
         {
             socket = inSocket;
@@ -21,11 +24,6 @@ namespace CSharpGameServer.Core
             ServerCore.Instance.CloseClient(clientSessionId);
         }
 
-        public void OnClosed()
-        {
-
-        }
-
         public void RefreshRecvTime()
         {
             lastRecvedTime = DateTime.Now;
@@ -34,11 +32,6 @@ namespace CSharpGameServer.Core
         public void Send(ReplyPacket packet)
         {
             ServerCore.Instance.SendPacket(this, packet);
-        }
-
-        public void OnSend()
-        {
-
         }
 
         public bool PushStreamData(byte[] inputStreamData)

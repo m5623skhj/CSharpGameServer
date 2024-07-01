@@ -1,17 +1,28 @@
-﻿using CSharpGameServer.PC.PCComponent;
+﻿using CSharpGameServer.Core;
+using CSharpGameServer.PC.PCComponent;
+using System.Net.Sockets;
 
 namespace TestGameServer.PC
 {
-    public class PC
+    public class PC : Client
     {
         private ulong sessionId = 0;
         private ulong pcId = 0;
 
         private ComponentManager componentManager = new ComponentManager();
 
-        PC(ulong inSessionId)
+        public override void OnClosed() 
         {
-            sessionId = inSessionId;
+        
+        }
+
+        public override void OnSend()
+        {
+
+        }
+
+        public PC(Socket inSocket, ulong inClientSessionId) : base(inSocket, inClientSessionId)
+        {
         }
 
         public void OnPCIdLoadCompleted(ulong inPCId)
