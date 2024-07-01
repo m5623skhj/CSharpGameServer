@@ -13,8 +13,7 @@ namespace CSharpGameServer.Packet
                 return;
             }
 
-            Pong pong = new Pong();
-            client.Send(pong);
+            client.HandlePing(ping);
         }
     }
 }

@@ -2,9 +2,9 @@
 using CSharpGameServer.PC.PCComponent;
 using System.Net.Sockets;
 
-namespace TestGameServer.PC
+namespace CSharpGameServer.PC
 {
-    public class PC : Client
+    public partial class PC : Client
     {
         private ulong sessionId = 0;
         private ulong pcId = 0;

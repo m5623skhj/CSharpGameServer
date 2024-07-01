@@ -3,7 +3,7 @@ using System.Net.Sockets;
 
 namespace CSharpGameServer.Core
 {
-    public class Client
+    public partial class Client
     {
         public Socket socket { get; }
         public ulong clientSessionId { get; }

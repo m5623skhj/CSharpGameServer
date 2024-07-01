@@ -1,4 +1,4 @@
-﻿namespace TestGameServer.PC
+﻿namespace CSharpGameServer.PC
 {
     public class PCManager
     {
