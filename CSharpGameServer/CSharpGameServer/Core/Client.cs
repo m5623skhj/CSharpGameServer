@@ -5,12 +5,18 @@ namespace CSharpGameServer.Core
 {
     public partial class Client
     {
+        public static ulong invalidSessionId = ulong.MaxValue;
+
         public Socket socket { get; }
-        public ulong clientSessionId { get; }
+        public ulong clientSessionId = invalidSessionId;
         private StreamRingBuffer streamRingBuffer = new StreamRingBuffer();
         public DateTime lastRecvedTime { get; private set; } = DateTime.Now;
 
-        public virtual void OnClosed() {}
+        public virtual void OnClosed() 
+        {
+            clientSessionId = invalidSessionId;
+        }
+
         public virtual void OnSend() {}
 
         public Client(Socket inSocket, ulong inClientSessionId) 
