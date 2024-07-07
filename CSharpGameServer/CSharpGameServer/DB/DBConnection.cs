@@ -41,10 +41,13 @@ namespace CSharpGameServer.DB
             }
             catch (Exception ex)
             {
-                Logger.LoggerManager.instance.WriteLogError("Query error {0} / {1}",
+                Logger.LoggerManager.Instance.WriteLogError("Query error {0} / {1}",
                     inQuery, ex.Message);
+                
+                return false;
             }
 
+            Logger.LoggerManager.Instance.WriteLogInfo("Query successed {0}", inQuery);
             return true;
         }
     }
