@@ -1,4 +1,6 @@
-﻿namespace CSharpGameServer.LazyRunner
+﻿using CSharpGameServer.DB;
+
+namespace CSharpGameServer.LazyRunner
 {
     public class LazyRunner
     {
@@ -22,6 +24,22 @@
         {
             action();
             timer.Dispose();
+        }
+    }
+
+    public class SPLazyRunner : LazyRunner
+    {
+        public SPLazyRunner(int inDelayMilliSeconds, string inSPString)
+            : base(() => 
+            {
+                var connection = DBConnectionManager.Instance.GetConnection();
+                if (connection.Execute(inSPString) == false)
+                {
+                    Logger.LoggerManager.Instance.WriteLogError("SPLazyRunner {0} failed", inSPString);
+                }
+            }
+            , inDelayMilliSeconds)
+        {
         }
     }
 }
