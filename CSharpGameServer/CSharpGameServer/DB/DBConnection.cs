@@ -24,5 +24,28 @@ namespace CSharpGameServer.DB
         {
             return new MySqlCommand(query, connection);
         }
+
+        public bool Execute(string inQuery)
+        {
+            if (connection == null)
+            {
+                return false;
+            }
+
+            try
+            {
+                using (var command = new MySqlCommand(inQuery, connection))
+                {
+                    command.ExecuteNonQuery();
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.LoggerManager.instance.WriteLogError("Query error {0} / {1}",
+                    inQuery, ex.Message);
+            }
+
+            return true;
+        }
     }
 }

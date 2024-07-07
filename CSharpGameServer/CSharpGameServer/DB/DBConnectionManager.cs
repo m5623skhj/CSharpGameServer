@@ -2,14 +2,37 @@
 {
     public class DBConnectionManager
     {
+        private static DBConnectionManager? instance = null;
         private readonly string connectionString;
         private readonly int maxPoolSize = 10;
         private Queue<DBConnection> connectionPool = new Queue<DBConnection>();
         private object connectionPoolLock = new object();
 
-        public DBConnectionManager(string server, string db, string userId, string password)
+        private DBConnectionManager(string server, string db, string userId, string password)
         {
             connectionString = $"Server={server};Database={db};Uid={userId};Pwd={password};";
+        }
+        public static void Initialize(string server, string db, string userId, string password)
+        {
+            if (instance == null)
+            {
+                if (instance == null)
+                {
+                    instance = new DBConnectionManager(server, db, userId, password);
+                }
+            }
+        }
+
+        public static DBConnectionManager Instance
+        {
+            get
+            {
+                if (instance == null)
+                {
+                    throw new InvalidOperationException("DBConnectionManager is not initialized. Call Initialize first.");
+                }
+                return instance;
+            }
         }
 
         public DBConnection GetConnection()
