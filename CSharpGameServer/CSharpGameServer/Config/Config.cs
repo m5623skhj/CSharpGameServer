@@ -31,7 +31,7 @@ namespace CSharpGameServer.Config
             }
             catch (Exception ex)
             {
-                Logger.LoggerManager.instance.WriteLogFatal("Config read failed with {ex}", ex);
+                Logger.LoggerManager.Instance.WriteLogFatal("Config read failed with {ex}", ex);
             }
 
             return false;

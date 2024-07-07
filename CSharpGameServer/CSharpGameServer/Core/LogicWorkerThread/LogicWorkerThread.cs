@@ -88,7 +88,7 @@ namespace CSharpGameServer.Core.LogicWorkerThread
             stopThreadEvent.Set();
             thread.Join();
 
-            LoggerManager.instance.WriteLogDebug("Thread {threadId} is stopped", threadId);
+            LoggerManager.Instance.WriteLogDebug("Thread {threadId} is stopped", threadId);
         }
 
         private void SetIsRunning(int setValue)
@@ -143,7 +143,7 @@ namespace CSharpGameServer.Core.LogicWorkerThread
                 workerThread.StopThread();
             }
             workerThreadList.Clear();
-            LoggerManager.instance.WriteLogDebug("All logic threads are stopped");
+            LoggerManager.Instance.WriteLogDebug("All logic threads are stopped");
         }
 
         private int GetThreadId(ulong ownerId)

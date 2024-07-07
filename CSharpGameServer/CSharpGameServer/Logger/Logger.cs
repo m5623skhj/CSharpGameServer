@@ -6,7 +6,7 @@ namespace CSharpGameServer.Logger
 {
     public class LoggerManager
     {
-        public static LoggerManager? instance = null;
+        private static LoggerManager? instance = null;
         private LoggingLevelSwitch loggerLevel = new LoggingLevelSwitch(LogEventLevel.Debug);
 
         private LoggerManager()

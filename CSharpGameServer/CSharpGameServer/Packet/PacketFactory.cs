@@ -53,13 +53,13 @@ namespace CSharpGameServer
         {
             if (packetType == PacketType.InvalidPacketType)
             {
-                LoggerManager.instance.WriteLogFatal("Invalid packet type {packetType}", packetObjectType.GetType());
+                LoggerManager.Instance.WriteLogFatal("Invalid packet type {packetType}", packetObjectType.GetType());
                 return false;
             }
 
             if (packetTypeDict.ContainsKey(packetType))
             {
-                LoggerManager.instance.WriteLogFatal("Duplicated packet type {packetType} / {packetObjectType}", packetType, packetObjectType);
+                LoggerManager.Instance.WriteLogFatal("Duplicated packet type {packetType} / {packetObjectType}", packetType, packetObjectType);
                 return false;
             }
 
@@ -93,7 +93,7 @@ namespace CSharpGameServer
 
             if (typeof(RequestPacket).IsAssignableFrom(packetObjectType) == false)
             {
-                LoggerManager.instance.WriteLogError("Packet type {packetType} is valid but is not assignable", packetType);
+                LoggerManager.Instance.WriteLogError("Packet type {packetType} is valid but is not assignable", packetType);
                 return new RequestPacketResult(null, PacketResultType.InvalidReceivedData);
             }
 
@@ -101,7 +101,7 @@ namespace CSharpGameServer
             RequestPacket? packet = ToStr(recvStream, packetObjectType) as RequestPacket;
             if (packet == null)
             {
-                LoggerManager.instance.WriteLogError("Null RequestPacket / packet type {packetType}", packetType);
+                LoggerManager.Instance.WriteLogError("Null RequestPacket / packet type {packetType}", packetType);
                 return new RequestPacketResult(null, PacketResultType.InvalidReceivedData);
             }
 

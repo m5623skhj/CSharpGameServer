@@ -27,13 +27,13 @@ namespace CSharpGameServer
         {
             if (packetType == PacketType.InvalidPacketType)
             {
-                LoggerManager.instance.WriteLogError("Invalid packet type {handler.Method.Name}", handler.Method.Name);
+                LoggerManager.Instance.WriteLogError("Invalid packet type {handler.Method.Name}", handler.Method.Name);
                 return false;
             }
 
             if (packetHandlerDict.ContainsKey(packetType))
             {
-                LoggerManager.instance.WriteLogError("Duplicated packet type {pakcetType} / {handler.Method.Name}", packetType, handler.Method.Name);
+                LoggerManager.Instance.WriteLogError("Duplicated packet type {pakcetType} / {handler.Method.Name}", packetType, handler.Method.Name);
                 return false;
             }
 
@@ -46,7 +46,7 @@ namespace CSharpGameServer
             if (packetHandlerDict.TryGetValue(packet.type, out Action<Client, RequestPacket>? action) == false)
             {
                 // add client info
-                LoggerManager.instance.WriteLogError("Invalid packet type {client.clientSessionId} / {packet.type}", client.clientSessionId, packet.type);
+                LoggerManager.Instance.WriteLogError("Invalid packet type {client.clientSessionId} / {packet.type}", client.clientSessionId, packet.type);
                 return;
             }
 

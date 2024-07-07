@@ -36,11 +36,11 @@ namespace CSharpGameServer.DB.Migration
                 process.WaitForExit();
                 migrationResult = process.ExitCode;
 
-                Logger.LoggerManager.instance.WriteLogInfo("Migration succeeded");
+                Logger.LoggerManager.Instance.WriteLogInfo("Migration succeeded");
             }
             catch (Exception e)
             {
-                Logger.LoggerManager.instance.WriteLogFatal("Migration failed with {exception}", e.Message);
+                Logger.LoggerManager.Instance.WriteLogFatal("Migration failed with {exception}", e.Message);
                 return migrationResult;
             }
 

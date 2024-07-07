@@ -51,7 +51,7 @@ namespace CSharpGameServer.Core
             }
             if (PacketRegisterList.RegisterAllPacket() == false)
             {
-                LoggerManager.instance.WriteLogError("RegisterAllPacket falied");
+                LoggerManager.Instance.WriteLogError("RegisterAllPacket falied");
                 return;
             }
 
@@ -65,7 +65,7 @@ namespace CSharpGameServer.Core
                 return false;
             }
             
-            LoggerManager.instance.SetLogLevel(config.conf.LogLevel);
+            LoggerManager.Instance.SetLogLevel(config.conf.LogLevel);
 
             return true;
         }
