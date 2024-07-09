@@ -2,7 +2,7 @@
 
 namespace CSharpGameServer.DB.SPObjects
 {
-    public class SPBase
+    public abstract class SPBase
     {
         protected string? query = null;
 
@@ -41,5 +41,8 @@ namespace CSharpGameServer.DB.SPObjects
         {
             return query;
         }
+
+        public abstract void OnCommit();
+        public abstract void OnRollback();
     }
 }

@@ -8,9 +8,6 @@
         {
             owner = inOwner;
         }
-
-        public abstract void OnCommit();
-        public abstract void OnRollback();
     }
 
     public class TestSPObject : PCOwnerSPObject
