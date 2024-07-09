@@ -1,4 +1,6 @@
-﻿using MySql.Data.MySqlClient;
+﻿using CSharpGameServer.DB.SPObjects;
+using CSharpGameServer.Logger;
+using MySql.Data.MySqlClient;
 
 namespace CSharpGameServer.DB
 {
@@ -8,15 +10,19 @@ namespace CSharpGameServer.DB
 
         public void CreateConnection(string connectionString)
         {
-            connection = new MySqlConnection(connectionString);
-            connection.Open();
+            if (connection == null)
+            {
+                connection = new MySqlConnection(connectionString);
+                connection.Open();
+            }
         }
 
         public void CloseConnection()
         {
-            if(connection != null)
+            if (connection != null)
             {
                 connection.Close();
+                connection = null;
             }
         }
 
@@ -25,30 +31,90 @@ namespace CSharpGameServer.DB
             return new MySqlCommand(query, connection);
         }
 
-        public bool Execute(string inQuery)
+        public bool Execute(SPBase spObject)
         {
             if (connection == null)
             {
                 return false;
             }
 
+            var query = spObject.GetQueryString();
+            if (query == null)
+            {
+                return false;
+            }
+            
             try
             {
-                using (var command = new MySqlCommand(inQuery, connection))
+                using (var command = new MySqlCommand(query, connection))
                 {
                     command.ExecuteNonQuery();
                 }
             }
             catch (Exception ex)
             {
-                Logger.LoggerManager.Instance.WriteLogError("Query error {0} / {1}",
-                    inQuery, ex.Message);
-                
+                LoggerManager.Instance.WriteLogError("Query error {0} / {1}",
+                    query, ex.Message);
+                spObject.OnRollback();
+
                 return false;
             }
 
-            Logger.LoggerManager.Instance.WriteLogInfo("Query successed {0}", inQuery);
+            spObject.OnCommit();
             return true;
+        }
+
+        public bool Execute(List<SPBase> batchSPObjects)
+        {
+            if (connection == null)
+            {
+                return false;
+            }
+
+            using (var batch = connection.CreateBatch())
+            {
+                foreach (SPBase spObject in batchSPObjects)
+                {
+                    string? queryString = spObject.GetQueryString();
+                    if (queryString == null)
+                    {
+                        return false;
+                    }
+
+                    var batchCommand = batch.CreateBatchCommand();
+                    batchCommand.CommandType = System.Data.CommandType.Text;
+                    batchCommand.CommandText = queryString;
+
+                    batch.BatchCommands.Add(batchCommand);
+                }
+
+                using (var transaction = connection.BeginTransaction())
+                {
+                    try
+                    {
+                        batch.ExecuteNonQuery();
+                        transaction.Commit();
+                    }
+                    catch (Exception e)
+                    {
+                        LoggerManager.Instance.WriteLogError("BatchSPObject failed, connection is null",
+                            string.Join(", ", batchSPObjects.Select(sp => sp.GetQueryString())), e.Message);
+
+                        transaction.Rollback();
+                        foreach (var sp in batchSPObjects)
+                        {
+                            sp.OnRollback();
+                        }
+                        return false;
+                    }
+                }
+
+                foreach (var sp in batchSPObjects)
+                {
+                    sp.OnCommit();
+                }
+                return true;
+            }
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using CSharpGameServer.DB;
+using CSharpGameServer.DB.SPObjects;
 
 namespace CSharpGameServer.LazyRunner
 {
@@ -29,13 +30,17 @@ namespace CSharpGameServer.LazyRunner
 
     public class SPLazyRunner : LazyRunner
     {
-        public SPLazyRunner(int inDelayMilliSeconds, string inSPString)
+        public SPLazyRunner(int inDelayMilliSeconds, SPBase spObject)
             : base(() => 
             {
                 var connection = DBConnectionManager.Instance.GetConnection();
-                if (connection.Execute(inSPString) == false)
+                if (connection.Execute(spObject) == false)
                 {
-                    Logger.LoggerManager.Instance.WriteLogError("SPLazyRunner {0} failed", inSPString);
+                    string? queryString = spObject.GetQueryString();
+                    if (queryString != null)
+                    {
+                        Logger.LoggerManager.Instance.WriteLogError("SPLazyRunner {0} failed", queryString);
+                    }
                 }
             }
             , inDelayMilliSeconds)
