@@ -42,8 +42,19 @@ namespace CSharpGameServer.LazyRunner
                         Logger.LoggerManager.Instance.WriteLogError("SPLazyRunner {0} failed", queryString);
                     }
                 }
-            }
-            , inDelayMilliSeconds)
+            }, inDelayMilliSeconds)
+        {
+        }
+    }
+
+    public class BatchSPLazyRunner : LazyRunner
+    {
+        public BatchSPLazyRunner(int inDelayMilliSeconds, BatchSPObject batchSPObject)
+            : base(() =>
+            {
+                var connection = DBConnectionManager.Instance.GetConnection();
+                connection.Execute(batchSPObject.GetSPList());
+            }, inDelayMilliSeconds)
         {
         }
     }

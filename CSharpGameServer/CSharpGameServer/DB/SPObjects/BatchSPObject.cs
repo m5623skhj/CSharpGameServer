@@ -11,6 +11,8 @@ namespace CSharpGameServer.DB.SPObjects
             batchSPObjects.Add(spObject);
         }
 
+        public List<SPBase> GetSPList() { return batchSPObjects; }
+
         public bool Execute()
         {
             var connection = DBConnectionManager.Instance.GetConnection();
