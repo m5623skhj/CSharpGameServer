@@ -1,4 +1,5 @@
 ﻿using CSharpGameServer.Core.LogicWorkerThread;
+using CSharpGameServer.DB;
 using CSharpGameServer.Logger;
 using CSharpGameServer.Protocol;
 using System.Net;
@@ -45,7 +46,7 @@ namespace CSharpGameServer.Core
 
         private void Initialize()
         {
-            if (InitializeConfig() == false)
+            if (InitializeByConfig() == false)
             {
                 return;
             }
@@ -58,7 +59,7 @@ namespace CSharpGameServer.Core
             logicWorkerThreadManager.MakeThreads(logicThreadSize);
         }
 
-        private bool InitializeConfig()
+        private bool InitializeByConfig()
         {
             if (config.ReadConfig() == false)
             {
@@ -66,6 +67,11 @@ namespace CSharpGameServer.Core
             }
             
             LoggerManager.Instance.SetLogLevel(config.conf.LogLevel);
+            DBConnectionManager.Initialize(
+                config.conf.dbServerIP,
+                config.conf.dbSchemaName,
+                config.conf.dbUserId,
+                config.conf.dbUserPassword);
 
             return true;
         }

@@ -12,6 +12,7 @@
         {
             connectionString = $"Server={server};Database={db};Uid={userId};Pwd={password};";
         }
+
         public static void Initialize(string server, string db, string userId, string password)
         {
             if (instance == null)

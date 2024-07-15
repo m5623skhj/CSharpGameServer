@@ -1,3 +1,9 @@
 {
-    "LogLevel": "Debug"
+  // Log
+  "LogLevel": "Debug",
+  // DB
+  "DBServer": "127.0.0.1",
+  "DataBase": "test_schema",
+  "UserId": "test",
+  "Password": "dbPassword"
 }
