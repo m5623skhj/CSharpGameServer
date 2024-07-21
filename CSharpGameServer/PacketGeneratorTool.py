@@ -77,7 +77,7 @@ def ProcessPacketGenerate():
 # Write file path here
 packetTypeFilePath = 'CSharpGameServer/PacketType.cs'
 protocolFilePath = 'CSharpGameServer/Protocol.cs'
-packetHandlerFilePath = 'CSharGameServer/PacketHandler.cs'
+packetHandlerFilePath = 'CSharpGameServer/PacketHandler.cs'
 clientPacketHandlerFilePath = 'CSharpGameServer/Core/ClientManager.cs'
 pcPacketHandlerFilePath = 'CSharpGameServer/PC/PCPacketHandler.cs'
 ymlFilePath = 'PacketDefine.yml'
