@@ -19,14 +19,24 @@ def GenerateProtocolOverride(packetName):
     }}
     """
 
-def GeneratePacketHandler(packetName):
-    method_name = packetName + "Handler"
-    return f"""
-    public void {method_name}()
-    {{
-        // TODO: Handle packet
-    }}
-    """
+def GeneratePacketHandler(values):
+    generateCode = "using CSharpGameServer.Core;\nusing CSharpGameServer.Protocol;\n\n"
+    generateCode += "namespace CSharpGameServer.Packet\n{\n"
+    generateCode += "    public partial class PacketHandlerManager\n    {\n"
+    for value in values:
+        if value['Type'] != 'RequestPacket':
+            continue
+
+        generateCode += f"        public static void Handle{value['PacketName']}(Client client, RequestPacket packet)\n"
+        generateCode += "        {\n"
+        generateCode += f"            {value['PacketName']}? {value['PacketName'].lower()} = packet as {value['PacketName']};\n"
+        generateCode += f"            if ({value['PacketName'].lower()} == null)\n"
+        generateCode += f"                return;\n\n"
+        generateCode += f"            client.Handle{value['PacketName']}({value['PacketName'].lower()});\n"
+        generateCode += "        }\n\n"
+
+    generateCode += "    }\n}"
+    return generateCode
 
 def GenerateClientPacketHandler(packetName):
     method_name = packetName + "Handler"
@@ -62,10 +72,9 @@ def ProcessPacketGenerate():
     #     for packetName in ymlData['Packet']:
     #         file.write(GenerateProtocolOverride(packetName))
     
-    # # Generate PacketHandler.cs
-    # with open(packetHandlerFilePath, 'w') as file:
-    #     for packetName in ymlData['Packet']:
-    #         file.write(GeneratePacketHandler(packetName))
+    # Generate PacketHandler.cs
+    with open(packetHandlerFilePath, 'w') as file:
+        file.write(GeneratePacketHandler(ymlData['Packet']))
             
     # # Generate ClientPacketHandler.cs
     # with open(clientPacketHandlerFilePath, 'w') as file:
