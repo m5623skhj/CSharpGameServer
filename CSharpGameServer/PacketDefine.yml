@@ -1,2 +1,5 @@
 Packet:
-  - Ping
+  - Type: RequestPacket
+    PacketName: Ping
+  - Type: ResponsePacket
+    PacketName: Pong
