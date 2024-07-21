@@ -65,12 +65,12 @@ def ProcessPacketGenerate():
             file.write(GeneratePacketHandler(packetName))
             
     # Generate ClientPacketHandler.cs
-    with open(packetHandlerFilePath, 'w') as file:
+    with open(clientPacketHandlerFilePath, 'w') as file:
         for packetName in ymlData['Packet']:
             file.write(GenerateClientPacketHandler(packetName))
     
     # Generate PCPacketHandler.cs
-    with open(packetHandlerFilePath, 'w') as file:
+    with open(pcPacketHandlerFilePath, 'w') as file:
         for packetName in ymlData['Packet']:
             file.write(GeneratePCPacketHandler(packetName))
 
