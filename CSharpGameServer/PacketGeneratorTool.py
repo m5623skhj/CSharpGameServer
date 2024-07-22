@@ -10,19 +10,42 @@ def GenerateEnumValue(packetName, values):
     
     return enumCode
         
-def GenerateProtocolOverride(packetName):
-    method_name = packetName + "Handler"
-    return f"""
-    public override void {method_name}()
-    {{
-        // TODO: Add your implementation here.
-    }}
-    """
+def GenerateProtocolOverride(values):
+    generateCode = "using CSharpGameServer.Core;\nusing CSharpGameServer.Protocol;\n\n"
+    generateCode += "namespace CSharpGameServer.Packet\n{\n"
+
+    for value in values:
+        packetType = value['Type']
+        if packetType != 'RequestPacket' and packetType != 'ReplyPacket' :
+            continue
+
+        packetName = value['PacketName']
+        if packetType == 'RequestPacket' :
+            generateCode += f"    public partial class {packetName} : {packetType}\n"
+        else :
+            generateCode += f"    public class {packetName} : {packetType}\n"
+        generateCode += "    {\n"
+        generateCode += "        public override void SetPacketType()\n"
+        generateCode += "        {\n"
+        generateCode += f"            type = PacketType.{packetName};\n"
+        generateCode += "        }\n"
+
+        if packetType == 'RequestPacket':
+            generateCode += "        protected override Action<Client, RequestPacket> GetHandler()\n"
+            generateCode += "        {\n"
+            generateCode += f"            return PacketHandlerManager.Handle{packetName};\n"
+            generateCode += "        }\n"
+
+        generateCode += "    }\n"
+
+    generateCode += "}"
+    return generateCode
 
 def GeneratePacketHandler(values):
     generateCode = "using CSharpGameServer.Core;\nusing CSharpGameServer.Protocol;\n\n"
     generateCode += "namespace CSharpGameServer.Packet\n{\n"
     generateCode += "    public partial class PacketHandlerManager\n    {\n"
+    
     for value in values:
         if value['Type'] != 'RequestPacket':
             continue
@@ -61,30 +84,28 @@ def ProcessPacketGenerate():
     with open(ymlFilePath, 'r') as file:
         ymlData = yaml.load(file, Loader=yaml.SafeLoader)
         
+    packetList = ymlData['Packet']
     # Generate PacketType.cs
-    enumCode = GenerateEnumValue('PacketType', ymlData['Packet'])
+    enumCode = GenerateEnumValue('PacketType', packetList)
     with open(packetTypeFilePath, 'w') as file:
         file.write(enumCode)
     
 
     # # Generate Protocol.cs
-    # with open(protocolFilePath, 'w') as file:
-    #     for packetName in ymlData['Packet']:
-    #         file.write(GenerateProtocolOverride(packetName))
+    with open(protocolFilePath, 'w') as file:
+        file.write(GenerateProtocolOverride(packetList))
     
     # Generate PacketHandler.cs
     with open(packetHandlerFilePath, 'w') as file:
-        file.write(GeneratePacketHandler(ymlData['Packet']))
+        file.write(GeneratePacketHandler(packetList))
             
     # # Generate ClientPacketHandler.cs
     # with open(clientPacketHandlerFilePath, 'w') as file:
-    #     for packetName in ymlData['Packet']:
-    #         file.write(GenerateClientPacketHandler(packetName))
+    #     file.write(GenerateClientPacketHandler(packetList))
     
     # # Generate PCPacketHandler.cs
     # with open(pcPacketHandlerFilePath, 'w') as file:
-    #     for packetName in ymlData['Packet']:
-    #         file.write(GeneratePCPacketHandler(packetName))
+    #     file.write(GeneratePCPacketHandler(packetList))
 
 
 # Write file path here
