@@ -1,4 +1,4 @@
-﻿using CSharpGameServer.Core;
+using CSharpGameServer.Core;
 using CSharpGameServer.Protocol;
 
 namespace CSharpGameServer.Packet
@@ -9,7 +9,6 @@ namespace CSharpGameServer.Packet
         {
             type = PacketType.Ping;
         }
-
         protected override Action<Client, RequestPacket> GetHandler()
         {
             return PacketHandlerManager.HandlePing;
@@ -23,4 +22,5 @@ namespace CSharpGameServer.Packet
             type = PacketType.Pong;
         }
     }
+
 }

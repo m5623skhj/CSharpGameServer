@@ -1,4 +1,4 @@
-﻿using CSharpGameServer.Core;
+using CSharpGameServer.Core;
 using CSharpGameServer.Protocol;
 
 namespace CSharpGameServer.Packet
@@ -9,11 +9,10 @@ namespace CSharpGameServer.Packet
         {
             Ping? ping = packet as Ping;
             if (ping == null)
-            {
                 return;
-            }
 
             client.HandlePing(ping);
         }
+
     }
 }
