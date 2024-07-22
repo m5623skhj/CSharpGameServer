@@ -20,7 +20,7 @@ def GenerateProtocolOverride(values):
             continue
 
         packetName = value['PacketName']
-        if packetType == 'RequestPacket' :
+        if packetType == 'RequestPacket':
             generateCode += f"    public partial class {packetName} : {packetType}\n"
         else :
             generateCode += f"    public class {packetName} : {packetType}\n"
@@ -36,7 +36,7 @@ def GenerateProtocolOverride(values):
             generateCode += f"            return PacketHandlerManager.Handle{packetName};\n"
             generateCode += "        }\n"
 
-        generateCode += "    }\n"
+        generateCode += "    }\n\n"
 
     generateCode += "}"
     return generateCode
@@ -61,24 +61,23 @@ def GeneratePacketHandler(values):
     generateCode += "    }\n}"
     return generateCode
 
-def GenerateClientPacketHandler(packetName):
-    method_name = packetName + "Handler"
-    return f"""
-    public override void {method_name}()
-    {{
-        base.{method_name}();
-        // TODO: Add client-specific handling here.
-    }}
-    """
+def GenerateClientPacketHandler(values):
+    generateCode = "using CSharpGameServer.Packet;\n\n"
+    generateCode += "namespace CSharpGameServer.Core\n{\n"
+    generateCode += "    public partial class Client\n"
 
-def GeneratePCPacketHandler(packetName):
-    method_name = packetName + "Handler"
-    return f"""
-    public override void {method_name}()
-    {{
-        // TODO: Implement the method.
-    }}
-    """
+    for value in values:
+        packetType = value['Type']
+        if packetType != 'RequestPacket':
+            continue
+        
+        packetName = value['PacketName']
+        generateCode += "    {\n"
+        generateCode += f"        public virtual void Handle{packetName}({packetName} {packetName.lower()}) {{ }}\n"
+        generateCode += "    }\n"
+
+    generateCode += "}"
+    return generateCode
 
 def ProcessPacketGenerate():
     with open(ymlFilePath, 'r') as file:
@@ -100,20 +99,15 @@ def ProcessPacketGenerate():
         file.write(GeneratePacketHandler(packetList))
             
     # # Generate ClientPacketHandler.cs
-    # with open(clientPacketHandlerFilePath, 'w') as file:
-    #     file.write(GenerateClientPacketHandler(packetList))
-    
-    # # Generate PCPacketHandler.cs
-    # with open(pcPacketHandlerFilePath, 'w') as file:
-    #     file.write(GeneratePCPacketHandler(packetList))
+    with open(clientPacketHandlerFilePath, 'w') as file:
+        file.write(GenerateClientPacketHandler(packetList))
 
 
 # Write file path here
-packetTypeFilePath = 'CSharpGameServer/PacketType.cs'
-protocolFilePath = 'CSharpGameServer/Protocol.cs'
-packetHandlerFilePath = 'CSharpGameServer/PacketHandler.cs'
-clientPacketHandlerFilePath = 'CSharpGameServer/Core/ClientManager.cs'
-pcPacketHandlerFilePath = 'CSharpGameServer/PC/PCPacketHandler.cs'
+packetTypeFilePath = 'CSharpGameServer/Packet/PacketType.cs'
+protocolFilePath = 'CSharpGameServer/Packet/Protocol.cs'
+packetHandlerFilePath = 'CSharpGameServer/Packet/PacketHandler.cs'
+clientPacketHandlerFilePath = 'CSharpGameServer/Core/ClientPacketHandler.cs'
 ymlFilePath = 'PacketDefine.yml'
 
 ProcessPacketGenerate()
