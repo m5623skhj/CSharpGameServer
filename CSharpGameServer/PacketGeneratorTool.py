@@ -1,5 +1,28 @@
 import yaml
 
+def IsValidPacketTypeInYaml(yamlData):
+    returnValue = True
+    checkedInvalidUniqueType = 0
+    
+    for value in yamlData:
+        packetType = value['Type']
+        
+        if packetType == 'UniqueType':
+            if checkedInvalidUniqueType == 0:
+                checkedInvalidUniqueType += 1
+                continue
+            else:
+                checkedInvalidUniqueType += 1
+                print("Duplicated UniqueType type " + value['PacketName'])
+                returnValue = False
+        
+        if packetType != 'RequestPacket' and packetType != 'ReplyPacket':
+            print("Invalid packet type : PacketName " + value['PacketName'] + " / Type : " + value['Type'])
+            returnValue = False
+    
+    return returnValue
+        
+
 def GenerateEnumValue(packetName, values):
     enumCode = f"namespace CSharpGameServer\n"
     enumCode += "{\n"
@@ -82,7 +105,11 @@ def GenerateClientPacketHandler(values):
 def ProcessPacketGenerate():
     with open(ymlFilePath, 'r') as file:
         ymlData = yaml.load(file, Loader=yaml.SafeLoader)
-        
+    
+    if IsValidPacketTypeInYaml(ymlData['Packet']) == False:
+        print("Code generate failed")
+        exit()
+    
     packetList = ymlData['Packet']
     # Generate PacketType.cs
     enumCode = GenerateEnumValue('PacketType', packetList)

@@ -1,7 +1,7 @@
 Packet:
-  - Type: Invalid
+  - Type: UniqueType
     PacketName: InvalidPacketType
   - Type: RequestPacket
     PacketName: Ping
   - Type: ReplyPacket
-    PacketName: Pong
+    PacketName: Pong 
