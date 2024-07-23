@@ -3,22 +3,33 @@ import yaml
 def IsValidPacketTypeInYaml(yamlData):
     returnValue = True
     checkedInvalidUniqueType = 0
+    duplicateChecker = set()
     
     for value in yamlData:
         packetType = value['Type']
+        packetName = value['PacketName']
         
         if packetType == 'UniqueType':
             if checkedInvalidUniqueType == 0:
                 checkedInvalidUniqueType += 1
+                duplicateChecker.add(packetName)
                 continue
             else:
                 checkedInvalidUniqueType += 1
-                print("Duplicated UniqueType type " + value['PacketName'])
+                print("Duplicated UniqueType type " + packetName)
                 returnValue = False
         
-        if packetType != 'RequestPacket' and packetType != 'ReplyPacket':
-            print("Invalid packet type : PacketName " + value['PacketName'] + " / Type : " + value['Type'])
+        if packetType != 'RequestPacket' and packetType != 'ReplyPacket':                
+            print("Invalid packet type : PacketName " + packetName + " / Type : " + value['Type'])
             returnValue = False
+            continue
+            
+        if packetName in duplicateChecker:
+            print("Duplicate packet name : " + packetName)
+            returnValue = False
+            continue
+    
+        duplicateChecker.add(packetName)
     
     return returnValue
         
@@ -115,7 +126,6 @@ def ProcessPacketGenerate():
     enumCode = GenerateEnumValue('PacketType', packetList)
     with open(packetTypeFilePath, 'w') as file:
         file.write(enumCode)
-    
 
     # # Generate Protocol.cs
     with open(protocolFilePath, 'w') as file:
