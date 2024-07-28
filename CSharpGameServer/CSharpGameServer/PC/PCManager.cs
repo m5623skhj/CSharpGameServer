@@ -1,7 +1,11 @@
-﻿namespace CSharpGameServer.PC
+﻿using CSharpGameServer.Core;
+
+namespace CSharpGameServer.PC
 {
     public class PCManager
     {
+        private ServerCore serverCore;
+
         private static PCManager? instance = null;
         private Dictionary<ulong, PC> pcIdToPCDict = new Dictionary<ulong, PC>();
 
@@ -18,6 +22,11 @@
 
                 return instance;
             }
+        }
+
+        public void SetServerCore(ServerCore inServerCore)
+        {
+            serverCore = inServerCore;
         }
 
         public void InsertPC(PC pc, ulong pcId)

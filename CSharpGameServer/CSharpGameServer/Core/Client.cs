@@ -5,6 +5,7 @@ namespace CSharpGameServer.Core
 {
     public partial class Client
     {
+        protected ServerCore serverCore;
         public static ulong invalidSessionId = ulong.MaxValue;
 
         public Socket socket { get; }
@@ -19,15 +20,16 @@ namespace CSharpGameServer.Core
 
         public virtual void OnSend() {}
 
-        public Client(Socket inSocket, ulong inClientSessionId) 
+        public Client(ServerCore inServerCore, Socket inSocket, ulong inClientSessionId) 
         {
+            serverCore = inServerCore;
             socket = inSocket;
             clientSessionId = inClientSessionId;
         }
 
         public void CloseSession()
         {
-            ServerCore.Instance.CloseClient(clientSessionId);
+            serverCore.CloseClient(clientSessionId);
         }
 
         public void RefreshRecvTime()
@@ -37,7 +39,7 @@ namespace CSharpGameServer.Core
 
         public void Send(ReplyPacket packet)
         {
-            ServerCore.Instance.SendPacket(this, packet);
+            serverCore.SendPacket(this, packet);
         }
 
         public bool PushStreamData(byte[] inputStreamData)

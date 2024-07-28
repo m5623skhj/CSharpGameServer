@@ -12,12 +12,12 @@ namespace CSharpGameServer.Core
 {
     public class ServerCore
     {
-        private static ServerCore? instance = null;
+        //private static ServerCore? instance = null;
 
         private Socket? listenSocket = null;
         private int port = 10001;
         private int backlogSize = 0;
-        private ulong atomicSessionId = 1;
+        protected ulong atomicSessionId = 1;
 
         private const int bufferSize = 2048;
         private bool running = false;
@@ -26,25 +26,25 @@ namespace CSharpGameServer.Core
         private readonly int logicThreadSize = 16;
         private Config.Config config = new Config.Config();
 
-        public static ServerCore Instance
-        {
-            get
-            {
-                if (instance == null)
-                {
-                    instance = new ServerCore();
-                }
+        //public static ServerCore Instance
+        //{
+        //    get
+        //    {
+        //        if (instance == null)
+        //        {
+        //            instance = new ServerCore();
+        //        }
 
-                return instance;
-            }
-        }
+        //        return instance;
+        //    }
+        //}
 
-        private ServerCore()
+        public ServerCore()
         {
             Initialize();
         }
 
-        private void Initialize()
+        public virtual void Initialize()
         {
             if (InitializeByConfig() == false)
             {
@@ -55,6 +55,8 @@ namespace CSharpGameServer.Core
                 LoggerManager.Instance.WriteLogError("RegisterAllPacket falied");
                 return;
             }
+
+            ClientManager.Instance.SetServerCore(this);
 
             logicWorkerThreadManager.MakeThreads(logicThreadSize);
         }
@@ -127,7 +129,7 @@ namespace CSharpGameServer.Core
             }
         }
 
-        private void ProcessAccept(SocketAsyncEventArgs acceptEventArgs)
+        protected virtual void ProcessAccept(SocketAsyncEventArgs acceptEventArgs)
         {
             Socket? clientSocket = acceptEventArgs.AcceptSocket;
             if (clientSocket == null)
@@ -136,7 +138,7 @@ namespace CSharpGameServer.Core
             }
 
             var newSessionId = Interlocked.Increment(ref atomicSessionId);
-            var newClient = new Client(clientSocket, newSessionId);
+            var newClient = new Client(this, clientSocket, newSessionId);
             if (newClient == null)
             {
                 return;
@@ -162,7 +164,7 @@ namespace CSharpGameServer.Core
             StartAccept();
         }
 
-        private void StartReceive(object? inClient)
+        protected void StartReceive(object? inClient)
         {
             if (inClient is null)
             {

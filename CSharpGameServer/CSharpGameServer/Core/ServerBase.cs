@@ -4,13 +4,23 @@ namespace CSharpGameServer.Core
 {
     public abstract class ServerBase
     {
-        protected void Run(string serverName)
+        public void Run(string serverName, ServerCore? targetServerCore = null)
         {
-            ServerCore.Instance.Run();
+            ServerCore? serverCore = null;
+            if (targetServerCore == null)
+            {
+                serverCore = new ServerCore();
+            }
+            else
+            {
+                serverCore = targetServerCore;
+            }
+
+            serverCore.Run();
             LoggerManager.Instance.WriteLogDebug("------------ " + serverName + " Server running ------------");
             ServerRunning();
 
-            ServerCore.Instance.Stop();
+            serverCore.Stop();
             LoggerManager.Instance.WriteLogDebug("------------ " + serverName + " Server stopped ------------");
         }
 

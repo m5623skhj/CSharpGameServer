@@ -21,7 +21,8 @@ namespace CSharpGameServer.PC
 
         }
 
-        public PC(Socket inSocket, ulong inClientSessionId) : base(inSocket, inClientSessionId)
+        public PC(ServerCore inServerCore, Socket inSocket, ulong inClientSessionId) 
+            : base(inServerCore, inSocket, inClientSessionId)
         {
         }
 

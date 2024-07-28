@@ -8,7 +8,7 @@ namespace CSharpGameServer.GameServer
 
         public void Run()
         {
-            Run(serverName);
+            Run(serverName, new GameServerCore());
         }
     }
 }

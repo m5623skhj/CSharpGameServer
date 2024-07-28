@@ -2,6 +2,7 @@
 {
     public class ClientManager
     {
+        private ServerCore serverCore;
         private static ClientManager? instance = null;
         private Dictionary<ulong, Client> sessionIdToClientDict = new Dictionary<ulong, Client>();
 
@@ -18,6 +19,11 @@
 
                 return instance;
             }
+        }
+
+        public void SetServerCore(ServerCore inServerCore)
+        {
+            serverCore = inServerCore;
         }
 
         private ClientManager()
@@ -44,7 +50,7 @@
             {
                 foreach (var client in sessionIdToClientDict.Values)
                 {
-                    ServerCore.Instance.CloseClient(client.clientSessionId);
+                    serverCore.CloseClient(client.clientSessionId);
                 }
             }
         }
