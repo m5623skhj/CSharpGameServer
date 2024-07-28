@@ -12,8 +12,6 @@ namespace CSharpGameServer.Core
 {
     public class ServerCore
     {
-        //private static ServerCore? instance = null;
-
         private Socket? listenSocket = null;
         private int port = 10001;
         private int backlogSize = 0;
@@ -25,19 +23,6 @@ namespace CSharpGameServer.Core
         private LogicWorkerThreadManager logicWorkerThreadManager = new LogicWorkerThreadManager();
         private readonly int logicThreadSize = 16;
         private Config.Config config = new Config.Config();
-
-        //public static ServerCore Instance
-        //{
-        //    get
-        //    {
-        //        if (instance == null)
-        //        {
-        //            instance = new ServerCore();
-        //        }
-
-        //        return instance;
-        //    }
-        //}
 
         public ServerCore()
         {
