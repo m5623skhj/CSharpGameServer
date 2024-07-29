@@ -3,6 +3,7 @@ import yaml
 def IsValidPacketTypeInYaml(yamlData):
     returnValue = True
     checkedInvalidUniqueType = 0
+    uniqueTypePacketName = ''
     duplicateChecker = set()
     
     for value in yamlData:
@@ -12,11 +13,12 @@ def IsValidPacketTypeInYaml(yamlData):
         if packetType == 'UniqueType':
             if checkedInvalidUniqueType == 0:
                 checkedInvalidUniqueType += 1
+                uniqueTypePacketName = packetName
                 duplicateChecker.add(packetName)
                 continue
             else:
                 checkedInvalidUniqueType += 1
-                print("Duplicated UniqueType type " + packetName)
+                print("Duplicated UniqueType type " + uniqueTypePacketName + " and " + packetName)
                 returnValue = False
         
         if packetType != 'RequestPacket' and packetType != 'ReplyPacket':                
@@ -75,6 +77,7 @@ def GenerateProtocolOverride(values):
     generateCode += "}"
     return generateCode
 
+
 def GeneratePacketHandler(values):
     generateCode = "using CSharpGameServer.Core;\nusing CSharpGameServer.Protocol;\n\n"
     generateCode += "namespace CSharpGameServer.Packet\n{\n"
@@ -95,6 +98,7 @@ def GeneratePacketHandler(values):
     generateCode += "    }\n}"
     return generateCode
 
+
 def GenerateClientPacketHandler(values):
     generateCode = "using CSharpGameServer.Packet;\n\n"
     generateCode += "namespace CSharpGameServer.Core\n{\n"
@@ -113,6 +117,7 @@ def GenerateClientPacketHandler(values):
     generateCode += "}"
     return generateCode
 
+
 def ProcessPacketGenerate():
     with open(ymlFilePath, 'r') as file:
         ymlData = yaml.load(file, Loader=yaml.SafeLoader)
@@ -127,7 +132,7 @@ def ProcessPacketGenerate():
     with open(packetTypeFilePath, 'w') as file:
         file.write(enumCode)
 
-    # # Generate Protocol.cs
+    # Generate Protocol.cs
     with open(protocolFilePath, 'w') as file:
         file.write(GenerateProtocolOverride(packetList))
     
@@ -135,7 +140,7 @@ def ProcessPacketGenerate():
     with open(packetHandlerFilePath, 'w') as file:
         file.write(GeneratePacketHandler(packetList))
             
-    # # Generate ClientPacketHandler.cs
+    # Generate ClientPacketHandler.cs
     with open(clientPacketHandlerFilePath, 'w') as file:
         file.write(GenerateClientPacketHandler(packetList))
 
