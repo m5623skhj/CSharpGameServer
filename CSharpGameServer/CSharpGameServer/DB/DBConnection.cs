@@ -48,6 +48,7 @@ namespace CSharpGameServer.DB
             {
                 using (var command = new MySqlCommand(query, connection))
                 {
+                    command.CommandType = System.Data.CommandType.StoredProcedure;
                     command.ExecuteNonQuery();
                 }
             }
@@ -61,6 +62,60 @@ namespace CSharpGameServer.DB
             }
 
             spObject.OnCommit();
+            return true;
+        }
+
+        
+        public bool Execute<ResultType>(SPBase spObject, out List<ResultType> resultList) 
+            where ResultType : new()
+        {
+            resultList = new List<ResultType>();
+
+            if (connection == null)
+            {
+                return false;
+            }
+
+            var query = spObject.GetQueryString();
+            if (query == null)
+            {
+                return false;
+            }
+
+            try
+            {
+                using (var command = new MySqlCommand(query, connection))
+                {
+                    command.CommandType = System.Data.CommandType.StoredProcedure;
+                    using (var reader = command.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            var item = new ResultType();
+                            foreach (var prop in typeof(ResultType).GetProperties())
+                            {
+                                if(reader.IsDBNull(reader.GetOrdinal(prop.Name)))
+                                {
+                                    LoggerManager.Instance.WriteLogError("Invalid sp result prop name " + prop.Name);
+                                    continue;
+                                }
+
+                                prop.SetValue(item, reader[prop.Name]);
+                            }
+                            resultList.Add(item);
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                LoggerManager.Instance.WriteLogError("Query error {0} / {1}",
+                    query, ex.Message);
+                spObject.OnRollback();
+
+                return false;
+            }
+
             return true;
         }
 
