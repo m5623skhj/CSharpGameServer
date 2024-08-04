@@ -48,7 +48,7 @@ namespace CSharpGameServer.DB
             {
                 using (var command = new MySqlCommand(query, connection))
                 {
-                    command.CommandType = System.Data.CommandType.StoredProcedure;
+                    command.CommandType = System.Data.CommandType.Text;
                     command.ExecuteNonQuery();
                 }
             }
@@ -65,7 +65,6 @@ namespace CSharpGameServer.DB
             return true;
         }
 
-        
         public bool Execute<ResultType>(SPBase spObject, out List<ResultType> resultList) 
             where ResultType : new()
         {
@@ -86,7 +85,7 @@ namespace CSharpGameServer.DB
             {
                 using (var command = new MySqlCommand(query, connection))
                 {
-                    command.CommandType = System.Data.CommandType.StoredProcedure;
+                    command.CommandType = System.Data.CommandType.Text;
                     using (var reader = command.ExecuteReader())
                     {
                         while (reader.Read())
