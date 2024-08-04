@@ -55,10 +55,10 @@ namespace CSharpGameServer.Core
             
             LoggerManager.Instance.SetLogLevel(config.conf.LogLevel);
             DBConnectionManager.Initialize(
-                config.conf.dbServerIP,
-                config.conf.dbSchemaName,
-                config.conf.dbUserId,
-                config.conf.dbUserPassword);
+                config.conf.DBServerIP,
+                config.conf.DBSchemaName,
+                config.conf.DBUserId,
+                config.conf.DBUserPassword);
 
             return true;
         }
