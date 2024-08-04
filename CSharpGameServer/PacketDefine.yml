@@ -1,5 +1,5 @@
 Packet:
-  - Type: UniqueType
+  - Type: Unique
     PacketName: InvalidPacketType
   - Type: RequestPacket
     PacketName: Ping

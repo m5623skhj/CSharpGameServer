@@ -10,7 +10,7 @@ def IsValidPacketTypeInYaml(yamlData):
         packetType = value['Type']
         packetName = value['PacketName']
         
-        if packetType == 'UniqueType':
+        if packetType == 'Unique':
             if checkedInvalidUniqueType == 0:
                 checkedInvalidUniqueType += 1
                 uniqueTypePacketName = packetName
@@ -18,7 +18,7 @@ def IsValidPacketTypeInYaml(yamlData):
                 continue
             else:
                 checkedInvalidUniqueType += 1
-                print("Duplicated UniqueType type " + uniqueTypePacketName + " and " + packetName)
+                print("Duplicated Unique type " + uniqueTypePacketName + " and " + packetName)
                 returnValue = False
         
         if packetType != 'RequestPacket' and packetType != 'ReplyPacket':                
