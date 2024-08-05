@@ -1,6 +1,7 @@
 ﻿using CSharpGameServer.DB.SPObjects;
 using CSharpGameServer.Logger;
 using MySql.Data.MySqlClient;
+using System.Data.Common;
 
 namespace CSharpGameServer.DB
 {
@@ -43,7 +44,7 @@ namespace CSharpGameServer.DB
             {
                 return false;
             }
-            
+
             try
             {
                 using (var command = new MySqlCommand(query, connection))
@@ -56,8 +57,8 @@ namespace CSharpGameServer.DB
             {
                 LoggerManager.Instance.WriteLogError("Query error {0} / {1}",
                     query, ex.Message);
-                spObject.OnRollback();
 
+                spObject.OnRollback();
                 return false;
             }
 
@@ -65,60 +66,44 @@ namespace CSharpGameServer.DB
             return true;
         }
 
-        public bool Execute<ResultType>(SPBase spObject, out List<ResultType> resultList) 
-            where ResultType : new()
+        public bool ExecuteWithResult(SPBase spObject)
         {
-            resultList = new List<ResultType>();
-
             if (connection == null)
             {
                 return false;
             }
 
-            var query = spObject.GetQueryString();
-            if (query == null)
+            var queryString = spObject.GetQueryString();
+            if (queryString == null)
             {
                 return false;
             }
 
             try
             {
-                using (var command = new MySqlCommand(query, connection))
+                using (var command = new MySqlCommand(queryString, connection))
                 {
                     command.CommandType = System.Data.CommandType.Text;
                     using (var reader = command.ExecuteReader())
                     {
-                        while (reader.Read())
-                        {
-                            var item = new ResultType();
-                            foreach (var prop in typeof(ResultType).GetProperties())
-                            {
-                                if(reader.IsDBNull(reader.GetOrdinal(prop.Name)))
-                                {
-                                    LoggerManager.Instance.WriteLogError("Invalid sp result prop name " + prop.Name);
-                                    continue;
-                                }
-
-                                prop.SetValue(item, reader[prop.Name]);
-                            }
-                            resultList.Add(item);
-                        }
+                        spObject.AddResultRows(reader);
                     }
                 }
             }
             catch (Exception ex)
             {
                 LoggerManager.Instance.WriteLogError("Query error {0} / {1}",
-                    query, ex.Message);
-                spObject.OnRollback();
+                    queryString, ex.Message);
 
+                spObject.OnRollback();
                 return false;
             }
 
+            spObject.OnCommit();
             return true;
         }
 
-        public bool Execute(List<SPBase> batchSPObjects)
+        public bool ExecuteBatch(List<SPBase> batchSPObjects)
         {
             if (connection == null)
             {
@@ -127,19 +112,9 @@ namespace CSharpGameServer.DB
 
             using (var batch = connection.CreateBatch())
             {
-                foreach (SPBase spObject in batchSPObjects)
+                if (MakeBatchCommand(batchSPObjects, batch) == false)
                 {
-                    string? queryString = spObject.GetQueryString();
-                    if (queryString == null)
-                    {
-                        return false;
-                    }
-
-                    var batchCommand = batch.CreateBatchCommand();
-                    batchCommand.CommandType = System.Data.CommandType.Text;
-                    batchCommand.CommandText = queryString;
-
-                    batch.BatchCommands.Add(batchCommand);
+                    return false;
                 }
 
                 using (var transaction = connection.BeginTransaction())
@@ -155,20 +130,91 @@ namespace CSharpGameServer.DB
                             string.Join(", ", batchSPObjects.Select(sp => sp.GetQueryString())), e.Message);
 
                         transaction.Rollback();
-                        foreach (var sp in batchSPObjects)
+                        foreach (var sp in batchSPObjects.AsEnumerable().Reverse())
                         {
                             sp.OnRollback();
                         }
                         return false;
                     }
                 }
-
-                foreach (var sp in batchSPObjects)
-                {
-                    sp.OnCommit();
-                }
-                return true;
             }
+
+            foreach (var sp in batchSPObjects)
+            {
+                sp.OnCommit();
+            }
+            return true;
+        }
+
+        public bool ExecuteBatchWithResult(List<SPBase> batchSPObjects)
+        {
+            if (connection == null)
+            {
+                return false;
+            }
+
+            using (var batch = connection.CreateBatch())
+            {
+                if (MakeBatchCommand(batchSPObjects, batch) == false)
+                {
+                    return false;
+                }
+
+                using (var transaction = connection.BeginTransaction())
+                {
+                    try
+                    {
+                        using (var reader = batch.ExecuteReader())
+                        {
+                            int spListIndex = 0;
+                            do
+                            {
+                                batchSPObjects[spListIndex].AddResultRows(reader);
+                                ++spListIndex;
+                            } while (reader.NextResult());
+                        }
+
+                        transaction.Commit();
+                    }
+                    catch (Exception e)
+                    {
+                        LoggerManager.Instance.WriteLogError("BatchSPObject failed, connection is null",
+                            string.Join(", ", batchSPObjects.Select(sp => sp.GetQueryString())), e.Message);
+
+                        transaction.Rollback();
+                        foreach (var sp in batchSPObjects.AsEnumerable().Reverse())
+                        {
+                            sp.OnRollback();
+                        }
+                        return false;
+                    }
+                }
+            }
+
+            foreach (var sp in batchSPObjects)
+            {
+                sp.OnCommit();
+            }
+            return true;
+        }
+
+        private bool MakeBatchCommand(List<SPBase> batchSPObjects, DbBatch batch)
+        {
+            foreach (var spObject in batchSPObjects)
+            {
+                var queryString = spObject.GetQueryString();
+                if (queryString == null)
+                {
+                    return false;
+                }
+
+                var batchCommand = batch.CreateBatchCommand();
+                batchCommand.CommandType = System.Data.CommandType.Text;
+                batchCommand.CommandText = queryString;
+
+                batch.BatchCommands.Add(batchCommand);
+            }
+            return true;
         }
     }
 }

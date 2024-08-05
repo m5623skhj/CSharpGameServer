@@ -24,7 +24,7 @@ namespace CSharpGameServer.DB.SPObjects
                 return false;
             }
 
-            return connection.Execute(batchSPObjects);
+            return connection.ExecuteBatch(batchSPObjects);
         }
     }
 }

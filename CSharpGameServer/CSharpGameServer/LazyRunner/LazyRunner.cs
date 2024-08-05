@@ -53,7 +53,7 @@ namespace CSharpGameServer.LazyRunner
             : base(() =>
             {
                 var connection = DBConnectionManager.Instance.GetConnection();
-                connection.Execute(batchSPObject.GetSPList());
+                connection.ExecuteBatch(batchSPObject.GetSPList());
             }, inDelayMilliSeconds)
         {
         }
