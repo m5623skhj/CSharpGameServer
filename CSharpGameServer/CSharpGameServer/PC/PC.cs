@@ -11,6 +11,8 @@ namespace CSharpGameServer.PC
 
         private ComponentManager componentManager = new ComponentManager();
 
+        public delegate void CallbackForInitFromDBComplete();
+
         public override void OnClosed() 
         {
         
@@ -32,9 +34,15 @@ namespace CSharpGameServer.PC
             PCInitializeFromDB();
         }
 
+        public void OnDBInitalizeCompleted()
+        {
+            Logger.LoggerManager.Instance.WriteLogInfo("Loading completed pcId : {0}", pcId);
+
+        }
+
         private void PCInitializeFromDB()
         {
-
+            CallbackForInitFromDBComplete callback = new CallbackForInitFromDBComplete(OnDBInitalizeCompleted);
         }
     }
 }
