@@ -30,6 +30,24 @@
         {
             return components.GetValueOrNull(inComponentType);
         }
+
+        public void UpdateComponents()
+        {
+            foreach (var component in components.Values)
+            {
+                component.PreUpdateComponents();
+            }
+
+            foreach (var component in components.Values)
+            {
+                component.UpdateComponents();
+            }
+
+            foreach (var component in components.Values)
+            {
+                component.PostUpdateComponents();
+            }
+        }
     }
 
     public abstract class ComponentBase
@@ -42,5 +60,8 @@
         }
 
         abstract public void Initialize();
+        abstract public void PreUpdateComponents();
+        abstract public void UpdateComponents();
+        abstract public void PostUpdateComponents();
     }
 }
