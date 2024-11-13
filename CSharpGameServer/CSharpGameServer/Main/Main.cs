@@ -1,10 +1,13 @@
 ﻿using CSharpGameServer.GameServer;
 
-class Program
+namespace TestServer.Main
 {
-    static void Main(string[] args)
+    class Program
     {
-        GameServer gameServer = new GameServer();
-        gameServer.Run();
+        static void Main(string[] args)
+        {
+            GameServer gameServer = new GameServer();
+            gameServer.Run();
+        }
     }
 }
