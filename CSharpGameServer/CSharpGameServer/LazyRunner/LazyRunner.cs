@@ -28,13 +28,13 @@ namespace CSharpGameServer.LazyRunner
         }
     }
 
-    public class SPLazyRunner : LazyRunner
+    public class SpLazyRunner : LazyRunner
     {
-        public SPLazyRunner(int inDelayMilliSeconds, SPBase spObject)
+        public SpLazyRunner(int inDelayMilliSeconds, SpBase spObject)
             : base(() => 
             {
-                var connection = DBConnectionManager.Instance.GetConnection();
-                if (connection.Execute(spObject) == false)
+                var connection = DbConnectionManager.Instance.GetConnection();
+                if (connection != null && connection.Execute(spObject) == false)
                 {
                     string? queryString = spObject.GetQueryString();
                     if (queryString != null)
@@ -47,13 +47,13 @@ namespace CSharpGameServer.LazyRunner
         }
     }
 
-    public class BatchSPLazyRunner : LazyRunner
+    public class BatchSpLazyRunner : LazyRunner
     {
-        public BatchSPLazyRunner(int inDelayMilliSeconds, BatchSPObject batchSPObject)
+        public BatchSpLazyRunner(int inDelayMilliSeconds, BatchSPObject batchSpObject)
             : base(() =>
             {
-                var connection = DBConnectionManager.Instance.GetConnection();
-                connection.ExecuteBatch(batchSPObject.GetSPList());
+                var connection = DbConnectionManager.Instance.GetConnection();
+                connection?.ExecuteBatch(batchSpObject.GetSpList());
             }, inDelayMilliSeconds)
         {
         }

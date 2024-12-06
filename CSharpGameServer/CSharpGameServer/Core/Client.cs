@@ -1,5 +1,5 @@
-﻿using CSharpGameServer.Protocol;
-using System.Net.Sockets;
+﻿using System.Net.Sockets;
+using CSharpGameServer.PacketBase;
 
 namespace CSharpGameServer.Core
 {
@@ -11,7 +11,7 @@ namespace CSharpGameServer.Core
         public Socket socket { get; }
         public ulong clientSessionId = invalidSessionId;
         private StreamRingBuffer streamRingBuffer = new StreamRingBuffer();
-        public DateTime lastRecvedTime { get; private set; } = DateTime.Now;
+        public DateTime lastReceivedTime { get; private set; } = DateTime.Now;
 
         public virtual void OnClosed() 
         {
@@ -34,7 +34,7 @@ namespace CSharpGameServer.Core
 
         public void RefreshRecvTime()
         {
-            lastRecvedTime = DateTime.Now;
+            lastReceivedTime = DateTime.Now;
         }
 
         public void Send(ReplyPacket packet)

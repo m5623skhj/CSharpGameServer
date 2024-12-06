@@ -6,14 +6,10 @@ namespace CSharpGameServer.GameServer
 {
     public class GameServerCore : ServerCore
     {
-        public GameServerCore()
-        {
-        }
-
         public override void Initialize()
         {
             base.Initialize();
-            PCManager.Instance.SetServerCore(this);
+            PcManager.Instance.SetServerCore(this);
         }
 
         protected override void ProcessAccept(SocketAsyncEventArgs acceptEventArgs)
@@ -25,15 +21,11 @@ namespace CSharpGameServer.GameServer
             }
 
             var newSessionId = Interlocked.Increment(ref atomicSessionId);
-            var newPC = new PC.PC(this, clientSocket, newSessionId);
-            if (newPC == null)
-            {
-                return;
-            }
+            var newPc = new Pc(this, clientSocket, newSessionId);
 
-            ThreadPool.QueueUserWorkItem(StartReceive, newPC);
+            ThreadPool.QueueUserWorkItem(StartReceive, newPc);
 
-            ClientManager.Instance.InsertSessionIdToClient(newSessionId, newPC);
+            ClientManager.Instance.InsertSessionIdToClient(newSessionId, newPc);
             acceptEventArgs.Completed += (sender, args) =>
             {
                 if (args.SocketError != SocketError.Success)

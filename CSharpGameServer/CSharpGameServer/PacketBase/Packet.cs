@@ -1,7 +1,7 @@
 ﻿using CSharpGameServer.Core;
 using CSharpGameServer.Packet;
 
-namespace CSharpGameServer.Protocol
+namespace CSharpGameServer.PacketBase
 {
     public abstract class PacketBase
     {

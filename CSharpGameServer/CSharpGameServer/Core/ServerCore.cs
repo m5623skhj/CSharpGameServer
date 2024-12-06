@@ -1,12 +1,12 @@
 ﻿using CSharpGameServer.Core.LogicWorkerThread;
 using CSharpGameServer.DB;
 using CSharpGameServer.Logger;
-using CSharpGameServer.Protocol;
 using System.Net;
 using System.Net.Sockets;
 using System.Runtime.InteropServices;
 using System.Text;
 using CSharpGameServer.Packet;
+using CSharpGameServer.PacketBase;
 
 
 namespace CSharpGameServer.Core
@@ -54,12 +54,12 @@ namespace CSharpGameServer.Core
                 return false;
             }
             
-            LoggerManager.Instance.SetLogLevel(config.conf.LogLevel);
-            DBConnectionManager.Initialize(
-                config.conf.DBServerIP,
-                config.conf.DBSchemaName,
-                config.conf.DBUserId,
-                config.conf.DBUserPassword);
+            LoggerManager.Instance.SetLogLevel(config.conf.logLevel);
+            DbConnectionManager.Initialize(
+                config.conf.dbServerIp,
+                config.conf.dbSchemaName,
+                config.conf.dbUserId,
+                config.conf.dbUserPassword);
 
             return true;
         }
@@ -125,10 +125,6 @@ namespace CSharpGameServer.Core
 
             var newSessionId = Interlocked.Increment(ref atomicSessionId);
             var newClient = new Client(this, clientSocket, newSessionId);
-            if (newClient == null)
-            {
-                return;
-            }
 
             ThreadPool.QueueUserWorkItem(StartReceive, newClient);
 
@@ -178,7 +174,7 @@ namespace CSharpGameServer.Core
                 return;
             }
 
-            if (ProcessReceive(receiveEventArgs) == true)
+            if (ProcessReceive(receiveEventArgs))
             {
                 StartReceive((Client)receiveEventArgs.UserToken);
             }

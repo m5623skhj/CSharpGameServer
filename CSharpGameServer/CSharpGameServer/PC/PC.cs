@@ -4,14 +4,14 @@ using System.Net.Sockets;
 
 namespace CSharpGameServer.PC
 {
-    public partial class PC : Client
+    public partial class Pc : Client
     {
         private ulong sessionId = 0;
         private ulong pcId = 0;
 
         private ComponentManager componentManager = new ComponentManager();
 
-        public delegate void CallbackForInitFromDBComplete();
+        public delegate void CallbackForInitFromDbComplete();
 
         public override void OnClosed() 
         {
@@ -23,15 +23,15 @@ namespace CSharpGameServer.PC
 
         }
 
-        public PC(ServerCore inServerCore, Socket inSocket, ulong inClientSessionId) 
+        public Pc(ServerCore inServerCore, Socket inSocket, ulong inClientSessionId) 
             : base(inServerCore, inSocket, inClientSessionId)
         {
         }
 
-        public void OnPCIdLoadCompleted(ulong inPCId)
+        public void OnPCIdLoadCompleted(ulong inPcId)
         {
-            pcId = inPCId;
-            PCInitializeFromDB();
+            pcId = inPcId;
+            PcInitializeFromDb();
         }
 
         public void OnDBInitializeCompleted()
@@ -40,9 +40,9 @@ namespace CSharpGameServer.PC
 
         }
 
-        private void PCInitializeFromDB()
+        private void PcInitializeFromDb()
         {
-            CallbackForInitFromDBComplete callback = new CallbackForInitFromDBComplete(OnDBInitializeCompleted);
+            CallbackForInitFromDbComplete callback = new CallbackForInitFromDbComplete(OnDBInitializeCompleted);
         }
     }
 }

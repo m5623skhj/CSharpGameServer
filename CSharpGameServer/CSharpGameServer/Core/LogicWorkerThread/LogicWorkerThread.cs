@@ -1,5 +1,6 @@
 ﻿using CSharpGameServer.Logger;
-using CSharpGameServer.Protocol;
+using CSharpGameServer.Packet;
+using CSharpGameServer.PacketBase;
 
 namespace CSharpGameServer.Core.LogicWorkerThread
 {
@@ -9,7 +10,7 @@ namespace CSharpGameServer.Core.LogicWorkerThread
         private ManualResetEvent stopThreadEvent = new ManualResetEvent(false);
         private Thread? thread = null;
         private int threadId;
-        private Queue<Tuple<Client, RequestPacket>> ItemStoreQueue = new Queue<Tuple<Client, RequestPacket>>();
+        private Queue<Tuple<Client, RequestPacket>> itemStoreQueue = new Queue<Tuple<Client, RequestPacket>>();
         private object itemStoreQueueLock = new object();
         private int isRunning = 0;
         private readonly int isTrue = 1;
@@ -38,12 +39,12 @@ namespace CSharpGameServer.Core.LogicWorkerThread
 
                 lock (itemStoreQueueLock)
                 {
-                    foreach (var packet in ItemStoreQueue)
+                    foreach (var packet in itemStoreQueue)
                     {
                         processList.Add(packet);
                     }
 
-                    ItemStoreQueue.Clear();
+                    itemStoreQueue.Clear();
                     SetIsRunning(isFalse);
                 }
 
@@ -59,12 +60,12 @@ namespace CSharpGameServer.Core.LogicWorkerThread
         {
             lock (itemStoreQueueLock)
             {
-                if (IsRunningThread() == true)
+                if (IsRunningThread())
                 {
                     return;
                 }
 
-                ItemStoreQueue.Enqueue(Tuple.Create(targetClient, packet));
+                itemStoreQueue.Enqueue(Tuple.Create(targetClient, packet));
             }
         }
 
@@ -125,7 +126,7 @@ namespace CSharpGameServer.Core.LogicWorkerThread
         public void PushPacket(Client targetClient, RequestPacket packet)
         {
             var threadId = GetThreadId(targetClient.clientSessionId);
-            if (workerThreadList[threadId].IsRunningThread() == true)
+            if (workerThreadList[threadId].IsRunningThread())
             {
                 workerThreadList[threadId].PushPacket(targetClient, packet);
             }

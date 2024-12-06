@@ -1,4 +1,4 @@
-﻿using CSharpGameServer.Protocol;
+﻿using CSharpGameServer.PacketBase;
 using MessageQueueId = int;
 
 namespace CSharpGameServer.Core

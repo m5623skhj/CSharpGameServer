@@ -2,29 +2,29 @@
 
 namespace CSharpGameServer.DB.SPObjects
 {
-    public class BatchSPObject
+    public abstract class BatchSPObject
     {
-        List<SPBase> batchSPObjects = new List<SPBase>();
+        List<SpBase> batchSpObjects = new List<SpBase>();
 
-        public void AddSPObject(SPBase spObject)
+        public void AddSpObject(SpBase spObject)
         {
-            batchSPObjects.Add(spObject);
+            batchSpObjects.Add(spObject);
         }
 
-        public List<SPBase> GetSPList() { return batchSPObjects; }
+        public List<SpBase> GetSpList() { return batchSpObjects; }
 
         public bool Execute()
         {
-            var connection = DBConnectionManager.Instance.GetConnection();
+            var connection = DbConnectionManager.Instance.GetConnection();
             if (connection == null)
             {
                 LoggerManager.Instance.WriteLogError("BatchSPObject failed, connection is null",
-                    string.Join(", ", batchSPObjects.Select(sp => sp.GetQueryString())));
+                    string.Join(", ", batchSpObjects.Select(sp => sp.GetQueryString())));
 
                 return false;
             }
 
-            return connection.ExecuteBatch(batchSPObjects);
+            return connection.ExecuteBatch(batchSpObjects);
         }
     }
 }

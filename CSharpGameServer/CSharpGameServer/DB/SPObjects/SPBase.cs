@@ -1,11 +1,10 @@
 ﻿using CSharpGameServer.Logger;
-using MySql.Data.MySqlClient;
 using System.Data.Common;
 using System.Reflection;
 
 namespace CSharpGameServer.DB.SPObjects
 {
-    public abstract class SPBase
+    public abstract class SpBase
     {
         protected string? query = null;
 
@@ -26,10 +25,10 @@ namespace CSharpGameServer.DB.SPObjects
                 values[i] = value;
             }
 
-            return GenerateSPQuery(values);
+            return GenerateSpQuery(values);
         }
 
-        public bool GenerateSPQuery(params object[] values)
+        public bool GenerateSpQuery(params object[] values)
         {
             if (query == null)
             {
@@ -51,22 +50,22 @@ namespace CSharpGameServer.DB.SPObjects
         public virtual void AddResultRows(DbDataReader reader) { }
     }
 
-    public abstract class SPWithResult<ResultType> : SPBase
+    public abstract class SpWithResult<TResultType> : SpBase
     {
-        protected List<ResultType> resultList = new List<ResultType>();
-        Type resultType = typeof(ResultType);
+        protected List<TResultType> resultList = new List<TResultType>();
+        Type resultType = typeof(TResultType);
 
         public override void AddResultRows(DbDataReader reader)
         {
             while (reader.Read())
             {
-                var item = (ResultType?)Activator.CreateInstance(resultType);
+                var item = (TResultType?)Activator.CreateInstance(resultType);
                 if (item == null)
                 {
                     throw new Exception("AddResultRows() : Failed to create instance of ResultType");
                 }
 
-                foreach (var prop in typeof(ResultType).GetProperties())
+                foreach (var prop in typeof(TResultType).GetProperties())
                 {
                     if (reader.IsDBNull(reader.GetOrdinal(prop.Name)))
                     {

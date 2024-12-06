@@ -1,7 +1,6 @@
-﻿using CSharpGameServer.Protocol;
-using CSharpGameServer.Packet;
+﻿using CSharpGameServer.PacketBase;
 
-namespace CSharpGameServer
+namespace CSharpGameServer.Packet
 {
     public static class PacketRegisterList
     {

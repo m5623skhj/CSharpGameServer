@@ -1,12 +1,10 @@
-﻿using CSharpGameServer.GameServer;
-
-namespace TestServer.Main
+﻿namespace CSharpGameServer.Main
 {
     class Program
     {
         static void Main(string[] args)
         {
-            GameServer gameServer = new GameServer();
+            GameServer.GameServer gameServer = new GameServer.GameServer();
             gameServer.Run();
         }
     }

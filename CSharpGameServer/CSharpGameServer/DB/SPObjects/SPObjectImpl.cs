@@ -1,23 +1,25 @@
 ﻿namespace CSharpGameServer.DB.SPObjects
 {
-    public abstract class PCOwnerSPObject : SPBase
+    public abstract class PCOwnerSPObject : SpBase
     {
-        protected PC.PC? owner = null;
+        protected PC.Pc? owner = null;
 
-        public PCOwnerSPObject(PC.PC inOwner) 
+        public PCOwnerSPObject(PC.Pc inOwner) 
         {
             owner = inOwner;
         }
     }
 
-    public class TestSPObject : PCOwnerSPObject
+    public class TestSpObject : PCOwnerSPObject
     {
-        private int? id = null;
-        private string? name = null;
+        private int? id;
+        private string? name;
 
-        public TestSPObject(PC.PC inOwner) 
+        public TestSpObject(PC.Pc inOwner) 
             : base(inOwner)
         {
+            id = null;
+            name = null;
             query = "SELECT * FROM tbl WHERE id = {0} AND name = \"{1}\"";
         }
 

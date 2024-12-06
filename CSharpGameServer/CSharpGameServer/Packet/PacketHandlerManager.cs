@@ -1,8 +1,8 @@
 ﻿using CSharpGameServer.Core;
 using CSharpGameServer.Logger;
-using CSharpGameServer.Protocol;
+using CSharpGameServer.PacketBase;
 
-namespace CSharpGameServer
+namespace CSharpGameServer.Packet
 {
     public partial class PacketHandlerManager
     {

@@ -54,9 +54,9 @@ namespace CSharpGameServer.PC.PCComponent
 
     public abstract class ComponentBase
     {
-        protected PC? owner = null;
+        protected Pc? owner = null;
 
-        public ComponentBase(PC? inOwner)
+        public ComponentBase(Pc? inOwner)
         {
             owner = inOwner;
         }

@@ -2,22 +2,22 @@
 
 namespace CSharpGameServer.PC
 {
-    public class PCManager
+    public class PcManager
     {
         private ServerCore? serverCore = null;
 
-        private static PCManager? instance = null;
-        private Dictionary<ulong, PC> pcIdToPCDict = new Dictionary<ulong, PC>();
+        private static PcManager? instance = null;
+        private Dictionary<ulong, Pc> pcIdToPcDict = new Dictionary<ulong, Pc>();
 
-        object pcIdToPCDictLock = new object();
+        object pcIdToPcDictLock = new object();
 
-        public static PCManager Instance
+        public static PcManager Instance
         {
             get
             {
                 if (instance == null)
                 {
-                    instance = new PCManager();
+                    instance = new PcManager();
                 }
 
                 return instance;
@@ -29,35 +29,35 @@ namespace CSharpGameServer.PC
             serverCore = inServerCore;
         }
 
-        public void InsertPC(PC pc, ulong pcId)
+        public void InsertPc(Pc pc, ulong pcId)
         {
-            lock (pcIdToPCDictLock)
+            lock (pcIdToPcDictLock)
             {
-                pcIdToPCDict.Add(pcId, pc);
+                pcIdToPcDict.Add(pcId, pc);
             }
         }
 
-        public void RemovePC(ulong pcId)
+        public void RemovePc(ulong pcId)
         {
-            lock (pcIdToPCDictLock)
+            lock (pcIdToPcDictLock)
             {
-                pcIdToPCDict.Remove(pcId);
+                pcIdToPcDict.Remove(pcId);
             }
         }
 
-        public PC? FindPC(ulong pcId)
+        public Pc? FindPc(ulong pcId)
         {
-            PC? findPC;
-            lock (pcIdToPCDictLock)
+            Pc? findPc;
+            lock (pcIdToPcDictLock)
             {
-                bool isFind = pcIdToPCDict.TryGetValue(pcId, out findPC);
+                bool isFind = pcIdToPcDict.TryGetValue(pcId, out findPc);
                 if (isFind == false)
                 {
                     return null;
                 }
             }
 
-            return findPC;
+            return findPc;
         }
     }
 }

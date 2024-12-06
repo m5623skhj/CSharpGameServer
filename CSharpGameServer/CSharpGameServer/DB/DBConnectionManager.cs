@@ -1,14 +1,14 @@
 ﻿namespace CSharpGameServer.DB
 {
-    public class DBConnectionManager
+    public class DbConnectionManager
     {
-        private static DBConnectionManager? instance = null;
+        private static DbConnectionManager? instance = null;
         private readonly string connectionString;
         private readonly int maxPoolSize = 10;
-        private Queue<DBConnection> connectionPool = new Queue<DBConnection>();
+        private Queue<DbConnection?> connectionPool = new Queue<DbConnection?>();
         private object connectionPoolLock = new object();
 
-        private DBConnectionManager(string server, string db, string userId, string password)
+        private DbConnectionManager(string server, string db, string userId, string password)
         {
             connectionString = $"Server={server};Database={db};Uid={userId};Pwd={password};";
         }
@@ -19,12 +19,12 @@
             {
                 if (instance == null)
                 {
-                    instance = new DBConnectionManager(server, db, userId, password);
+                    instance = new DbConnectionManager(server, db, userId, password);
                 }
             }
         }
 
-        public static DBConnectionManager Instance
+        public static DbConnectionManager Instance
         {
             get
             {
@@ -36,7 +36,7 @@
             }
         }
 
-        public DBConnection GetConnection()
+        public DbConnection? GetConnection()
         {
             lock (connectionPoolLock)
             {
@@ -49,15 +49,15 @@
             return CreateConnection();
         }
 
-        private DBConnection CreateConnection()
+        private DbConnection CreateConnection()
         {
-            var connection = new DBConnection();
+            var connection = new DbConnection();
             connection.CreateConnection(connectionString);
 
             return connection;
         }
 
-        public void ReleaseConnection(DBConnection connection)
+        public void ReleaseConnection(DbConnection? connection)
         {
             if (connection == null)
             {

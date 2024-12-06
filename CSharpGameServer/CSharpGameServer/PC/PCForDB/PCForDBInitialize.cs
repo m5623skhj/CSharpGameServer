@@ -1,6 +1,6 @@
-﻿namespace CSharpGameServer.PC.PCForDBInitialize
+﻿namespace CSharpGameServer.PC.PCForDB
 {
-    public static class PCForDBInitialize
+    public static class PcForDbInitialize
     {
 
     }

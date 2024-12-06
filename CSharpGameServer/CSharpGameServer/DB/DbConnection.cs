@@ -5,7 +5,7 @@ using System.Data.Common;
 
 namespace CSharpGameServer.DB
 {
-    public class DBConnection
+    public class DbConnection
     {
         private MySqlConnection? connection = null;
 
@@ -32,7 +32,7 @@ namespace CSharpGameServer.DB
             return new MySqlCommand(query, connection);
         }
 
-        public bool Execute(SPBase spObject)
+        public bool Execute(SpBase spObject)
         {
             if (connection == null)
             {
@@ -66,7 +66,7 @@ namespace CSharpGameServer.DB
             return true;
         }
 
-        public bool ExecuteWithResult(SPBase spObject)
+        public bool ExecuteWithResult(SpBase spObject)
         {
             if (connection == null)
             {
@@ -103,7 +103,7 @@ namespace CSharpGameServer.DB
             return true;
         }
 
-        public bool ExecuteBatch(List<SPBase> batchSPObjects)
+        public bool ExecuteBatch(List<SpBase> batchSpObjects)
         {
             if (connection == null)
             {
@@ -112,7 +112,7 @@ namespace CSharpGameServer.DB
 
             using (var batch = connection.CreateBatch())
             {
-                if (MakeBatchCommand(batchSPObjects, batch) == false)
+                if (MakeBatchCommand(batchSpObjects, batch) == false)
                 {
                     return false;
                 }
@@ -127,10 +127,10 @@ namespace CSharpGameServer.DB
                     catch (Exception e)
                     {
                         LoggerManager.Instance.WriteLogError("BatchSPObject failed, connection is null",
-                            string.Join(", ", batchSPObjects.Select(sp => sp.GetQueryString())), e.Message);
+                            string.Join(", ", batchSpObjects.Select(sp => sp.GetQueryString())), e.Message);
 
                         transaction.Rollback();
-                        foreach (var sp in batchSPObjects.AsEnumerable().Reverse())
+                        foreach (var sp in batchSpObjects.AsEnumerable().Reverse())
                         {
                             sp.OnRollback();
                         }
@@ -139,14 +139,14 @@ namespace CSharpGameServer.DB
                 }
             }
 
-            foreach (var sp in batchSPObjects)
+            foreach (var sp in batchSpObjects)
             {
                 sp.OnCommit();
             }
             return true;
         }
 
-        public bool ExecuteBatchWithResult(List<SPBase> batchSPObjects)
+        public bool ExecuteBatchWithResult(List<SpBase> batchSpObjects)
         {
             if (connection == null)
             {
@@ -155,7 +155,7 @@ namespace CSharpGameServer.DB
 
             using (var batch = connection.CreateBatch())
             {
-                if (MakeBatchCommand(batchSPObjects, batch) == false)
+                if (MakeBatchCommand(batchSpObjects, batch) == false)
                 {
                     return false;
                 }
@@ -169,7 +169,7 @@ namespace CSharpGameServer.DB
                             int spListIndex = 0;
                             do
                             {
-                                batchSPObjects[spListIndex].AddResultRows(reader);
+                                batchSpObjects[spListIndex].AddResultRows(reader);
                                 ++spListIndex;
                             } while (reader.NextResult());
                         }
@@ -179,10 +179,10 @@ namespace CSharpGameServer.DB
                     catch (Exception e)
                     {
                         LoggerManager.Instance.WriteLogError("BatchSPObject failed, connection is null",
-                            string.Join(", ", batchSPObjects.Select(sp => sp.GetQueryString())), e.Message);
+                            string.Join(", ", batchSpObjects.Select(sp => sp.GetQueryString())), e.Message);
 
                         transaction.Rollback();
-                        foreach (var sp in batchSPObjects.AsEnumerable().Reverse())
+                        foreach (var sp in batchSpObjects.AsEnumerable().Reverse())
                         {
                             sp.OnRollback();
                         }
@@ -191,16 +191,16 @@ namespace CSharpGameServer.DB
                 }
             }
 
-            foreach (var sp in batchSPObjects)
+            foreach (var sp in batchSpObjects)
             {
                 sp.OnCommit();
             }
             return true;
         }
 
-        private bool MakeBatchCommand(List<SPBase> batchSPObjects, DbBatch batch)
+        private bool MakeBatchCommand(List<SpBase> batchSpObjects, DbBatch batch)
         {
-            foreach (var spObject in batchSPObjects)
+            foreach (var spObject in batchSpObjects)
             {
                 var queryString = spObject.GetQueryString();
                 if (queryString == null)

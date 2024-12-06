@@ -3,11 +3,11 @@ using CSharpGameServer.Packet;
 
 namespace CSharpGameServer.PC
 {
-    public partial class PC : Client
+    public partial class Pc : Client
     {
         public override void HandlePing(Ping ping)
         {
-            Pong pong = new Pong();
+            var pong = new Pong();
             Send(pong);
         }
     }

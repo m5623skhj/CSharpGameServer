@@ -1,4 +1,4 @@
-namespace CSharpGameServer
+namespace CSharpGameServer.Packet
 {
     public enum PacketType : int
     {

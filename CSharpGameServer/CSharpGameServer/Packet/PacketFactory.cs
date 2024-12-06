@@ -2,7 +2,7 @@
 using System.Text;
 using CSharpGameServer.Core;
 using CSharpGameServer.Logger;
-using CSharpGameServer.Protocol;
+using CSharpGameServer.PacketBase;
 
 namespace CSharpGameServer.Packet
 {
