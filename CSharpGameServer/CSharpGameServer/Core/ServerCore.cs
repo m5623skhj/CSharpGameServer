@@ -6,6 +6,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Runtime.InteropServices;
 using System.Text;
+using CSharpGameServer.Packet;
 
 
 namespace CSharpGameServer.Core
@@ -227,7 +228,7 @@ namespace CSharpGameServer.Core
                 {
                     case PacketResultType.InvalidReceivedData:
                         return false;
-                    case PacketResultType.IncompletedReceived:
+                    case PacketResultType.IncompleteReceived:
                         return true;
                     case PacketResultType.Success:
                         storedSize -= requestPacketResult.packetLength;
@@ -236,7 +237,10 @@ namespace CSharpGameServer.Core
 
                         // Since the null check is already performed in GetPacketFromReceivedData(),
                         // it is not rechecked here.
-                        logicWorkerThreadManager.PushPacket(receivedClient, requestPacketResult.packet);
+                        if (requestPacketResult.packet != null)
+                        {
+                            logicWorkerThreadManager.PushPacket(receivedClient, requestPacketResult.packet);
+                        }
                         logicWorkerThreadManager.DoWork(receivedClient.clientSessionId);
                         break;
                 }

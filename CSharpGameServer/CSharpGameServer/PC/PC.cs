@@ -34,7 +34,7 @@ namespace CSharpGameServer.PC
             PCInitializeFromDB();
         }
 
-        public void OnDBInitalizeCompleted()
+        public void OnDBInitializeCompleted()
         {
             Logger.LoggerManager.Instance.WriteLogInfo("Loading completed pcId : {0}", pcId);
 
@@ -42,7 +42,7 @@ namespace CSharpGameServer.PC
 
         private void PCInitializeFromDB()
         {
-            CallbackForInitFromDBComplete callback = new CallbackForInitFromDBComplete(OnDBInitalizeCompleted);
+            CallbackForInitFromDBComplete callback = new CallbackForInitFromDBComplete(OnDBInitializeCompleted);
         }
     }
 }

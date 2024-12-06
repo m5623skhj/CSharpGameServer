@@ -1,14 +1,9 @@
-﻿public static class DictionaryExtensions
+﻿namespace CSharpGameServer.etc;
+
+public static class DictionaryExtensions
 {
-    public static TValue? GetValueOrNull<TKey, TValue>(this Dictionary<TKey, TValue> dictionary, TKey key) where TValue : class
+    public static TValue? GetValueOrNull<TKey, TValue>(this Dictionary<TKey, TValue?> dictionary, TKey key) where TValue : class where TKey : notnull
     {
-        if (dictionary.TryGetValue(key, out TValue value))
-        {
-            return value;
-        }
-        else
-        {
-            return null;
-        }
+        return dictionary.GetValueOrDefault(key);
     }
 }

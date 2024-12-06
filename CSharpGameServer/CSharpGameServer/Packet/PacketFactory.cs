@@ -1,15 +1,15 @@
-﻿using CSharpGameServer.Core;
+﻿using System.Runtime.InteropServices;
+using System.Text;
+using CSharpGameServer.Core;
 using CSharpGameServer.Logger;
 using CSharpGameServer.Protocol;
-using System.Runtime.InteropServices;
-using System.Text;
 
-namespace CSharpGameServer
+namespace CSharpGameServer.Packet
 {
     public enum PacketResultType : short
     {
         Success = 0,
-        IncompletedReceived,
+        IncompleteReceived,
         InvalidReceivedData,
     }
 
@@ -22,9 +22,9 @@ namespace CSharpGameServer
             packetLength = inPacketSize;
         }
 
-        public RequestPacket? packet = null;
-        public PacketResultType resultType = PacketResultType.Success;
-        public ushort packetLength = 0;
+        public readonly RequestPacket? packet = null;
+        public readonly PacketResultType resultType = PacketResultType.Success;
+        public readonly ushort packetLength = 0;
     }
 
     public class PacketFactory
@@ -33,7 +33,7 @@ namespace CSharpGameServer
         private readonly int headerSize = 6;
 
         private static PacketFactory? instance = null;
-        private Dictionary<PacketType, Type> packetTypeDict = new Dictionary<PacketType, Type>();
+        private readonly Dictionary<PacketType, Type> packetTypeDict = new Dictionary<PacketType, Type>();
 
         public static PacketFactory Instance
         {
@@ -53,7 +53,7 @@ namespace CSharpGameServer
         {
             if (packetType == PacketType.InvalidPacketType)
             {
-                LoggerManager.Instance.WriteLogFatal("Invalid packet type {packetType}", packetObjectType.GetType());
+                LoggerManager.Instance.WriteLogFatal("Invalid packet type {packetType}", packetObjectType);
                 return false;
             }
 
@@ -71,7 +71,7 @@ namespace CSharpGameServer
         {
             if (receivedData.Length < headerSize)
             {
-                return new RequestPacketResult(null, PacketResultType.IncompletedReceived);
+                return new RequestPacketResult(null, PacketResultType.IncompleteReceived);
             }
 
             int.TryParse(receivedData.Substring(0, 4), out int packetType);
@@ -84,7 +84,7 @@ namespace CSharpGameServer
             ushort.TryParse(receivedData.Substring(4, 2), out ushort packetLength);
             if (packetLength > receivedData.Length)
             {
-                return new RequestPacketResult(null, PacketResultType.IncompletedReceived);
+                return new RequestPacketResult(null, PacketResultType.IncompleteReceived);
             }
             else if (packetLength > StreamRingBuffer.defaultBufferSize)
             {

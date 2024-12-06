@@ -1,4 +1,6 @@
-﻿namespace CSharpGameServer.PC.PCComponent
+﻿using CSharpGameServer.etc;
+
+namespace CSharpGameServer.PC.PCComponent
 {
     public enum ComponentType : int
     {
@@ -28,7 +30,7 @@
 
         public ComponentBase? GetComponent(ComponentType inComponentType)
         {
-            return components.GetValueOrNull(inComponentType);
+            return components!.GetValueOrNull(inComponentType);
         }
 
         public void UpdateComponents()

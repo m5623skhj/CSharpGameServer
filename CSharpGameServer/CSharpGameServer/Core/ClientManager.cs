@@ -2,7 +2,7 @@
 {
     public class ClientManager
     {
-        private ServerCore serverCore;
+        private ServerCore serverCore = null!;
         private static ClientManager? instance = null;
         private Dictionary<ulong, Client> sessionIdToClientDict = new Dictionary<ulong, Client>();
 

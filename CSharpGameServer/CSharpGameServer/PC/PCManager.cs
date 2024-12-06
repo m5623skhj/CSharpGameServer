@@ -4,7 +4,7 @@ namespace CSharpGameServer.PC
 {
     public class PCManager
     {
-        private ServerCore serverCore;
+        private ServerCore? serverCore = null;
 
         private static PCManager? instance = null;
         private Dictionary<ulong, PC> pcIdToPCDict = new Dictionary<ulong, PC>();
@@ -24,7 +24,7 @@ namespace CSharpGameServer.PC
             }
         }
 
-        public void SetServerCore(ServerCore inServerCore)
+        public void SetServerCore(ServerCore? inServerCore)
         {
             serverCore = inServerCore;
         }
