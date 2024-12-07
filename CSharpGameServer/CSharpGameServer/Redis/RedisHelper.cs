@@ -1,14 +1,13 @@
 ﻿using StackExchange.Redis;
-using System.Diagnostics.Metrics;
 
 namespace CSharpGameServer.Redis
 {
     public class RedisHelper : IDisposable
     {
-        private static RedisHelper? instance = null;
+        private static RedisHelper? instance;
         private static ConnectionMultiplexer? redis = null;
         private static readonly object constructorLock = new object();
-        private readonly IDatabase? database = null;
+        private readonly IDatabase? database;
 
         public static RedisHelper Instance(string connectionString)
         {

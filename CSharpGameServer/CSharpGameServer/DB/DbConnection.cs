@@ -7,7 +7,7 @@ namespace CSharpGameServer.DB
 {
     public class DbConnection
     {
-        private MySqlConnection? connection = null;
+        private MySqlConnection? connection;
 
         public void CreateConnection(string connectionString)
         {

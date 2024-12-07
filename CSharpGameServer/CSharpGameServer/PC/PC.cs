@@ -6,8 +6,8 @@ namespace CSharpGameServer.PC
 {
     public partial class Pc : Client
     {
-        private ulong sessionId = 0;
-        private ulong pcId = 0;
+        private ulong sessionId;
+        private ulong pcId;
 
         private ComponentManager componentManager = new ComponentManager();
 

@@ -9,7 +9,7 @@ namespace CSharpGameServer.Core
         public static ulong invalidSessionId = ulong.MaxValue;
 
         public Socket socket { get; }
-        public ulong clientSessionId = invalidSessionId;
+        public ulong clientSessionId;
         private StreamRingBuffer streamRingBuffer = new StreamRingBuffer();
         public DateTime lastReceivedTime { get; private set; } = DateTime.Now;
 

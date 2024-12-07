@@ -4,9 +4,9 @@ namespace CSharpGameServer.PC
 {
     public class PcManager
     {
-        private ServerCore? serverCore = null;
+        private ServerCore? serverCore;
 
-        private static PcManager? instance = null;
+        private static PcManager? instance;
         private Dictionary<ulong, Pc> pcIdToPcDict = new Dictionary<ulong, Pc>();
 
         object pcIdToPcDictLock = new object();

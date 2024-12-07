@@ -2,7 +2,7 @@
 {
     public class DbConnectionManager
     {
-        private static DbConnectionManager? instance = null;
+        private static DbConnectionManager? instance;
         private readonly string connectionString;
         private readonly int maxPoolSize = 10;
         private Queue<DbConnection?> connectionPool = new Queue<DbConnection?>();

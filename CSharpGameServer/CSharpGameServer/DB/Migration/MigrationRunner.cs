@@ -4,7 +4,7 @@ namespace CSharpGameServer.DB.Migration
 {
     public class MigrationRunner
     {
-        private static MigrationRunner? instance = null;
+        private static MigrationRunner? instance;
         private readonly string migratorFilePath = "";
 
         public static MigrationRunner Instance

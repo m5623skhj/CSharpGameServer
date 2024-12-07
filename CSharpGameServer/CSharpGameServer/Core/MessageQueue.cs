@@ -33,7 +33,7 @@ namespace CSharpGameServer.Core
 
     public class MessageQueueManager
     {
-        private static MessageQueueManager? instance = null;
+        private static MessageQueueManager? instance;
         private static readonly object constructorLock = new object();
         private MessageQueue[] queueList;
         private readonly int logicThreadSize;

@@ -6,7 +6,7 @@ namespace CSharpGameServer.Packet
 {
     public partial class PacketHandlerManager
     {
-        private static PacketHandlerManager? instance = null;
+        private static PacketHandlerManager? instance;
         private Dictionary<PacketType, Action<Client, RequestPacket>> packetHandlerDict = new Dictionary<PacketType, Action<Client, RequestPacket>>();
 
         public static PacketHandlerManager Instance

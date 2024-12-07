@@ -2,7 +2,7 @@
 
 namespace CSharpGameServer.PC.PCComponent
 {
-    public enum ComponentType : int
+    public enum ComponentType
     {
         InvalidComponentType = 0,
     }
@@ -54,7 +54,7 @@ namespace CSharpGameServer.PC.PCComponent
 
     public abstract class ComponentBase
     {
-        protected Pc? owner = null;
+        protected Pc? owner;
 
         public ComponentBase(Pc? inOwner)
         {

@@ -8,11 +8,11 @@ namespace CSharpGameServer.Core.LogicWorkerThread
     {
         private ManualResetEvent doWorkThreadEvent = new ManualResetEvent(false);
         private ManualResetEvent stopThreadEvent = new ManualResetEvent(false);
-        private Thread? thread = null;
+        private Thread? thread;
         private int threadId;
         private Queue<Tuple<Client, RequestPacket>> itemStoreQueue = new Queue<Tuple<Client, RequestPacket>>();
         private object itemStoreQueueLock = new object();
-        private int isRunning = 0;
+        private int isRunning;
         private readonly int isTrue = 1;
         private readonly int isFalse = 0;
 

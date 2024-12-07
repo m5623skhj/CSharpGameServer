@@ -3,7 +3,7 @@
     public class ClientManager
     {
         private ServerCore serverCore = null!;
-        private static ClientManager? instance = null;
+        private static ClientManager? instance;
         private Dictionary<ulong, Client> sessionIdToClientDict = new Dictionary<ulong, Client>();
 
         object sessionIdToClientDictLock = new object();

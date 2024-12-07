@@ -1,16 +1,16 @@
 ﻿namespace CSharpGameServer.DB.SPObjects
 {
-    public abstract class PCOwnerSPObject : SpBase
+    public abstract class PcOwnerSpObject : SpBase
     {
-        protected PC.Pc? owner = null;
+        protected PC.Pc? owner;
 
-        public PCOwnerSPObject(PC.Pc inOwner) 
+        public PcOwnerSpObject(PC.Pc inOwner) 
         {
             owner = inOwner;
         }
     }
 
-    public class TestSpObject : PCOwnerSPObject
+    public class TestSpObject : PcOwnerSpObject
     {
         private int? id;
         private string? name;

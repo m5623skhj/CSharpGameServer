@@ -13,13 +13,13 @@ namespace CSharpGameServer.Core
 {
     public class ServerCore
     {
-        private Socket? listenSocket = null;
+        private Socket? listenSocket;
         private int port = 10001;
-        private int backlogSize = 0;
+        private int backlogSize = 200;
         protected ulong atomicSessionId = 1;
 
         private const int bufferSize = 2048;
-        private bool running = false;
+        private bool running;
 
         private LogicWorkerThreadManager logicWorkerThreadManager = new LogicWorkerThreadManager();
         private readonly int logicThreadSize = 16;

@@ -7,8 +7,8 @@
         private byte[] buffer;
         private uint bufferSize;
         
-        private uint head = 0;
-        private uint tail = 0;
+        private uint head;
+        private uint tail;
 
         public StreamRingBuffer()
         {

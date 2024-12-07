@@ -49,7 +49,7 @@ namespace CSharpGameServer.LazyRunner
 
     public class BatchSpLazyRunner : LazyRunner
     {
-        public BatchSpLazyRunner(int inDelayMilliSeconds, BatchSPObject batchSpObject)
+        public BatchSpLazyRunner(int inDelayMilliSeconds, BatchSpObject batchSpObject)
             : base(() =>
             {
                 var connection = DbConnectionManager.Instance.GetConnection();

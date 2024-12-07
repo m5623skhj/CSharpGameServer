@@ -2,7 +2,7 @@
 
 namespace CSharpGameServer.DB.SPObjects
 {
-    public abstract class BatchSPObject
+    public abstract class BatchSpObject
     {
         List<SpBase> batchSpObjects = new List<SpBase>();
 
