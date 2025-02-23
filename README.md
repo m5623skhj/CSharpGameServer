@@ -59,11 +59,7 @@ public override void HandlePacketName(PacketName inParameter) { 함수 정의 ..
 
 3. Migrator
 
-프로그램 실행시, 마이그레이터가 실행되며, 마이그레이터가 실패할 경우, 프로그램은 자동으로 종료하게 됩니다.
-
-마이그레이터는 아래를 사용합니다.
-
-https://github.com/m5623skhj/DBMigrator
+프로그램 실행시, [마이그레이터](https://github.com/m5623skhj/DBMigrator)가 실행되며, 마이그레이션이 실패할 경우, 프로그램은 자동으로 종료하게 됩니다.
 
 4 를 참조하여 DB 설정들을 자신의 상황에 맞게 수정해야 합니다.
 
