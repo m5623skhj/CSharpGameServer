@@ -26,7 +26,7 @@ namespace CSharpGameServer.Core.LogicWorkerThread
         private void StartWorkerThread()
         {
             WaitHandle[] threadEventes = [doWorkThreadEvent, stopThreadEvent];
-            List<Tuple<Client, RequestPacket>> processList = new List<Tuple<Client, RequestPacket>>();
+            List<Tuple<Client, RequestPacket>> processList = [];
             SetIsRunning(isTrue);
 
             while (true)
