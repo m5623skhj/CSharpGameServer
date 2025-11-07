@@ -1,0 +1,9 @@
+CSharpGameServer/CSharpGameServer/bin/
+CSharpGameServer/CSharpGameServer/obj/
+CSharpGameServer/TestClient/bin/
+CSharpGameServer/TestClient/obj/
+CSharpGameServer/DBMigrator/.vs/
+CSharpGameServer/DBMigrator/Migrator/obj/
+CSharpGameServer/DBMigrator/Migrator/bin/
+CSharpGameServer/DBMigrator/Migrator/__pycache__/
+CSharpGameServer/.vs/
