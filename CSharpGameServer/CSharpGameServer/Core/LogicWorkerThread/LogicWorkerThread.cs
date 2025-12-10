@@ -6,32 +6,32 @@ namespace CSharpGameServer.Core.LogicWorkerThread
 {
     internal class LogicWorker
     {
-        private ManualResetEvent doWorkThreadEvent = new ManualResetEvent(false);
-        private ManualResetEvent stopThreadEvent = new ManualResetEvent(false);
-        private Thread? thread;
-        private int threadId;
-        private Queue<Tuple<Client, RequestPacket>> itemStoreQueue = new Queue<Tuple<Client, RequestPacket>>();
-        private object itemStoreQueueLock = new object();
+        private readonly ManualResetEvent doWorkThreadEvent = new(false);
+        private readonly ManualResetEvent stopThreadEvent = new(false);
+        private readonly Thread? thread;
+        private readonly int threadId;
+        private readonly Queue<Tuple<Client, RequestPacket>> itemStoreQueue = new();
+        private readonly object itemStoreQueueLock = new();
         private int isRunning;
-        private readonly int isTrue = 1;
-        private readonly int isFalse = 0;
+        private const int IsTrue = 1;
+        private const int IsFalse = 0;
 
         public LogicWorker(int inThreadId)
         {
             threadId = inThreadId;
-            thread = new Thread(() => StartWorkerThread());
+            thread = new Thread(StartWorkerThread);
             thread.Start();
         }
 
         private void StartWorkerThread()
         {
-            WaitHandle[] threadEventes = [doWorkThreadEvent, stopThreadEvent];
+            WaitHandle[] threadEvents = [doWorkThreadEvent, stopThreadEvent];
             List<Tuple<Client, RequestPacket>> processList = [];
-            SetIsRunning(isTrue);
+            SetIsRunning(IsTrue);
 
             while (true)
             {
-                int eventIndex = WaitHandle.WaitAny(threadEventes);
+                var eventIndex = WaitHandle.WaitAny(threadEvents);
                 if (eventIndex == 1)
                 {
                     break;
@@ -39,13 +39,10 @@ namespace CSharpGameServer.Core.LogicWorkerThread
 
                 lock (itemStoreQueueLock)
                 {
-                    foreach (var packet in itemStoreQueue)
-                    {
-                        processList.Add(packet);
-                    }
+                    processList.AddRange(itemStoreQueue);
 
                     itemStoreQueue.Clear();
-                    SetIsRunning(isFalse);
+                    SetIsRunning(IsFalse);
                 }
 
                 foreach (var processItem in processList)
@@ -105,19 +102,14 @@ namespace CSharpGameServer.Core.LogicWorkerThread
 
     public class LogicWorkerThreadManager
     {
-        private List<LogicWorker> workerThreadList;
+        private readonly List<LogicWorker> workerThreadList = [];
         private int threadSize;
-
-        public LogicWorkerThreadManager()
-        {
-            workerThreadList = new List<LogicWorker>();
-        }
 
         public void MakeThreads(int inThreadSize)
         {
             threadSize = inThreadSize;
 
-            for (int threadId = 0; threadId < inThreadSize; threadId++)
+            for (var threadId = 0; threadId < inThreadSize; threadId++)
             {
                 workerThreadList.Add(new LogicWorker(threadId));
             }
@@ -125,7 +117,7 @@ namespace CSharpGameServer.Core.LogicWorkerThread
 
         public void PushPacket(Client targetClient, RequestPacket packet)
         {
-            var threadId = GetThreadId(targetClient.clientSessionId);
+            var threadId = GetThreadId(targetClient.ClientSessionId);
             if (workerThreadList[threadId].IsRunningThread())
             {
                 workerThreadList[threadId].PushPacket(targetClient, packet);
@@ -139,7 +131,7 @@ namespace CSharpGameServer.Core.LogicWorkerThread
 
         public void StopAllLogicThreads()
         {
-            foreach (LogicWorker workerThread in workerThreadList)
+            foreach (var workerThread in workerThreadList)
             {
                 workerThread.StopThread();
             }
@@ -149,8 +141,8 @@ namespace CSharpGameServer.Core.LogicWorkerThread
 
         private int GetThreadId(ulong ownerId)
         {
-            ulong devided = (ownerId / (ulong)threadSize);
-            return (int)(ownerId - (devided * (ulong)(threadSize)));
+            var divided = (ownerId / (ulong)threadSize);
+            return (int)(ownerId - (divided * (ulong)(threadSize)));
         }
     }
 }

@@ -4,25 +4,24 @@ namespace CSharpGameServer.Redis
 {
     public class RedisHelper : IDisposable
     {
-        private static RedisHelper? instance;
+        private static RedisHelper? _instance;
         private static ConnectionMultiplexer? redis = null;
-        private static readonly object constructorLock = new object();
+        private static readonly object ConstructorLock = new();
         private readonly IDatabase? database;
 
         public static RedisHelper Instance(string connectionString)
         {
-            if (instance == null)
+            if (_instance != null)
             {
-                lock (constructorLock)
-                {
-                    if (instance == null)
-                    {
-                        instance = new RedisHelper(connectionString);
-                    }
-                }
+                return _instance;
             }
 
-            return instance;
+            lock (ConstructorLock)
+            {
+                _instance ??= new RedisHelper(connectionString);
+            }
+
+            return _instance;
         }
 
         private RedisHelper(string connectionString)
@@ -33,10 +32,7 @@ namespace CSharpGameServer.Redis
 
         public void SetValue(string key, string value)
         {
-            if (database != null)
-            {
-                database.StringAppend(key, value);
-            }
+            database?.StringAppend(key, value);
         }
 
         public async Task SetValueAsync(string key, string value)
@@ -49,12 +45,7 @@ namespace CSharpGameServer.Redis
 
         public RedisValue? GetValue(string key)
         {
-            if (database != null)
-            {
-                return database.StringGet(key);
-            }
-
-            return null;
+            return database?.StringGet(key);
         }
 
         public async Task<RedisValue?> GetValueAsync(string key)
@@ -69,12 +60,7 @@ namespace CSharpGameServer.Redis
 
         public bool DeleteKey(string key)
         {
-            if (database != null)
-            {
-                return database.KeyDelete(key);
-            }
-
-            return false;
+            return database != null && database.KeyDelete(key);
         }
 
         public async Task<bool> DeleteKeyAsync(string key)
@@ -89,12 +75,7 @@ namespace CSharpGameServer.Redis
 
         public bool SetKeyExpiry(string key, TimeSpan time)
         {
-            if (database != null)
-            {
-                return database.KeyExpire(key, time);
-            }
-
-            return false;
+            return database != null && database.KeyExpire(key, time);
         }
 
         public async Task<bool> SetKeyExpiryAsync(string key, TimeSpan expiry)
@@ -109,12 +90,7 @@ namespace CSharpGameServer.Redis
 
         public bool RefreshKeyExpiry(string key, TimeSpan time)
         {
-            if (database != null)
-            {
-                return database.KeyExpire(key, time);
-            }
-
-            return false;
+            return database != null && database.KeyExpire(key, time);
         }
 
         public async Task<bool> RefreshKeyExpiryAsync(string key, TimeSpan expiry)

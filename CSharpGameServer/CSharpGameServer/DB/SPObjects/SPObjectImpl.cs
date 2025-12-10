@@ -20,7 +20,7 @@
         {
             id = null;
             name = null;
-            query = "SELECT * FROM tbl WHERE id = {0} AND name = \"{1}\"";
+            Query = "SELECT * FROM tbl WHERE id = {0} AND name = \"{1}\"";
         }
 
         public override void OnCommit()

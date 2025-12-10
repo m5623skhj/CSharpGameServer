@@ -9,28 +9,24 @@ namespace CSharpGameServer.Config
         {
         }
 
-        public LogEventLevel logLevel = 0;
+        public LogEventLevel LogLevel = 0;
         
-        public string dbServerIp = "";
-        public string dbSchemaName = "";
-        public string dbUserId = "";
-        public string dbUserPassword = "";
+        public string DbServerIp = "";
+        public string DbSchemaName = "";
+        public string DbUserId = "";
+        public string DbUserPassword = "";
     }
 
     public class Config
     {
-        private ConfigItem configItem;
-        public ConfigItem conf
-        {
-            get { return configItem; }
-        }
+        public ConfigItem Conf { get; private set; }
 
         public bool ReadConfig()
         {
             try
             {
-                string configJson = File.ReadAllText("Config/config.json");
-                configItem = JsonSerializer.Deserialize<ConfigItem>(configJson);
+                var configJson = File.ReadAllText("Config/config.json");
+                Conf = JsonSerializer.Deserialize<ConfigItem>(configJson);
 
                 return true;
             }

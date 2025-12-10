@@ -4,7 +4,7 @@ namespace CSharpGameServer.DB.SPObjects
 {
     public abstract class BatchSpObject
     {
-        List<SpBase> batchSpObjects = new List<SpBase>();
+        private readonly List<SpBase> batchSpObjects = [];
 
         public void AddSpObject(SpBase spObject)
         {
@@ -16,15 +16,16 @@ namespace CSharpGameServer.DB.SPObjects
         public bool Execute()
         {
             var connection = DbConnectionManager.Instance.GetConnection();
-            if (connection == null)
+            if (connection != null)
             {
-                LoggerManager.Instance.WriteLogError("BatchSPObject failed, connection is null",
-                    string.Join(", ", batchSpObjects.Select(sp => sp.GetQueryString())));
-
-                return false;
+                return connection.ExecuteBatch(batchSpObjects);
             }
 
-            return connection.ExecuteBatch(batchSpObjects);
+            LoggerManager.Instance.WriteLogError("BatchSPObject failed, connection is null",
+                string.Join(", ", batchSpObjects.Select(sp => sp.GetQueryString())));
+
+            return false;
+
         }
     }
 }

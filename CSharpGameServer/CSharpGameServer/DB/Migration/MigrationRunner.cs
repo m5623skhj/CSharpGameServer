@@ -1,33 +1,26 @@
 ﻿using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 
 namespace CSharpGameServer.DB.Migration
 {
     public class MigrationRunner
     {
-        private static MigrationRunner? instance;
-        private readonly string migratorFilePath = "";
+        private const string MigratorFilePath = "";
 
-        public static MigrationRunner Instance
-        {
-            get
-            {
-                if (instance == null)
-                {
-                    instance = new MigrationRunner();
-                }
-
-                return instance;
-            }
-        }
+        [field: AllowNull, MaybeNull]
+        public static MigrationRunner Instance => field ??= new MigrationRunner();
 
         public int RunMigration()
         {
-            int migrationResult = 0;
-            ProcessStartInfo startInfo = new ProcessStartInfo();
-            startInfo.FileName = migratorFilePath;
+            var migrationResult = 0;
+            var startInfo = new ProcessStartInfo
+            {
+                FileName = MigratorFilePath
+            };
+
             try
             {
-                Process? process = Process.Start(startInfo);
+                var process = Process.Start(startInfo);
                 if(process == null)
                 {
                     return migrationResult;

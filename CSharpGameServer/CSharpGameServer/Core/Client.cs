@@ -3,43 +3,36 @@ using CSharpGameServer.PacketBase;
 
 namespace CSharpGameServer.Core
 {
-    public partial class Client
+    public partial class Client(ServerCore inServerCore, Socket inSocket, ulong inClientSessionId)
     {
-        protected ServerCore serverCore;
-        public static ulong invalidSessionId = ulong.MaxValue;
+        protected ServerCore ServerCore = inServerCore;
+        private const ulong InvalidSessionId = ulong.MaxValue;
 
-        public Socket socket { get; }
-        public ulong clientSessionId;
-        private StreamRingBuffer streamRingBuffer = new StreamRingBuffer();
-        public DateTime lastReceivedTime { get; private set; } = DateTime.Now;
+        public Socket Socket { get; } = inSocket;
+        public ulong ClientSessionId = inClientSessionId;
+        private readonly StreamRingBuffer streamRingBuffer = new();
+        public DateTime LastReceivedTime { get; private set; } = DateTime.Now;
 
         public virtual void OnClosed() 
         {
-            clientSessionId = invalidSessionId;
+            ClientSessionId = InvalidSessionId;
         }
 
         public virtual void OnSend() {}
 
-        public Client(ServerCore inServerCore, Socket inSocket, ulong inClientSessionId) 
-        {
-            serverCore = inServerCore;
-            socket = inSocket;
-            clientSessionId = inClientSessionId;
-        }
-
         public void CloseSession()
         {
-            serverCore.CloseClient(clientSessionId);
+            ServerCore.CloseClient(ClientSessionId);
         }
 
         public void RefreshRecvTime()
         {
-            lastReceivedTime = DateTime.Now;
+            LastReceivedTime = DateTime.Now;
         }
 
         public void Send(ReplyPacket packet)
         {
-            serverCore.SendPacket(this, packet);
+            ServerCore.SendPacket(this, packet);
         }
 
         public bool PushStreamData(byte[] inputStreamData)

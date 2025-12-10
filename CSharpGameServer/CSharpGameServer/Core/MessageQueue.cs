@@ -3,16 +3,11 @@ using MessageQueueId = int;
 
 namespace CSharpGameServer.Core
 {
-    internal class MessageQueue
+    internal class MessageQueue(MessageQueueId inMessageQueueId)
     {
-        private Queue<RequestPacket> messageQueue = new Queue<RequestPacket>();
-        private readonly object queueLock = new object();
-        private readonly MessageQueueId messageQueueId;
-
-        public MessageQueue(MessageQueueId inMessageQueueId)
-        {
-            messageQueueId = inMessageQueueId;
-        }
+        private readonly Queue<RequestPacket> messageQueue = new();
+        private readonly object queueLock = new();
+        private readonly MessageQueueId messageQueueId = inMessageQueueId;
 
         public void PushToQueue(RequestPacket packet)
         {
@@ -31,39 +26,31 @@ namespace CSharpGameServer.Core
         }
     }
 
-    public class MessageQueueManager
+    public class MessageQueueManager(int inQueueListSize, int inLogicThreadSize)
     {
-        private static MessageQueueManager? instance;
-        private static readonly object constructorLock = new object();
-        private MessageQueue[] queueList;
-        private readonly int logicThreadSize;
+        private static MessageQueueManager? _instance;
+        private static readonly object ConstructorLock = new();
+        private readonly MessageQueue[] queueList = new MessageQueue[inQueueListSize];
 
         public static MessageQueueManager Instance(int inQueueListSize, int inLogicThreadSize)
         {
-            if (instance == null)
+            if (_instance != null)
             {
-                lock (constructorLock)
-                {
-                    if (instance == null)
-                    {
-                        instance = new MessageQueueManager(inQueueListSize, inLogicThreadSize);
-                    }
-                }
+                return _instance;
             }
 
-            return instance;
-        }
+            lock (ConstructorLock)
+            {
+                _instance ??= new MessageQueueManager(inQueueListSize, inLogicThreadSize);
+            }
 
-        public MessageQueueManager(int inQueueListSize, int inLogicThreadSize)
-        {
-            queueList = new MessageQueue[inQueueListSize];
-            logicThreadSize = inLogicThreadSize;
+            return _instance;
         }
 
         public void PushToQueue(ulong clientSessionId, RequestPacket packet)
         {
-            ulong devided = (clientSessionId / (ulong)logicThreadSize);
-            int logicThreadId = (int)(clientSessionId - (devided * (ulong)(logicThreadSize)));
+            var divided = (clientSessionId / (ulong)inLogicThreadSize);
+            var logicThreadId = (int)(clientSessionId - (divided * (ulong)(inLogicThreadSize)));
             
             queueList[logicThreadId].PushToQueue(packet);
         }

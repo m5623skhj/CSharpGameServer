@@ -11,20 +11,24 @@ namespace CSharpGameServer.DB
 
         public void CreateConnection(string connectionString)
         {
-            if (connection == null)
+            if (connection != null)
             {
-                connection = new MySqlConnection(connectionString);
-                connection.Open();
+                return;
             }
+
+            connection = new MySqlConnection(connectionString);
+            connection.Open();
         }
 
         public void CloseConnection()
         {
-            if (connection != null)
+            if (connection == null)
             {
-                connection.Close();
-                connection = null;
+                return;
             }
+
+            connection.Close();
+            connection = null;
         }
 
         public MySqlCommand MakeQueryCommand(string query)
@@ -47,11 +51,9 @@ namespace CSharpGameServer.DB
 
             try
             {
-                using (var command = new MySqlCommand(query, connection))
-                {
-                    command.CommandType = System.Data.CommandType.Text;
-                    command.ExecuteNonQuery();
-                }
+                using var command = new MySqlCommand(query, connection);
+                command.CommandType = System.Data.CommandType.Text;
+                command.ExecuteNonQuery();
             }
             catch (Exception ex)
             {
@@ -81,14 +83,10 @@ namespace CSharpGameServer.DB
 
             try
             {
-                using (var command = new MySqlCommand(queryString, connection))
-                {
-                    command.CommandType = System.Data.CommandType.Text;
-                    using (var reader = command.ExecuteReader())
-                    {
-                        spObject.AddResultRows(reader);
-                    }
-                }
+                using var command = new MySqlCommand(queryString, connection);
+                command.CommandType = System.Data.CommandType.Text;
+                using var reader = command.ExecuteReader();
+                spObject.AddResultRows(reader);
             }
             catch (Exception ex)
             {
@@ -166,7 +164,7 @@ namespace CSharpGameServer.DB
                     {
                         using (var reader = batch.ExecuteReader())
                         {
-                            int spListIndex = 0;
+                            var spListIndex = 0;
                             do
                             {
                                 batchSpObjects[spListIndex].AddResultRows(reader);
@@ -198,11 +196,10 @@ namespace CSharpGameServer.DB
             return true;
         }
 
-        private bool MakeBatchCommand(List<SpBase> batchSpObjects, DbBatch batch)
+        private static bool MakeBatchCommand(List<SpBase> batchSpObjects, DbBatch batch)
         {
-            foreach (var spObject in batchSpObjects)
+            foreach (var queryString in batchSpObjects.Select(spObject => spObject.GetQueryString()))
             {
-                var queryString = spObject.GetQueryString();
                 if (queryString == null)
                 {
                     return false;
@@ -214,6 +211,7 @@ namespace CSharpGameServer.DB
 
                 batch.BatchCommands.Add(batchCommand);
             }
+
             return true;
         }
     }

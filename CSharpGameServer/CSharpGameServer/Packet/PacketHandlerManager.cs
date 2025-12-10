@@ -46,7 +46,7 @@ namespace CSharpGameServer.Packet
             if (packetHandlerDict.TryGetValue(packet.type, out Action<Client, RequestPacket>? action) == false)
             {
                 // add client info
-                LoggerManager.Instance.WriteLogError("Invalid packet type {client.clientSessionId} / {packet.type}", client.clientSessionId, packet.type);
+                LoggerManager.Instance.WriteLogError("Invalid packet type {client.clientSessionId} / {packet.type}", client.ClientSessionId, packet.type);
                 return;
             }
 

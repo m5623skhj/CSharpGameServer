@@ -3,23 +3,12 @@
     public class ClientManager
     {
         private ServerCore serverCore = null!;
-        private static ClientManager? instance;
-        private Dictionary<ulong, Client> sessionIdToClientDict = new Dictionary<ulong, Client>();
+        private static ClientManager? _instance;
+        private readonly Dictionary<ulong, Client> sessionIdToClientDict = new();
 
-        object sessionIdToClientDictLock = new object();
+        private readonly object sessionIdToClientDictLock = new();
 
-        public static ClientManager Instance
-        {
-            get
-            {
-                if (instance == null)
-                {
-                    instance = new ClientManager();
-                }
-
-                return instance;
-            }
-        }
+        public static ClientManager Instance => _instance ??= new ClientManager();
 
         public void SetServerCore(ServerCore inServerCore)
         {
@@ -50,7 +39,7 @@
             {
                 foreach (var client in sessionIdToClientDict.Values)
                 {
-                    serverCore.CloseClient(client.clientSessionId);
+                    serverCore.CloseClient(client.ClientSessionId);
                 }
             }
         }
@@ -63,7 +52,7 @@
             }
         }
 
-        public void RemoveSessionidToClient(ulong sessionId)
+        public void RemoveSessionIdToClient(ulong sessionId)
         {
             lock (sessionIdToClientDictLock)
             {
@@ -75,7 +64,7 @@
         {
             lock (sessionIdToClientDictLock)
             {
-                sessionIdToClientDict.TryGetValue(sessionId, out Client? client);
+                sessionIdToClientDict.TryGetValue(sessionId, out var client);
                 return client;
             }
         }

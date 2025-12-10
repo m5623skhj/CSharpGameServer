@@ -7,7 +7,7 @@ namespace CSharpGameServer.LazyRunner
     {
         private readonly Action action;
         private readonly int delayMilliSeconds;
-        private Timer timer;
+        private readonly Timer timer;
 
         public LazyRunner(Action inAction, int inDelayMilliSeconds)
         {
@@ -28,34 +28,24 @@ namespace CSharpGameServer.LazyRunner
         }
     }
 
-    public class SpLazyRunner : LazyRunner
+    public class SpLazyRunner(int inDelayMilliSeconds, SpBase spObject) : LazyRunner(() =>
     {
-        public SpLazyRunner(int inDelayMilliSeconds, SpBase spObject)
-            : base(() => 
-            {
-                var connection = DbConnectionManager.Instance.GetConnection();
-                if (connection != null && connection.Execute(spObject) == false)
-                {
-                    string? queryString = spObject.GetQueryString();
-                    if (queryString != null)
-                    {
-                        Logger.LoggerManager.Instance.WriteLogError("SPLazyRunner {0} failed", queryString);
-                    }
-                }
-            }, inDelayMilliSeconds)
+        var connection = DbConnectionManager.Instance.GetConnection();
+        if (connection == null || connection.Execute(spObject))
         {
+            return;
         }
-    }
 
-    public class BatchSpLazyRunner : LazyRunner
-    {
-        public BatchSpLazyRunner(int inDelayMilliSeconds, BatchSpObject batchSpObject)
-            : base(() =>
-            {
-                var connection = DbConnectionManager.Instance.GetConnection();
-                connection?.ExecuteBatch(batchSpObject.GetSpList());
-            }, inDelayMilliSeconds)
+        var queryString = spObject.GetQueryString();
+        if (queryString != null)
         {
+            Logger.LoggerManager.Instance.WriteLogError("SPLazyRunner {0} failed", queryString);
         }
-    }
+    }, inDelayMilliSeconds);
+
+    public class BatchSpLazyRunner(int inDelayMilliSeconds, BatchSpObject batchSpObject) : LazyRunner(() =>
+    {
+        var connection = DbConnectionManager.Instance.GetConnection();
+        connection?.ExecuteBatch(batchSpObject.GetSpList());
+    }, inDelayMilliSeconds);
 }

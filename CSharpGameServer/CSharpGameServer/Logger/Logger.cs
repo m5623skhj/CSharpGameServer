@@ -1,4 +1,5 @@
-﻿using Serilog;
+﻿using System.Diagnostics.CodeAnalysis;
+using Serilog;
 using Serilog.Core;
 using Serilog.Events;
 
@@ -6,8 +7,7 @@ namespace CSharpGameServer.Logger
 {
     public class LoggerManager
     {
-        private static LoggerManager? instance;
-        private LoggingLevelSwitch loggerLevel = new LoggingLevelSwitch(LogEventLevel.Debug);
+        private readonly LoggingLevelSwitch loggerLevel = new(LogEventLevel.Debug);
 
         private LoggerManager()
         {
@@ -28,18 +28,8 @@ namespace CSharpGameServer.Logger
             loggerLevel.MinimumLevel = inLevel;
         }
 
-        public static LoggerManager Instance
-        {
-            get
-            {
-                if (instance == null)
-                {
-                    instance = new LoggerManager();
-                }
-
-                return instance;
-            }
-        }
+        [field: AllowNull, MaybeNull]
+        public static LoggerManager Instance => field ??= new LoggerManager();
 
         public void WriteLogVerb(string log, params object[] objects)
         {

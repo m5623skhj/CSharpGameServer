@@ -2,7 +2,7 @@
 {
     public class StreamRingBuffer
     {
-        static public readonly uint defaultBufferSize = 8192;
+        public static readonly uint DefaultBufferSize = 8192;
 
         private byte[] buffer;
         private uint bufferSize;
@@ -12,7 +12,7 @@
 
         public StreamRingBuffer()
         {
-            bufferSize = defaultBufferSize;
+            bufferSize = DefaultBufferSize;
             buffer = new byte[bufferSize];
         }
 
@@ -30,7 +30,7 @@
 
         public bool PushData(byte[] inputData)
         {
-            uint inputSize = (uint)inputData.Length;
+            var inputSize = (uint)inputData.Length;
             if (inputSize > GetUseSize() ||
                 inputSize == 0)
             {
@@ -39,8 +39,8 @@
 
             if (tail + inputSize > buffer.Length)
             {
-                uint tailToBufferEnd = bufferSize - tail;
-                uint tailPos = inputSize - tailToBufferEnd;
+                var tailToBufferEnd = bufferSize - tail;
+                var tailPos = inputSize - tailToBufferEnd;
 
                 Array.Copy(buffer, tail, inputData, 0, tailToBufferEnd);
                 Array.Copy(buffer, 0, inputData, tailToBufferEnd, tailPos);
@@ -57,18 +57,20 @@
 
         public byte[]? PopData(uint popSize)
         {
-            byte[]? data = PeekData(popSize);
-            if (data != null)
+            var data = PeekData(popSize);
+            if (data == null)
             {
-                uint headToBufferEnd = bufferSize - head;
-                if (headToBufferEnd < popSize)
-                {
-                    head = popSize - headToBufferEnd;
-                }
-                else
-                {
-                    head += popSize;
-                }
+                return data;
+            }
+
+            var headToBufferEnd = bufferSize - head;
+            if (headToBufferEnd < popSize)
+            {
+                head = popSize - headToBufferEnd;
+            }
+            else
+            {
+                head += popSize;
             }
 
             return data;
@@ -76,12 +78,7 @@
 
         public byte[]? PeekData(uint peekSize)
         {
-            if (GetUseSize() < peekSize)
-            {
-                return null;
-            }
-
-            return GetData(peekSize);
+            return GetUseSize() < peekSize ? null : GetData(peekSize);
         }
 
         public byte[] PeekAllData()
@@ -124,24 +121,19 @@
 
         public bool IsEmpty()
         {
-            if (head != tail)
-            {
-                return false;
-            }
-
-            return true;
+            return head == tail;
         }
 
         private byte[] GetData(uint dataSize)
         {
-            byte[] data = new byte[dataSize];
+            var data = new byte[dataSize];
             if (head < tail)
             {
                 Array.Copy(buffer, head, data, 0, head + dataSize);
             }
             else
             {
-                uint tailToEndSize = bufferSize - tail;
+                var tailToEndSize = bufferSize - tail;
                 if (tailToEndSize >= dataSize)
                 {
                     Array.Copy(buffer, tail, data, 0, dataSize);

@@ -17,14 +17,14 @@ namespace CSharpGameServer.Core
             LoggerManager.Instance.WriteLogDebug("------------ " + serverName + " Server stopped ------------");
         }
 
-        protected void ServerRunning()
+        private static void ServerRunning()
         {
-            bool running = true;
+            var running = true;
             while (running)
             {
                 if (Console.KeyAvailable)
                 {
-                    ConsoleKeyInfo key = Console.ReadKey();
+                    var key = Console.ReadKey();
                     switch (key.Key)
                     {
                         case ConsoleKey.Escape:
@@ -33,7 +33,9 @@ namespace CSharpGameServer.Core
                             }
                             break;
                         default:
-                            break;
+                        {
+                        }
+                        break;
                     }
                 }
 

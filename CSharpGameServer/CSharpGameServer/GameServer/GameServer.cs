@@ -5,12 +5,12 @@ namespace CSharpGameServer.GameServer
 {
     public class GameServer : ServerBase
     {
-        private const int migrationSuccessResult = 1;
-        private string serverName = "GameServer";
+        private const int MigrationSuccessResult = 1;
+        private const string ServerName = "GameServer";
 
         private static bool IsMigrationSuccess(int migrationResult)
         {
-            return migrationResult == migrationSuccessResult;
+            return migrationResult == MigrationSuccessResult;
         }
 
         public void Run()
@@ -22,7 +22,7 @@ namespace CSharpGameServer.GameServer
             }
             Console.WriteLine("------------ Migration succeded ------------");
 
-            Run(serverName, new GameServerCore());
+            Run(ServerName, new GameServerCore());
         }
     }
 }

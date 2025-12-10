@@ -14,7 +14,7 @@ namespace CSharpGameServer.GameServer
 
         protected override void ProcessAccept(SocketAsyncEventArgs acceptEventArgs)
         {
-            Socket? clientSocket = acceptEventArgs.AcceptSocket;
+            var clientSocket = acceptEventArgs.AcceptSocket;
             if (clientSocket == null)
             {
                 return;

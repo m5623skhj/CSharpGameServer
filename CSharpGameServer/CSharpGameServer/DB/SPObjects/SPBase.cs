@@ -6,17 +6,17 @@ namespace CSharpGameServer.DB.SPObjects
 {
     public abstract class SpBase
     {
-        protected string? query = null;
+        protected string? Query;
 
         public bool SetParams(object paramObject)
         {
-            Type paramType = paramObject.GetType();
-            PropertyInfo[] properties = paramType.GetProperties();
-            object[] values = new object[properties.Length];
+            var paramType = paramObject.GetType();
+            var properties = paramType.GetProperties();
+            var values = new object[properties.Length];
 
-            for (int i = 0; i < properties.Length; i++)
+            for (var i = 0; i < properties.Length; i++)
             {
-                object? value = properties[i].GetValue(paramObject);
+                var value = properties[i].GetValue(paramObject);
                 if (value == null)
                 {
                     return false;
@@ -30,18 +30,18 @@ namespace CSharpGameServer.DB.SPObjects
 
         public bool GenerateSpQuery(params object[] values)
         {
-            if (query == null)
+            if (Query == null)
             {
                 return false;
             }
 
-            query = string.Format(query, values);
+            Query = string.Format(Query, values);
             return true;
         }
 
         public string? GetQueryString()
         {
-            return query;
+            return Query;
         }
 
         public abstract void OnCommit();
@@ -52,8 +52,8 @@ namespace CSharpGameServer.DB.SPObjects
 
     public abstract class SpWithResult<TResultType> : SpBase
     {
-        protected List<TResultType> resultList = new List<TResultType>();
-        Type resultType = typeof(TResultType);
+        protected List<TResultType> ResultList = [];
+        private readonly Type resultType = typeof(TResultType);
 
         public override void AddResultRows(DbDataReader reader)
         {
@@ -75,7 +75,7 @@ namespace CSharpGameServer.DB.SPObjects
 
                     prop.SetValue(item, reader[prop.Name]);
                 }
-                resultList.Add(item);
+                ResultList.Add(item);
             }
         }
     }

@@ -48,12 +48,12 @@ namespace CSharpGameServer.Core
                 return false;
             }
             
-            LoggerManager.Instance.SetLogLevel(config.conf.logLevel);
+            LoggerManager.Instance.SetLogLevel(config.Conf.LogLevel);
             DbConnectionManager.Initialize(
-                config.conf.dbServerIp,
-                config.conf.dbSchemaName,
-                config.conf.dbUserId,
-                config.conf.dbUserPassword);
+                config.Conf.DbServerIp,
+                config.Conf.DbSchemaName,
+                config.Conf.DbUserId,
+                config.Conf.DbUserPassword);
 
             return true;
         }
@@ -149,7 +149,7 @@ namespace CSharpGameServer.Core
             receiveEventArgs.Completed += ReceiveCompleted;
             receiveEventArgs.UserToken = client;
 
-            client.socket.ReceiveAsync(receiveEventArgs);
+            client.Socket.ReceiveAsync(receiveEventArgs);
         }
 
         private void ReceiveCompleted(object? sender, SocketAsyncEventArgs receiveEventArgs)
@@ -177,7 +177,7 @@ namespace CSharpGameServer.Core
                 || receiveEventArgs.BytesTransferred <= 0
                 || receiveEventArgs.Buffer == null)
             {
-                CloseClient(receivedClient.clientSessionId);
+                CloseClient(receivedClient.ClientSessionId);
                 return false;
             }
 
@@ -188,7 +188,7 @@ namespace CSharpGameServer.Core
                 return true;
             }
 
-            CloseClient(receivedClient.clientSessionId);
+            CloseClient(receivedClient.ClientSessionId);
             return false;
 
         }
@@ -230,7 +230,7 @@ namespace CSharpGameServer.Core
                             logicWorkerThreadManager.PushPacket(receivedClient, requestPacketResult.packet);
                         }
 
-                        logicWorkerThreadManager.DoWork(receivedClient.clientSessionId);
+                        logicWorkerThreadManager.DoWork(receivedClient.ClientSessionId);
                         break;
                     }
                     default:
@@ -283,18 +283,18 @@ namespace CSharpGameServer.Core
             sendEventArgs.Completed += SendCompleted;
             sendEventArgs.UserToken = client;
 
-            client.socket.SendAsync(sendEventArgs);
+            client.Socket.SendAsync(sendEventArgs);
         }
 
         public void CloseClient(ulong closedClientSessionId)
         {
             var closeClient = ClientManager.Instance.FindBySessionId(closedClientSessionId);
 
-            closeClient?.socket.BeginDisconnect(false, asyncResult =>
+            closeClient?.Socket.BeginDisconnect(false, asyncResult =>
             {
-                closeClient.socket.EndDisconnect(asyncResult);
+                closeClient.Socket.EndDisconnect(asyncResult);
                 closeClient.OnClosed();
-                ClientManager.Instance.RemoveSessionidToClient(closedClientSessionId);
+                ClientManager.Instance.RemoveSessionIdToClient(closedClientSessionId);
             }, null);
         }
     }

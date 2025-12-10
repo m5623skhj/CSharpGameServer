@@ -88,7 +88,7 @@ namespace CSharpGameServer.Packet
                 return new RequestPacketResult(null, PacketResultType.IncompleteReceived);
             }
 
-            if (packetLength > StreamRingBuffer.defaultBufferSize)
+            if (packetLength > StreamRingBuffer.DefaultBufferSize)
             {
                 return new RequestPacketResult(null, PacketResultType.InvalidReceivedData);
             }

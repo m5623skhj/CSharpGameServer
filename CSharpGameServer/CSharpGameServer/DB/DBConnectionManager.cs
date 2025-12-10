@@ -2,11 +2,11 @@
 {
     public class DbConnectionManager
     {
-        private static DbConnectionManager? instance;
+        private static DbConnectionManager? _instance;
         private readonly string connectionString;
         private readonly int maxPoolSize = 10;
-        private Queue<DbConnection?> connectionPool = new Queue<DbConnection?>();
-        private object connectionPoolLock = new object();
+        private readonly Queue<DbConnection?> connectionPool = new();
+        private readonly object connectionPoolLock = new();
 
         private DbConnectionManager(string server, string db, string userId, string password)
         {
@@ -15,24 +15,23 @@
 
         public static void Initialize(string server, string db, string userId, string password)
         {
-            if (instance == null)
+            if (_instance != null)
             {
-                if (instance == null)
-                {
-                    instance = new DbConnectionManager(server, db, userId, password);
-                }
+                return;
             }
+
+            _instance ??= new DbConnectionManager(server, db, userId, password);
         }
 
         public static DbConnectionManager Instance
         {
             get
             {
-                if (instance == null)
+                if (_instance == null)
                 {
                     throw new InvalidOperationException("DBConnectionManager is not initialized. Call Initialize first.");
                 }
-                return instance;
+                return _instance;
             }
         }
 
