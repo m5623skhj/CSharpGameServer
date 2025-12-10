@@ -1,9 +1,8 @@
-﻿using CSharpGameServer.Core;
-using CSharpGameServer.Packet;
+﻿using CSharpGameServer.Packet;
 
 namespace CSharpGameServer.PC
 {
-    public partial class Pc : Client
+    public partial class Pc
     {
         public override void HandlePing(Ping ping)
         {

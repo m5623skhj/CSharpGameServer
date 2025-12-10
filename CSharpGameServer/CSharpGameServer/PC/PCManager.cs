@@ -6,23 +6,12 @@ namespace CSharpGameServer.PC
     {
         private ServerCore? serverCore;
 
-        private static PcManager? instance;
-        private Dictionary<ulong, Pc> pcIdToPcDict = new Dictionary<ulong, Pc>();
+        private static PcManager? _instance;
+        private readonly Dictionary<ulong, Pc> pcIdToPcDict = new();
 
-        object pcIdToPcDictLock = new object();
+        private readonly object pcIdToPcDictLock = new();
 
-        public static PcManager Instance
-        {
-            get
-            {
-                if (instance == null)
-                {
-                    instance = new PcManager();
-                }
-
-                return instance;
-            }
-        }
+        public static PcManager Instance => _instance ??= new PcManager();
 
         public void SetServerCore(ServerCore? inServerCore)
         {
@@ -50,7 +39,7 @@ namespace CSharpGameServer.PC
             Pc? findPc;
             lock (pcIdToPcDictLock)
             {
-                bool isFind = pcIdToPcDict.TryGetValue(pcId, out findPc);
+                var isFind = pcIdToPcDict.TryGetValue(pcId, out findPc);
                 if (isFind == false)
                 {
                     return null;

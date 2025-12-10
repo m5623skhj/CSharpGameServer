@@ -4,24 +4,24 @@ using System.Text;
 
 namespace TestClient.Main
 {
-    class Program
+    internal class Program
     {
-        static void Main(string[] args)
+        private static void Main(string[] args)
         {
-            string ip = "127.0.0.1";
-            int port = 10001;
+            const string ip = "127.0.0.1";
+            const int port = 10001;
 
-            TcpClient client = new TcpClient(ip, port);
-            NetworkStream stream = client.GetStream();
+            var client = new TcpClient(ip, port);
+            using var stream = client.GetStream();
 
-            PacketType packetType = PacketType.Ping;
-            byte[] sendData = Encoding.ASCII.GetBytes(packetType.ToString());
+            const PacketType packetType = PacketType.Ping;
+            var sendData = Encoding.ASCII.GetBytes(packetType.ToString());
 
             stream.Write(sendData, 0, sendData.Length);
 
-            byte[] recvData = new byte[512];
-            int recvBytes = stream.Read(recvData, 0, recvData.Length);
-            string packet = Encoding.ASCII.GetString(recvData, 0, recvBytes);
+            var recvData = new byte[512];
+            var recvBytes = stream.Read(recvData, 0, recvData.Length);
+            var packet = Encoding.ASCII.GetString(recvData, 0, recvBytes);
 
             if (Enum.TryParse(packet, out PacketType receivedPacketType))
             {

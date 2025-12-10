@@ -9,13 +9,13 @@ namespace CSharpGameServer.PC.PCComponent
 
     public class ComponentManager
     {
-        private Dictionary<ComponentType, ComponentBase> components = new Dictionary<ComponentType, ComponentBase>();
+        private Dictionary<ComponentType, ComponentBase> components = new();
 
         private void AddComponentListForInitialize()
         {
             components.Clear();
 
-            // AddComponent
+            // AddComponents
         }
 
         public void Initialize()
@@ -52,18 +52,13 @@ namespace CSharpGameServer.PC.PCComponent
         }
     }
 
-    public abstract class ComponentBase
+    public abstract class ComponentBase(Pc? inOwner)
     {
-        protected Pc? owner;
+        protected Pc? Owner = inOwner;
 
-        public ComponentBase(Pc? inOwner)
-        {
-            owner = inOwner;
-        }
-
-        abstract public void Initialize();
-        abstract public void PreUpdateComponents();
-        abstract public void UpdateComponents();
-        abstract public void PostUpdateComponents();
+        public abstract void Initialize();
+        public abstract void PreUpdateComponents();
+        public abstract void UpdateComponents();
+        public abstract void PostUpdateComponents();
     }
 }

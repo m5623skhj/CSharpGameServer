@@ -7,9 +7,10 @@ namespace CSharpGameServer.Packet
     {
         public static void HandlePing(Client client, RequestPacket packet)
         {
-            Ping? ping = packet as Ping;
-            if (ping == null)
+            if (packet is not Ping ping)
+            {
                 return;
+            }
 
             client.HandlePing(ping);
         }

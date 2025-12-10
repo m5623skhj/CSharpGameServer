@@ -5,9 +5,10 @@ namespace CSharpGameServer.Redis
     public class RedisHelper : IDisposable
     {
         private static RedisHelper? _instance;
-        private static ConnectionMultiplexer? redis = null;
+        private static readonly ConnectionMultiplexer? Redis = null;
         private static readonly object ConstructorLock = new();
         private readonly IDatabase? database;
+        private bool disposed;
 
         public static RedisHelper Instance(string connectionString)
         {
@@ -37,7 +38,7 @@ namespace CSharpGameServer.Redis
 
         public async Task SetValueAsync(string key, string value)
         {
-            if(database != null)
+            if (database != null)
             {
                 await database.StringAppendAsync(key, value);
             }
@@ -105,7 +106,23 @@ namespace CSharpGameServer.Redis
 
         public void Dispose()
         {
-            redis?.Dispose();
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposed)
+            {
+                return;
+            }
+
+            if (disposing)
+            {
+                Redis?.Dispose();
+            }
+
+            disposed = true;
         }
     }
 }

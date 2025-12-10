@@ -73,10 +73,6 @@ namespace CSharpGameServer.Core
             {
                 listenSocket.Listen(BacklogSize);
             }
-            else
-            {
-                listenSocket.Listen();
-            }
 
             StartAccept();
         }
@@ -207,7 +203,7 @@ namespace CSharpGameServer.Core
             while (storedSize > 0)
             {
                 var requestPacketResult = GetPacketFromReceivedData(receivedData, bufferStartPoint);
-                switch (requestPacketResult.resultType) 
+                switch (requestPacketResult.ResultType) 
                 {
                     case PacketResultType.InvalidReceivedData:
                     {
@@ -219,15 +215,15 @@ namespace CSharpGameServer.Core
                     }
                     case PacketResultType.Success:
                     {
-                        storedSize -= requestPacketResult.packetLength;
-                        bufferStartPoint += requestPacketResult.packetLength;
-                        receivedClient.RemoveStreamData(requestPacketResult.packetLength);
+                        storedSize -= requestPacketResult.PacketLength;
+                        bufferStartPoint += requestPacketResult.PacketLength;
+                        receivedClient.RemoveStreamData(requestPacketResult.PacketLength);
 
                         // Since the null check is already performed in GetPacketFromReceivedData(),
                         // it is not rechecked here.
-                        if (requestPacketResult.packet != null)
+                        if (requestPacketResult.Packet != null)
                         {
-                            logicWorkerThreadManager.PushPacket(receivedClient, requestPacketResult.packet);
+                            logicWorkerThreadManager.PushPacket(receivedClient, requestPacketResult.Packet);
                         }
 
                         logicWorkerThreadManager.DoWork(receivedClient.ClientSessionId);
@@ -235,7 +231,7 @@ namespace CSharpGameServer.Core
                     }
                     default:
                     {
-                        LoggerManager.Instance.WriteLogError("Unknown PacketResultType {resultType}", requestPacketResult.resultType);
+                        LoggerManager.Instance.WriteLogError("Unknown PacketResultType {resultType}", requestPacketResult.ResultType);
                         break;
                     }
                 }

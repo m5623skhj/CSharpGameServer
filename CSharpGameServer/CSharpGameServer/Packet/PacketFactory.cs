@@ -1,5 +1,5 @@
-﻿using System.Runtime.InteropServices;
-using System.Text;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Runtime.InteropServices;
 using CSharpGameServer.Core;
 using CSharpGameServer.Logger;
 using CSharpGameServer.PacketBase;
@@ -17,37 +17,39 @@ namespace CSharpGameServer.Packet
     {
         public RequestPacketResult(RequestPacket? inPacket, PacketResultType inResultType, ushort inPacketSize = 0)
         {
-            packet = inPacket;
-            resultType = inResultType;
-            packetLength = inPacketSize;
+            Packet = inPacket;
+            ResultType = inResultType;
+            PacketLength = inPacketSize;
         }
 
-        public readonly RequestPacket? packet = null;
-        public readonly PacketResultType resultType = PacketResultType.Success;
-        public readonly ushort packetLength = 0;
+        public readonly RequestPacket? Packet = null;
+        public readonly PacketResultType ResultType = PacketResultType.Success;
+        public readonly ushort PacketLength = 0;
     }
 
     public class PacketFactory
     {
         // Packet header : PacketType(4) + PacketSize(2)
-        private readonly int headerSize = 6;
+        private const int HeaderSize = 6;
 
-        private static PacketFactory? instance = null;
-        private readonly Dictionary<PacketType, Type> packetTypeDict = new Dictionary<PacketType, Type>();
+        private readonly Dictionary<PacketType, Type> packetTypeDict = new();
 
+        [field: AllowNull, MaybeNull]
         public static PacketFactory Instance
         {
             get
             {
-                if (instance == null)
+                if (field != null)
                 {
-                    instance = new PacketFactory();
-                    instance.packetTypeDict.Clear();
+                    return field;
                 }
 
-                return instance;
+                field = new PacketFactory();
+                field.packetTypeDict.Clear();
+
+                return field;
             }
-        }
+        } = null!;
 
         public bool RegisterPacket(PacketType packetType, Type packetObjectType)
         {
@@ -57,20 +59,20 @@ namespace CSharpGameServer.Packet
                 return false;
             }
 
-            if (packetTypeDict.ContainsKey(packetType))
+            if (packetTypeDict.TryAdd(packetType, packetObjectType))
             {
-                LoggerManager.Instance.WriteLogFatal("Duplicated packet type {packetType} / {packetObjectType}", packetType, packetObjectType);
-                return false;
+                return true;
             }
 
-            packetTypeDict[packetType] = packetObjectType;
-            return true;
+            LoggerManager.Instance.WriteLogFatal("Duplicated packet type {packetType} / {packetObjectType}", packetType, packetObjectType);
+            return false;
+
         }
 
         public RequestPacketResult CreatePacket(byte[] buffer, int offset)
         {
             var remainingSize = buffer.Length - offset;
-            if (remainingSize < headerSize)
+            if (remainingSize < HeaderSize)
             {
                 return new RequestPacketResult(null, PacketResultType.IncompleteReceived);
             }

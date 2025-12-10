@@ -3,11 +3,11 @@ using CSharpGameServer.PacketBase;
 
 namespace CSharpGameServer.Packet
 {
-    public partial class Ping : RequestPacket
+    public class Ping : RequestPacket
     {
         public override void SetPacketType()
         {
-            type = PacketType.Ping;
+            Type = PacketType.Ping;
         }
         protected override Action<Client, RequestPacket> GetHandler()
         {
@@ -19,7 +19,7 @@ namespace CSharpGameServer.Packet
     {
         public override void SetPacketType()
         {
-            type = PacketType.Pong;
+            Type = PacketType.Pong;
         }
     }
 

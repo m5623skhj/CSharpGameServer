@@ -1,4 +1,5 @@
-﻿using CSharpGameServer.Core;
+﻿using System.Diagnostics.CodeAnalysis;
+using CSharpGameServer.Core;
 using CSharpGameServer.Logger;
 using CSharpGameServer.PacketBase;
 
@@ -6,20 +7,22 @@ namespace CSharpGameServer.Packet
 {
     public partial class PacketHandlerManager
     {
-        private static PacketHandlerManager? instance;
-        private Dictionary<PacketType, Action<Client, RequestPacket>> packetHandlerDict = new Dictionary<PacketType, Action<Client, RequestPacket>>();
+        private readonly Dictionary<PacketType, Action<Client, RequestPacket>> packetHandlerDict = new();
 
+        [field: AllowNull, MaybeNull]
         public static PacketHandlerManager Instance
         {
             get
             {
-                if (instance == null)
+                if (field != null)
                 {
-                    instance = new PacketHandlerManager();
-                    instance.packetHandlerDict.Clear();
+                    return field;
                 }
 
-                return instance;
+                field = new PacketHandlerManager();
+                field.packetHandlerDict.Clear();
+
+                return field;
             }
         }
 
@@ -31,22 +34,22 @@ namespace CSharpGameServer.Packet
                 return false;
             }
 
-            if (packetHandlerDict.ContainsKey(packetType))
+            if (packetHandlerDict.TryAdd(packetType, handler))
             {
-                LoggerManager.Instance.WriteLogError("Duplicated packet type {pakcetType} / {handler.Method.Name}", packetType, handler.Method.Name);
-                return false;
+                return true;
             }
 
-            packetHandlerDict[packetType] = handler;
-            return true;
+            LoggerManager.Instance.WriteLogError("Duplicated packet type {packetType} / {handler.Method.Name}", packetType, handler.Method.Name);
+            return false;
+
         }
 
         public void CallHandler(Client client, RequestPacket packet)
         {
-            if (packetHandlerDict.TryGetValue(packet.type, out Action<Client, RequestPacket>? action) == false)
+            if (packetHandlerDict.TryGetValue(packet.Type, out var action) == false)
             {
                 // add client info
-                LoggerManager.Instance.WriteLogError("Invalid packet type {client.clientSessionId} / {packet.type}", client.ClientSessionId, packet.type);
+                LoggerManager.Instance.WriteLogError("Invalid packet type {client.clientSessionId} / {packet.type}", client.ClientSessionId, packet.Type);
                 return;
             }
 

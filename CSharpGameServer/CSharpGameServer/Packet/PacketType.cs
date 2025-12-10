@@ -1,6 +1,6 @@
 namespace CSharpGameServer.Packet
 {
-    public enum PacketType : int
+    public enum PacketType
     {
         InvalidPacketType,
         Ping,

@@ -4,7 +4,8 @@ using System.Net.Sockets;
 
 namespace CSharpGameServer.PC
 {
-    public partial class Pc : Client
+    public partial class Pc(ServerCore inServerCore, Socket inSocket, ulong inClientSessionId)
+        : Client(inServerCore, inSocket, inClientSessionId)
     {
         private ulong sessionId;
         private ulong pcId;
@@ -21,11 +22,6 @@ namespace CSharpGameServer.PC
         public override void OnSend()
         {
 
-        }
-
-        public Pc(ServerCore inServerCore, Socket inSocket, ulong inClientSessionId) 
-            : base(inServerCore, inSocket, inClientSessionId)
-        {
         }
 
         public void OnPCIdLoadCompleted(ulong inPcId)

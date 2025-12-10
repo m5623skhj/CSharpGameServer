@@ -6,7 +6,7 @@ namespace CSharpGameServer.Packet
     {
         public static bool RegisterAllPacket()
         {
-            bool result = true;
+            var result = true;
 
             result &= RegisterPacket(new Ping());
 
