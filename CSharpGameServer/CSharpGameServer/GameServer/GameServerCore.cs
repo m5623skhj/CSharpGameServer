@@ -20,7 +20,7 @@ namespace CSharpGameServer.GameServer
                 return;
             }
 
-            var newSessionId = Interlocked.Increment(ref atomicSessionId);
+            var newSessionId = Interlocked.Increment(ref AtomicSessionId);
             var newPc = new Pc(this, clientSocket, newSessionId);
 
             ThreadPool.QueueUserWorkItem(StartReceive, newPc);

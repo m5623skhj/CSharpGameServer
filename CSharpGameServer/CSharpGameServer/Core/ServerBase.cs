@@ -6,15 +6,8 @@ namespace CSharpGameServer.Core
     {
         public void Run(string serverName, ServerCore? targetServerCore = null)
         {
-            ServerCore? serverCore = null;
-            if (targetServerCore == null)
-            {
-                serverCore = new ServerCore();
-            }
-            else
-            {
-                serverCore = targetServerCore;
-            }
+            var serverCore = targetServerCore ?? new ServerCore();
+            serverCore.Initialize();
 
             serverCore.Run();
             LoggerManager.Instance.WriteLogDebug("------------ " + serverName + " Server running ------------");

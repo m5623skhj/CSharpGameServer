@@ -25,14 +25,14 @@
 
         public override void OnCommit()
         {
-            // checkt if owner is not null then
+            // check if owner is not null then
             // Callback owner TestSPObject on committed
         }
 
         public override void OnRollback()
         {
             // check if owner is not null then
-            // Callback owner TestSPObject on rollbacked
+            // Callback owner TestSPObject on rollback
         }
     }
 }

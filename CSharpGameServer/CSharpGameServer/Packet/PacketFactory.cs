@@ -67,26 +67,28 @@ namespace CSharpGameServer.Packet
             return true;
         }
 
-        public RequestPacketResult CreatePacket(string receivedData)
+        public RequestPacketResult CreatePacket(byte[] buffer, int offset)
         {
-            if (receivedData.Length < headerSize)
+            var remainingSize = buffer.Length - offset;
+            if (remainingSize < headerSize)
             {
                 return new RequestPacketResult(null, PacketResultType.IncompleteReceived);
             }
 
-            int.TryParse(receivedData.Substring(0, 4), out int packetType);
-            if (packetTypeDict.TryGetValue((PacketType)packetType, out Type? packetObjectType) == false)
+            var packetType = BitConverter.ToInt32(buffer, offset);
+            if (packetTypeDict.TryGetValue((PacketType)packetType, out var packetObjectType) == false)
             {
                 LoggerManager.Instance.WriteLogError("Invalid packet type {packetType}", packetType);
                 return new RequestPacketResult(null, PacketResultType.InvalidReceivedData);
             }
 
-            ushort.TryParse(receivedData.Substring(4, 2), out ushort packetLength);
-            if (packetLength > receivedData.Length)
+            var packetLength = BitConverter.ToUInt16(buffer, offset + 4);
+            if (packetLength > remainingSize)
             {
                 return new RequestPacketResult(null, PacketResultType.IncompleteReceived);
             }
-            else if (packetLength > StreamRingBuffer.defaultBufferSize)
+
+            if (packetLength > StreamRingBuffer.defaultBufferSize)
             {
                 return new RequestPacketResult(null, PacketResultType.InvalidReceivedData);
             }
@@ -97,23 +99,29 @@ namespace CSharpGameServer.Packet
                 return new RequestPacketResult(null, PacketResultType.InvalidReceivedData);
             }
 
-            byte[] recvStream = Encoding.UTF8.GetBytes(receivedData.Substring(0, packetLength));
-            RequestPacket? packet = ToStr(recvStream, packetObjectType) as RequestPacket;
-            if (packet == null)
+            if (BytesToStruct(buffer, offset, packetObjectType) is RequestPacket packet)
             {
-                LoggerManager.Instance.WriteLogError("Null RequestPacket / packet type {packetType}", packetType);
-                return new RequestPacketResult(null, PacketResultType.InvalidReceivedData);
+                return new RequestPacketResult(packet, PacketResultType.Success, packetLength);
             }
 
-            return new RequestPacketResult(packet, PacketResultType.Success, packetLength);
+            LoggerManager.Instance.WriteLogError("Null RequestPacket / packet type {packetType}", packetType);
+            return new RequestPacketResult(null, PacketResultType.InvalidReceivedData);
         }
 
-        private object? ToStr(byte[] data, Type type)
+        private static object? BytesToStruct(byte[] data, int offset, Type structType)
         {
-            GCHandle handle = GCHandle.Alloc(data, GCHandleType.Pinned);
-            object? result = Marshal.PtrToStructure(handle.AddrOfPinnedObject(), type);
-            handle.Free();
-            return result;
+            var size = Marshal.SizeOf(structType);
+            var ptr = Marshal.AllocHGlobal(size);
+            
+            try
+            {
+                Marshal.Copy(data, offset, ptr, size);
+                return Marshal.PtrToStructure(ptr, structType);
+            }
+            finally
+            {
+                Marshal.FreeHGlobal(ptr);
+            }
         }
     }
 }
