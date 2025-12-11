@@ -25,24 +25,28 @@ namespace CSharpGameServer
     public struct CreateRoom
     {
         public PacketHeader Header;
+        public string RoomName;
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
     public struct RoomCreated
     {
         public PacketHeader Header;
+        public ushort ErrorCode;
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
     public struct JoinRoom
     {
         public PacketHeader Header;
+        public string RoomName;
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
     public struct RoomJoined
     {
         public PacketHeader Header;
+        public ushort ErrorCode;
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
@@ -55,12 +59,14 @@ namespace CSharpGameServer
     public struct RoomLeft
     {
         public PacketHeader Header;
+        public ushort ErrorCode;
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
     public struct SendChat
     {
         public PacketHeader Header;
+        public string Message;
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
@@ -79,6 +85,7 @@ namespace CSharpGameServer
     public struct RoomListUpdate
     {
         public PacketHeader Header;
+        public string[] Rooms;
     }
 
 }
