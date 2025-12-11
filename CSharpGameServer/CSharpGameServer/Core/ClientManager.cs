@@ -6,7 +6,7 @@
         private static ClientManager? _instance;
         private readonly Dictionary<ulong, Client> sessionIdToClientDict = new();
 
-        private readonly object sessionIdToClientDictLock = new();
+        private readonly Lock sessionIdToClientDictLock = new();
 
         public static ClientManager Instance => _instance ??= new ClientManager();
 

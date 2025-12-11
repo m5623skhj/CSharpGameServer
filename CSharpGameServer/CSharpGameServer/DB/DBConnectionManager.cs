@@ -4,9 +4,9 @@
     {
         private static DbConnectionManager? _instance;
         private readonly string connectionString;
-        private readonly int maxPoolSize = 10;
+        private const int MaxPoolSize = 10;
         private readonly Queue<DbConnection?> connectionPool = new();
-        private readonly object connectionPoolLock = new();
+        private readonly Lock connectionPoolLock = new();
 
         private DbConnectionManager(string server, string db, string userId, string password)
         {
@@ -65,7 +65,7 @@
 
             lock (connectionPoolLock)
             {
-                if (connectionPool.Count < maxPoolSize)
+                if (connectionPool.Count < MaxPoolSize)
                 {
                     connectionPool.Enqueue(connection);
                 }

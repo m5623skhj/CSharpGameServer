@@ -20,7 +20,7 @@ namespace CSharpGameServer.GameServer
             {
                 Console.WriteLine("------------ Migration failed ------------");
             }
-            Console.WriteLine("------------ Migration succeded ------------");
+            Console.WriteLine("------------ Migration succeeded ------------");
 
             Run(ServerName, new GameServerCore());
         }

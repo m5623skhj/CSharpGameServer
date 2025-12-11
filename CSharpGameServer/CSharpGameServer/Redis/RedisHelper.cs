@@ -6,7 +6,7 @@ namespace CSharpGameServer.Redis
     {
         private static RedisHelper? _instance;
         private static readonly ConnectionMultiplexer? Redis = null;
-        private static readonly object ConstructorLock = new();
+        private static readonly Lock ConstructorLock = new();
         private readonly IDatabase? database;
         private bool disposed;
 

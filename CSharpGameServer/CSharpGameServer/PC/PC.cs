@@ -38,7 +38,7 @@ namespace CSharpGameServer.PC
 
         private void PcInitializeFromDb()
         {
-            CallbackForInitFromDbComplete callback = new CallbackForInitFromDbComplete(OnDBInitializeCompleted);
+            var callback = new CallbackForInitFromDbComplete(OnDBInitializeCompleted);
         }
     }
 }

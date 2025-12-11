@@ -6,7 +6,7 @@ namespace CSharpGameServer.Core
     internal class MessageQueue(MessageQueueId inMessageQueueId)
     {
         private readonly Queue<RequestPacket> messageQueue = new();
-        private readonly object queueLock = new();
+        private readonly Lock queueLock = new();
         private readonly MessageQueueId messageQueueId = inMessageQueueId;
 
         public void PushToQueue(RequestPacket packet)
@@ -29,7 +29,7 @@ namespace CSharpGameServer.Core
     public class MessageQueueManager(int inQueueListSize, int inLogicThreadSize)
     {
         private static MessageQueueManager? _instance;
-        private static readonly object ConstructorLock = new();
+        private static readonly Lock ConstructorLock = new();
         private readonly MessageQueue[] queueList = new MessageQueue[inQueueListSize];
 
         public static MessageQueueManager Instance(int inQueueListSize, int inLogicThreadSize)
