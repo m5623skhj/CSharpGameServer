@@ -31,27 +31,31 @@
         public bool PushData(byte[] inputData)
         {
             var inputSize = (uint)inputData.Length;
-            if (inputSize > GetUseSize() ||
-                inputSize == 0)
+            if (inputSize > GetFreeSize() || inputSize == 0)
             {
                 return false;
             }
 
-            if (tail + inputSize > buffer.Length)
+            if (tail + inputSize > bufferSize)
             {
                 var tailToBufferEnd = bufferSize - tail;
                 var tailPos = inputSize - tailToBufferEnd;
 
-                Array.Copy(buffer, tail, inputData, 0, tailToBufferEnd);
-                Array.Copy(buffer, 0, inputData, tailToBufferEnd, tailPos);
+                Array.Copy(inputData, 0, buffer, tail, tailToBufferEnd);
+                Array.Copy(inputData, tailToBufferEnd, buffer, 0, tailPos);
                 tail = tailPos;
             }
             else
             {
-                Array.Copy(buffer, tail, inputData, 0, inputSize);
+                Array.Copy(inputData, 0, buffer, tail, inputSize);
                 tail += inputSize;
             }
 
+            if (tail == bufferSize)
+            {
+                tail = 0;
+            }
+            
             return true;
         }
 
@@ -111,12 +115,18 @@
             {
                 return bufferSize - head + tail;
             }
-            else if (head < tail) 
+            
+            if (head < tail) 
             {
                 return tail - head;
             }
 
             return 0;
+        }
+
+        public uint GetFreeSize()
+        {
+            return bufferSize - GetUseSize() - 1;
         }
 
         public bool IsEmpty()
