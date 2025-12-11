@@ -59,6 +59,12 @@ namespace CSharpGameServer.Packet
                 return false;
             }
 
+            if (!typeof(RequestPacket).IsAssignableFrom(packetObjectType))
+            {
+                LoggerManager.Instance.WriteLogFatal("Invalid packet object type {packetObjectType}", packetObjectType);
+                return false;
+            }
+            
             if (packetTypeDict.TryAdd(packetType, packetObjectType))
             {
                 return true;
@@ -66,7 +72,6 @@ namespace CSharpGameServer.Packet
 
             LoggerManager.Instance.WriteLogFatal("Duplicated packet type {packetType} / {packetObjectType}", packetType, packetObjectType);
             return false;
-
         }
 
         public RequestPacketResult CreatePacket(byte[] buffer, int offset)
@@ -95,35 +100,8 @@ namespace CSharpGameServer.Packet
                 return new RequestPacketResult(null, PacketResultType.InvalidReceivedData);
             }
 
-            if (typeof(RequestPacket).IsAssignableFrom(packetObjectType) == false)
-            {
-                LoggerManager.Instance.WriteLogError("Packet type {packetType} is valid but is not assignable", packetType);
-                return new RequestPacketResult(null, PacketResultType.InvalidReceivedData);
-            }
-
-            if (BytesToStruct(buffer, offset, packetObjectType) is RequestPacket packet)
-            {
-                return new RequestPacketResult(packet, PacketResultType.Success, packetLength);
-            }
-
-            LoggerManager.Instance.WriteLogError("Null RequestPacket / packet type {packetType}", packetType);
-            return new RequestPacketResult(null, PacketResultType.InvalidReceivedData);
-        }
-
-        private static object? BytesToStruct(byte[] data, int offset, Type structType)
-        {
-            var size = Marshal.SizeOf(structType);
-            var ptr = Marshal.AllocHGlobal(size);
-            
-            try
-            {
-                Marshal.Copy(data, offset, ptr, size);
-                return Marshal.PtrToStructure(ptr, structType);
-            }
-            finally
-            {
-                Marshal.FreeHGlobal(ptr);
-            }
+            var packet = (RequestPacket)Activator.CreateInstance(packetObjectType);
+            return new RequestPacketResult(packet, PacketResultType.Success, packetLength);
         }
     }
 }
