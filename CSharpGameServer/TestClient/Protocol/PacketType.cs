@@ -5,5 +5,15 @@ namespace CSharpGameServer
         InvalidPacketType,
         Ping,
         Pong,
+        CreateRoom,
+        RoomCreated,
+        JoinRoom,
+        RoomJoined,
+        LeaveRoom,
+        RoomLeft,
+        SendChat,
+        ChatMessage,
+        GetRoomList,
+        RoomListUpdate,
     }
 }

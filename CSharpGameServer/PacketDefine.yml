@@ -4,4 +4,45 @@ Packet:
   - Type: RequestPacket
     PacketName: Ping
   - Type: ReplyPacket
-    PacketName: Pong 
+    PacketName: Pong
+  - Type: RequestPacket
+    PacketName: CreateRoom
+    Fields:
+      - Name: RoomName
+        Type: string
+  - Type: ReplyPacket
+    PacketName: RoomCreated
+    Fields:
+      - Name: ErrorCode
+        Type: ushort
+  - Type: RequestPacket
+    PacketName: JoinRoom
+    Fields:
+      - Name: RoomName
+        Type: string
+  - Type: ReplyPacket
+    PacketName: RoomJoined
+    Fields:
+      - Name: ErrorCode
+        Type: ushort
+  - Type: RequestPacket
+    PacketName: LeaveRoom
+  - Type: ReplyPacket
+    PacketName: RoomLeft
+    Fields:
+      - Name: ErrorCode
+        Type: ushort
+  - Type: RequestPacket
+    PacketName: SendChat
+    Fields:
+      - Name: Message
+        Type: string
+  - Type: ReplyPacket
+    PacketName: ChatMessage
+  - Type: RequestPacket
+    PacketName: GetRoomList
+  - Type: ReplyPacket
+    PacketName: RoomListUpdate
+    Fields:
+      - Name: Rooms
+        Type: string[]

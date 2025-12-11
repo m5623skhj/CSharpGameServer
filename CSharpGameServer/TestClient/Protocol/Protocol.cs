@@ -21,4 +21,64 @@ namespace CSharpGameServer
         public PacketHeader Header;
     }
 
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public struct CreateRoom
+    {
+        public PacketHeader Header;
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public struct RoomCreated
+    {
+        public PacketHeader Header;
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public struct JoinRoom
+    {
+        public PacketHeader Header;
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public struct RoomJoined
+    {
+        public PacketHeader Header;
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public struct LeaveRoom
+    {
+        public PacketHeader Header;
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public struct RoomLeft
+    {
+        public PacketHeader Header;
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public struct SendChat
+    {
+        public PacketHeader Header;
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public struct ChatMessage
+    {
+        public PacketHeader Header;
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public struct GetRoomList
+    {
+        public PacketHeader Header;
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public struct RoomListUpdate
+    {
+        public PacketHeader Header;
+    }
+
 }
