@@ -63,6 +63,7 @@ def GenerateProtocolOverride(values, namespace, isServer=True):
         if packetType != 'RequestPacket' and packetType != 'ReplyPacket':
             continue
 
+        fields = value.get("Fields", [])
         packetName = value['PacketName']
         
         generateCode += "    [StructLayout(LayoutKind.Sequential, Pack = 1)]\n"
@@ -75,6 +76,11 @@ def GenerateProtocolOverride(values, namespace, isServer=True):
             generateCode += f"            Type = PacketType.{packetName};\n"
             generateCode += "        }\n"
 
+            for field in fields:
+                fieldName = field["Name"]
+                fieldType = field["Type"]
+                generateCode += f"        public {fieldType} {fieldName} {{ get; set; }}\n"
+
             if packetType == 'RequestPacket':
                 generateCode += "        protected override Action<Client, RequestPacket> GetHandler()\n"
                 generateCode += "        {\n"
@@ -86,6 +92,10 @@ def GenerateProtocolOverride(values, namespace, isServer=True):
             generateCode += f"    public struct {packetName}\n"
             generateCode += "    {\n"
             generateCode += "        public PacketHeader Header;\n"
+
+            for field in fields:
+                code += f"        public {field['Type']} {field['Name']};\n"
+
             generateCode += "    }\n\n"
 
     generateCode += "}"
