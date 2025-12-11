@@ -10,11 +10,6 @@ namespace CSharpGameServer.Config
         }
 
         public LogEventLevel LogLevel = 0;
-        
-        public string DbServerIp = "";
-        public string DbSchemaName = "";
-        public string DbUserId = "";
-        public string DbUserPassword = "";
     }
 
     public class Config

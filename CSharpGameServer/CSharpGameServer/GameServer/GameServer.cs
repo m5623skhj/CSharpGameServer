@@ -1,28 +1,17 @@
 ﻿using CSharpGameServer.Core;
-using CSharpGameServer.DB.Migration;
+using CSharpGameServer.Logger;
 
 namespace CSharpGameServer.GameServer
 {
     public class GameServer : ServerBase
     {
-        private const int MigrationSuccessResult = 1;
-        private const string ServerName = "GameServer";
-
-        private static bool IsMigrationSuccess(int migrationResult)
-        {
-            return migrationResult == MigrationSuccessResult;
-        }
+        private const string ServerName = "ChattingServerServer";
 
         public void Run()
         {
-            Console.WriteLine("------------ Try migration ------------");
-            if (IsMigrationSuccess(MigrationRunner.Instance.RunMigration()) == false)
-            {
-                Console.WriteLine("------------ Migration failed ------------");
-            }
-            Console.WriteLine("------------ Migration succeded ------------");
-
+            LoggerManager.Instance.WriteLogInfo("Starting {ServerName}...", ServerName);
             Run(ServerName, new GameServerCore());
+            LoggerManager.Instance.WriteLogInfo("{ServerName} has stopped.", ServerName);
         }
     }
 }

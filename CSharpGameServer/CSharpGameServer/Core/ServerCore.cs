@@ -1,5 +1,4 @@
 ﻿using CSharpGameServer.Core.LogicWorkerThread;
-using CSharpGameServer.DB;
 using CSharpGameServer.Logger;
 using System.Net;
 using System.Net.Sockets;
@@ -49,12 +48,6 @@ namespace CSharpGameServer.Core
             }
             
             LoggerManager.Instance.SetLogLevel(config.Conf.LogLevel);
-            DbConnectionManager.Initialize(
-                config.Conf.DbServerIp,
-                config.Conf.DbSchemaName,
-                config.Conf.DbUserId,
-                config.Conf.DbUserPassword);
-
             return true;
         }
 

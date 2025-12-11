@@ -1,3 +1,5 @@
+#nullable disable
+
 using CSharpGameServer.Core;
 using CSharpGameServer.PacketBase;
 using System.Runtime.InteropServices;
