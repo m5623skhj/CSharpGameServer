@@ -169,12 +169,15 @@ def GenerateClientProtocol(values, namespace):
         if packetType != 'RequestPacket' and packetType != 'ReplyPacket':
             continue
 
+        fields = value.get("Fields", [])
         packetName = value['PacketName']
         
         code += "    [StructLayout(LayoutKind.Sequential, Pack = 1)]\n"
         code += f"    public struct {packetName}\n"
         code += "    {\n"
         code += "        public PacketHeader Header;\n"
+        for field in fields:
+            code += f"        public {field['Type']} {field['Name']};\n"
         code += "    }\n\n"
     
     code += "}"
