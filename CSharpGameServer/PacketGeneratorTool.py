@@ -47,7 +47,7 @@ def GenerateEnumValue(packetName, values, namespace):
     return enumCode
 
 def GenerateProtocolOverride(values, namespace, isServer=True):
-    generateCode = ""
+    generateCode = "#nullable disable\n\n"
     
     if isServer:
         generateCode += "using CSharpGameServer.Core;\n"
