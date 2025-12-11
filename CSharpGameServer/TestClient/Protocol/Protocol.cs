@@ -73,6 +73,7 @@ namespace CSharpGameServer
     public struct ChatMessage
     {
         public PacketHeader Header;
+        public string Message;
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]

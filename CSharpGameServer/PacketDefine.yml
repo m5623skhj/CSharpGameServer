@@ -39,6 +39,9 @@ Packet:
         Type: string
   - Type: ReplyPacket
     PacketName: ChatMessage
+    Fields:
+      - Name: Message
+        Type: string
   - Type: RequestPacket
     PacketName: GetRoomList
   - Type: ReplyPacket

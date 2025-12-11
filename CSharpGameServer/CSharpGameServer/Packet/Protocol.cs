@@ -120,6 +120,7 @@ namespace CSharpGameServer.Packet
         {
             Type = PacketType.ChatMessage;
         }
+        public string Message { get; set; }
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
