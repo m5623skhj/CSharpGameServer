@@ -42,7 +42,6 @@ namespace CSharpGameServer.Core.LogicWorkerThread
                     processList.AddRange(itemStoreQueue);
 
                     itemStoreQueue.Clear();
-                    SetIsRunning(IsFalse);
                 }
 
                 foreach (var processItem in processList)
@@ -51,17 +50,14 @@ namespace CSharpGameServer.Core.LogicWorkerThread
                 }
                 processList.Clear();
             }
+            
+            SetIsRunning(IsFalse);
         }
 
         public void PushPacket(Client targetClient, RequestPacket packet)
         {
             lock (itemStoreQueueLock)
             {
-                if (IsRunningThread())
-                {
-                    return;
-                }
-
                 itemStoreQueue.Enqueue(Tuple.Create(targetClient, packet));
             }
         }
