@@ -11,7 +11,7 @@ namespace CSharpGameServer.Core.LogicWorkerThread
         private readonly Thread? thread;
         private readonly int threadId;
         private readonly Queue<Tuple<Client, RequestPacket>> itemStoreQueue = new();
-        private readonly object itemStoreQueueLock = new();
+        private readonly Lock itemStoreQueueLock = new();
         private int isRunning;
         private const int IsTrue = 1;
         private const int IsFalse = 0;
