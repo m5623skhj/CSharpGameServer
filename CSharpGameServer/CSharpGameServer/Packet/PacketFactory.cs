@@ -100,7 +100,7 @@ namespace CSharpGameServer.Packet
                 return new RequestPacketResult(null, PacketResultType.InvalidReceivedData);
             }
 
-            var packet = (RequestPacket)Activator.CreateInstance(packetObjectType);
+            var packet = (RequestPacket)Activator.CreateInstance(packetObjectType)!;
             return new RequestPacketResult(packet, PacketResultType.Success, packetLength);
         }
     }
