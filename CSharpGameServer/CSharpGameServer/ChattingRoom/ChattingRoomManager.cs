@@ -1,4 +1,5 @@
 ﻿using CSharpGameServer.Packet;
+using System.Collections.Concurrent;
 
 namespace CSharpGameServer.ChattingRoom
 {
@@ -7,8 +8,7 @@ namespace CSharpGameServer.ChattingRoom
         private static ChattingRoomManager? _instance;
         public static ChattingRoomManager Instance => _instance ??= new ChattingRoomManager();
 
-        private readonly Dictionary<string, ChattingRoom> chattingRooms = [];
-        private readonly Lock chattingRoomsLock = new();
+        private readonly ConcurrentDictionary<string, ChattingRoom> chattingRooms = [];
 
         private const int RoomNameLengthMax = 20;
 
@@ -18,43 +18,28 @@ namespace CSharpGameServer.ChattingRoom
             {
                 return;
             }
-
-            lock (chattingRoomsLock)
-            {
-                chattingRooms.TryAdd(chattingRoom.Data.RoomName, new ChattingRoom());
-            }
+            
+            chattingRooms.TryAdd(chattingRoom.Data.RoomName, new ChattingRoom());
         }
 
         public void RemoveChattingRoom(string roomName)
         {
-            lock (chattingRoomsLock)
-            {
-                chattingRooms.Remove(roomName);
-            }
+            chattingRooms.Remove(roomName, out _);
         }
 
         public bool ExistsChattingRoom(string roomName)
         {
-            lock (chattingRoomsLock)
-            {
-                return chattingRooms.ContainsKey(roomName);
-            }
+            return chattingRooms.ContainsKey(roomName);
         }
 
         public int CountChattingRooms()
         {
-            lock (chattingRoomsLock)
-            {
-                return chattingRooms.Count;
-            }
+            return chattingRooms.Count;
         }
 
         public void ClearChattingRooms()
         {
-            lock (chattingRoomsLock)
-            {
-                chattingRooms.Clear();
-            }
+            chattingRooms.Clear();
         }
     }
 }
