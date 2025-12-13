@@ -6,8 +6,7 @@ using System.Runtime.InteropServices;
 
 namespace CSharpGameServer.Packet
 {
-    [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    public class Ping : RequestPacket
+    public class PingPacket : RequestPacket
     {
         public override void SetPacketType()
         {
@@ -19,8 +18,7 @@ namespace CSharpGameServer.Packet
         }
     }
 
-    [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    public class Pong : ReplyPacket
+    public class PongPacket : ReplyPacket
     {
         public override void SetPacketType()
         {
@@ -29,13 +27,17 @@ namespace CSharpGameServer.Packet
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    public class CreateRoom : RequestPacket
+    public struct CreateRoom
     {
+        public string RoomName { get; set; }
+    }
+    public class CreateRoomPacket : RequestPacket
+    {
+        public CreateRoom Data { get; set; }
         public override void SetPacketType()
         {
             Type = PacketType.CreateRoom;
         }
-        public string RoomName { get; set; }
         protected override Action<Client, RequestPacket> GetHandler()
         {
             return PacketHandlerManager.HandleCreateRoom;
@@ -43,23 +45,31 @@ namespace CSharpGameServer.Packet
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    public class RoomCreated : ReplyPacket
+    public struct RoomCreated
     {
+        public ushort ErrorCode { get; set; }
+    }
+    public class RoomCreatedPacket : ReplyPacket
+    {
+        public RoomCreated Data { get; set; }
         public override void SetPacketType()
         {
             Type = PacketType.RoomCreated;
         }
-        public ushort ErrorCode { get; set; }
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    public class JoinRoom : RequestPacket
+    public struct JoinRoom
     {
+        public string RoomName { get; set; }
+    }
+    public class JoinRoomPacket : RequestPacket
+    {
+        public JoinRoom Data { get; set; }
         public override void SetPacketType()
         {
             Type = PacketType.JoinRoom;
         }
-        public string RoomName { get; set; }
         protected override Action<Client, RequestPacket> GetHandler()
         {
             return PacketHandlerManager.HandleJoinRoom;
@@ -67,17 +77,20 @@ namespace CSharpGameServer.Packet
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    public class RoomJoined : ReplyPacket
+    public struct RoomJoined
     {
+        public ushort ErrorCode { get; set; }
+    }
+    public class RoomJoinedPacket : ReplyPacket
+    {
+        public RoomJoined Data { get; set; }
         public override void SetPacketType()
         {
             Type = PacketType.RoomJoined;
         }
-        public ushort ErrorCode { get; set; }
     }
 
-    [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    public class LeaveRoom : RequestPacket
+    public class LeaveRoomPacket : RequestPacket
     {
         public override void SetPacketType()
         {
@@ -90,23 +103,31 @@ namespace CSharpGameServer.Packet
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    public class RoomLeft : ReplyPacket
+    public struct RoomLeft
     {
+        public ushort ErrorCode { get; set; }
+    }
+    public class RoomLeftPacket : ReplyPacket
+    {
+        public RoomLeft Data { get; set; }
         public override void SetPacketType()
         {
             Type = PacketType.RoomLeft;
         }
-        public ushort ErrorCode { get; set; }
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    public class SendChat : RequestPacket
+    public struct SendChat
     {
+        public string Message { get; set; }
+    }
+    public class SendChatPacket : RequestPacket
+    {
+        public SendChat Data { get; set; }
         public override void SetPacketType()
         {
             Type = PacketType.SendChat;
         }
-        public string Message { get; set; }
         protected override Action<Client, RequestPacket> GetHandler()
         {
             return PacketHandlerManager.HandleSendChat;
@@ -114,17 +135,20 @@ namespace CSharpGameServer.Packet
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    public class ChatMessage : ReplyPacket
+    public struct ChatMessage
     {
+        public string Message { get; set; }
+    }
+    public class ChatMessagePacket : ReplyPacket
+    {
+        public ChatMessage Data { get; set; }
         public override void SetPacketType()
         {
             Type = PacketType.ChatMessage;
         }
-        public string Message { get; set; }
     }
 
-    [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    public class GetRoomList : RequestPacket
+    public class GetRoomListPacket : RequestPacket
     {
         public override void SetPacketType()
         {
@@ -137,13 +161,17 @@ namespace CSharpGameServer.Packet
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    public class RoomListUpdate : ReplyPacket
+    public struct RoomListUpdate
     {
+        public string[] Rooms { get; set; }
+    }
+    public class RoomListUpdatePacket : ReplyPacket
+    {
+        public RoomListUpdate Data { get; set; }
         public override void SetPacketType()
         {
             Type = PacketType.RoomListUpdate;
         }
-        public string[] Rooms { get; set; }
     }
 
 }

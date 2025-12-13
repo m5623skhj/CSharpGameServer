@@ -1,4 +1,5 @@
 ﻿using CSharpGameServer.Packet;
+using CSharpGameServer.PacketBase;
 using CSharpGameServer.PC;
 
 namespace CSharpGameServer.ChattingRoom
@@ -24,16 +25,24 @@ namespace CSharpGameServer.ChattingRoom
             }
         }
 
-        public void BroadcastMessage(string message, Pc? exceptPc = null)
+        public void RoomBroadcastMessage(string message)
         {
-            ChatMessage packet = new()
+            ChatMessagePacket packet = new()
             {
-                Message = message
+                Data = new ChatMessage()
+                {
+                    Message = message
+                }
             };
 
+            RoomBroadcast(packet);
+        }
+
+        private void RoomBroadcast(ReplyPacket packet)
+        {
             lock (membersLock)
             {
-                foreach (var member in members.Where(member => member != exceptPc))
+                foreach (var member in members)
                 {
                     member.Send(packet);
                 }

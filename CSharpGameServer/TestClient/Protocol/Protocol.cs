@@ -10,80 +10,80 @@ namespace CSharpGameServer
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    public struct Ping
+    public struct PingPacket
     {
         public PacketHeader Header;
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    public struct Pong
+    public struct PongPacket
     {
         public PacketHeader Header;
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    public struct CreateRoom
-    {
-        public PacketHeader Header;
-        public string RoomName;
-    }
-
-    [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    public struct RoomCreated
-    {
-        public PacketHeader Header;
-        public ushort ErrorCode;
-    }
-
-    [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    public struct JoinRoom
+    public struct CreateRoomPacket
     {
         public PacketHeader Header;
         public string RoomName;
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    public struct RoomJoined
+    public struct RoomCreatedPacket
     {
         public PacketHeader Header;
         public ushort ErrorCode;
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    public struct LeaveRoom
+    public struct JoinRoomPacket
     {
         public PacketHeader Header;
+        public string RoomName;
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    public struct RoomLeft
+    public struct RoomJoinedPacket
     {
         public PacketHeader Header;
         public ushort ErrorCode;
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    public struct SendChat
+    public struct LeaveRoomPacket
+    {
+        public PacketHeader Header;
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public struct RoomLeftPacket
+    {
+        public PacketHeader Header;
+        public ushort ErrorCode;
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public struct SendChatPacket
     {
         public PacketHeader Header;
         public string Message;
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    public struct ChatMessage
+    public struct ChatMessagePacket
     {
         public PacketHeader Header;
         public string Message;
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    public struct GetRoomList
+    public struct GetRoomListPacket
     {
         public PacketHeader Header;
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    public struct RoomListUpdate
+    public struct RoomListUpdatePacket
     {
         public PacketHeader Header;
         public string[] Rooms;

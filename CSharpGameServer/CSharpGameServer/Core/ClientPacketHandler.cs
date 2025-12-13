@@ -4,11 +4,11 @@ namespace CSharpGameServer.Core
 {
     public partial class Client
     {
-        public virtual void HandlePing(Ping ping) { }
-        public virtual void HandleCreateRoom(CreateRoom createroom) { }
-        public virtual void HandleJoinRoom(JoinRoom joinroom) { }
-        public virtual void HandleLeaveRoom(LeaveRoom leaveroom) { }
-        public virtual void HandleSendChat(SendChat sendchat) { }
-        public virtual void HandleGetRoomList(GetRoomList getroomlist) { }
+        public virtual void HandlePing(PingPacket pingpacket) { }
+        public virtual void HandleCreateRoom(CreateRoomPacket createroompacket) { }
+        public virtual void HandleJoinRoom(JoinRoomPacket joinroompacket) { }
+        public virtual void HandleLeaveRoom(LeaveRoomPacket leaveroompacket) { }
+        public virtual void HandleSendChat(SendChatPacket sendchatpacket) { }
+        public virtual void HandleGetRoomList(GetRoomListPacket getroomlistpacket) { }
     }
 }

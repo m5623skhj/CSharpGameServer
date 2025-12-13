@@ -2,7 +2,7 @@
 
 namespace CSharpGameServer.ChattingRoom
 {
-    internal class ChattingRoomManager
+    public class ChattingRoomManager
     {
         private static ChattingRoomManager? _instance;
         public static ChattingRoomManager Instance => _instance ??= new ChattingRoomManager();
@@ -10,11 +10,18 @@ namespace CSharpGameServer.ChattingRoom
         private readonly Dictionary<string, ChattingRoom> chattingRooms = [];
         private readonly Lock chattingRoomsLock = new();
 
-        public void AddChattingRoom(CreateRoom chattingRoom)
+        private const int RoomNameLengthMax = 20;
+
+        public void AddChattingRoom(CreateRoomPacket chattingRoom)
         {
+            if (string.IsNullOrWhiteSpace(chattingRoom.Data.RoomName) || chattingRoom.Data.RoomName.Length > RoomNameLengthMax)
+            {
+                return;
+            }
+
             lock (chattingRoomsLock)
             {
-                chattingRooms.TryAdd(chattingRoom.RoomName, new ChattingRoom());
+                chattingRooms.TryAdd(chattingRoom.Data.RoomName, new ChattingRoom());
             }
         }
 
@@ -23,6 +30,30 @@ namespace CSharpGameServer.ChattingRoom
             lock (chattingRoomsLock)
             {
                 chattingRooms.Remove(roomName);
+            }
+        }
+
+        public bool ExistsChattingRoom(string roomName)
+        {
+            lock (chattingRoomsLock)
+            {
+                return chattingRooms.ContainsKey(roomName);
+            }
+        }
+
+        public int CountChattingRooms()
+        {
+            lock (chattingRoomsLock)
+            {
+                return chattingRooms.Count;
+            }
+        }
+
+        public void ClearChattingRooms()
+        {
+            lock (chattingRoomsLock)
+            {
+                chattingRooms.Clear();
             }
         }
     }

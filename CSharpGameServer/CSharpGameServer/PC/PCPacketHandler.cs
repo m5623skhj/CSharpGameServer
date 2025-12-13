@@ -4,9 +4,9 @@ namespace CSharpGameServer.PC
 {
     public partial class Pc
     {
-        public override void HandlePing(Ping ping)
+        public override void HandlePing(PingPacket ping)
         {
-            var pong = new Pong();
+            var pong = new PongPacket();
             Send(pong);
         }
     }

@@ -7,62 +7,62 @@ namespace CSharpGameServer.Packet
     {
         public static void HandlePing(Client client, RequestPacket packet)
         {
-            if (packet is not Ping ping)
+            if (packet is not PingPacket pingpacket)
             {
                 return;
             }
 
-            client.HandlePing(ping);
+            client.HandlePing(pingpacket);
         }
 
         public static void HandleCreateRoom(Client client, RequestPacket packet)
         {
-            if (packet is not CreateRoom createroom)
+            if (packet is not CreateRoomPacket createroompacket)
             {
                 return;
             }
 
-            client.HandleCreateRoom(createroom);
+            client.HandleCreateRoom(createroompacket);
         }
 
         public static void HandleJoinRoom(Client client, RequestPacket packet)
         {
-            if (packet is not JoinRoom joinroom)
+            if (packet is not JoinRoomPacket joinroompacket)
             {
                 return;
             }
 
-            client.HandleJoinRoom(joinroom);
+            client.HandleJoinRoom(joinroompacket);
         }
 
         public static void HandleLeaveRoom(Client client, RequestPacket packet)
         {
-            if (packet is not LeaveRoom leaveroom)
+            if (packet is not LeaveRoomPacket leaveroompacket)
             {
                 return;
             }
 
-            client.HandleLeaveRoom(leaveroom);
+            client.HandleLeaveRoom(leaveroompacket);
         }
 
         public static void HandleSendChat(Client client, RequestPacket packet)
         {
-            if (packet is not SendChat sendchat)
+            if (packet is not SendChatPacket sendchatpacket)
             {
                 return;
             }
 
-            client.HandleSendChat(sendchat);
+            client.HandleSendChat(sendchatpacket);
         }
 
         public static void HandleGetRoomList(Client client, RequestPacket packet)
         {
-            if (packet is not GetRoomList getroomlist)
+            if (packet is not GetRoomListPacket getroomlistpacket)
             {
                 return;
             }
 
-            client.HandleGetRoomList(getroomlist);
+            client.HandleGetRoomList(getroomlistpacket);
         }
 
     }
