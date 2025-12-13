@@ -1,7 +1,5 @@
 {
-  // Log
   "LogLevel": "Debug",
-  // DB
   "DBServerIP": "127.0.0.1",
   "DBSchemaName": "test_schema",
   "DBUserId": "test",
