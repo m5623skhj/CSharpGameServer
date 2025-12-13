@@ -1,6 +1,6 @@
 ﻿namespace ServerUnitTest
 {
-    public class ChattingRoomTest
+    public class UnitTest
     {
         [Fact]
         public void Test1()
