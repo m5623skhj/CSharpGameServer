@@ -1,7 +1,6 @@
 ﻿using CSharpGameServer.Core;
 using System.Net.Sockets;
 using CSharpGameServer.ChattingRoom;
-using CSharpGameServer.Packet;
 
 namespace CSharpGameServer.PC
 {
@@ -26,6 +25,11 @@ namespace CSharpGameServer.PC
 
         public ErrorCode SetMyName(string inName)
         {
+            if (!string.IsNullOrEmpty(Name))
+            {
+                return ErrorCode.AlreadySetName;
+            }
+
             const int nameMax = 10;
             if (inName.Length > nameMax || string.IsNullOrWhiteSpace(inName))
             {
