@@ -9,6 +9,11 @@ namespace CSharpGameServer.Packet
             var result = true;
 
             result &= RegisterPacket(new PingPacket());
+            result &= RegisterPacket(new CreateRoomPacket());
+            result &= RegisterPacket(new JoinRoomPacket());
+            result &= RegisterPacket(new LeaveRoomPacket());
+            result &= RegisterPacket(new SendChatPacket());
+            result &= RegisterPacket(new SetMyNamePacket());
 
             return result;
         }

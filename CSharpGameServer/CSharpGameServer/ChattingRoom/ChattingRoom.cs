@@ -6,26 +6,26 @@ namespace CSharpGameServer.ChattingRoom
 {
     public class ChattingRoom
     {
-        private readonly HashSet<Pc> members = [];
+        private readonly Dictionary<ulong, string> memberNames = [];
         private readonly Lock membersLock = new();
 
-        public void AddMember(Pc pc)
+        public bool AddMember(ulong id, string name)
         {
             lock (membersLock)
             {
-                members.Add(pc);
+                return memberNames.TryAdd(id, name);
             }
         }
 
-        public void RemoveMember(Pc pc)
+        public void RemoveMember(ulong id)
         {
             lock (membersLock)
             {
-                members.Remove(pc);
+                memberNames.Remove(id);
             }
         }
 
-        public void RoomBroadcastMessage(string message)
+        public void SendMessage(string message)
         {
             ChatMessagePacket packet = new()
             {
@@ -38,13 +38,21 @@ namespace CSharpGameServer.ChattingRoom
             RoomBroadcast(packet);
         }
 
+        public bool IsEmptyRoom()
+        {
+            lock (membersLock)
+            {
+                return memberNames.Count == 0;
+            }
+        }
+
         private void RoomBroadcast(ReplyPacket packet)
         {
             lock (membersLock)
             {
-                foreach (var member in members)
+                foreach (var pc in memberNames.Select(member => PcManager.Instance.FindPc(member.Key)).OfType<Pc>())
                 {
-                    member.Send(packet);
+                    pc.Send(packet);
                 }
             }
         }

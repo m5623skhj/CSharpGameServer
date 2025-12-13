@@ -77,16 +77,24 @@ namespace CSharpGameServer
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    public struct GetRoomListPacket
-    {
-        public PacketHeader Header;
-    }
-
-    [StructLayout(LayoutKind.Sequential, Pack = 1)]
     public struct RoomListUpdatePacket
     {
         public PacketHeader Header;
         public string[] Rooms;
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public struct SetMyNamePacket
+    {
+        public PacketHeader Header;
+        public string Name;
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public struct SetMyNameResultPacket
+    {
+        public PacketHeader Header;
+        public ushort ErrorCode;
     }
 
 }

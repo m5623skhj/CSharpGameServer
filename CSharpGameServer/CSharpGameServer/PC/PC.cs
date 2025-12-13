@@ -1,44 +1,39 @@
 ﻿using CSharpGameServer.Core;
-using CSharpGameServer.PC.PCComponent;
 using System.Net.Sockets;
+using CSharpGameServer.ChattingRoom;
+using CSharpGameServer.Packet;
 
 namespace CSharpGameServer.PC
 {
     public partial class Pc(ServerCore inServerCore, Socket inSocket, ulong inClientSessionId)
         : Client(inServerCore, inSocket, inClientSessionId)
     {
-        private ulong sessionId;
-        private ulong pcId;
+        public string Name { get; private set; } = "";
 
-        private ComponentManager componentManager = new ComponentManager();
-
-        public delegate void CallbackForInitFromDbComplete();
+        public override void OnConnected()
+        {
+            ChattingRoomManager.Instance.OnEnterUser(ClientSessionId);
+        }
 
         public override void OnClosed() 
         {
-        
+            ChattingRoomManager.Instance.OnLeaveUser(ClientSessionId);
         }
 
         public override void OnSend()
         {
-
         }
 
-        public void OnPCIdLoadCompleted(ulong inPcId)
+        public ErrorCode SetMyName(string inName)
         {
-            pcId = inPcId;
-            PcInitializeFromDb();
-        }
+            const int nameMax = 10;
+            if (inName.Length > nameMax || string.IsNullOrWhiteSpace(inName))
+            {
+                return ErrorCode.InvalidName;
+            }
 
-        public void OnDBInitializeCompleted()
-        {
-            Logger.LoggerManager.Instance.WriteLogInfo("Loading completed pcId : {0}", pcId);
-
-        }
-
-        private void PcInitializeFromDb()
-        {
-            CallbackForInitFromDbComplete callback = new CallbackForInitFromDbComplete(OnDBInitializeCompleted);
+            Name = inName;
+            return ErrorCode.Success;
         }
     }
 }

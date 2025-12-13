@@ -148,18 +148,6 @@ namespace CSharpGameServer.Packet
         }
     }
 
-    public class GetRoomListPacket : RequestPacket
-    {
-        public override void SetPacketType()
-        {
-            Type = PacketType.GetRoomList;
-        }
-        protected override Action<Client, RequestPacket> GetHandler()
-        {
-            return PacketHandlerManager.HandleGetRoomList;
-        }
-    }
-
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
     public struct RoomListUpdate
     {
@@ -171,6 +159,38 @@ namespace CSharpGameServer.Packet
         public override void SetPacketType()
         {
             Type = PacketType.RoomListUpdate;
+        }
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public struct SetMyName
+    {
+        public string Name { get; set; }
+    }
+    public class SetMyNamePacket : RequestPacket
+    {
+        public SetMyName Data { get; set; }
+        public override void SetPacketType()
+        {
+            Type = PacketType.SetMyName;
+        }
+        protected override Action<Client, RequestPacket> GetHandler()
+        {
+            return PacketHandlerManager.HandleSetMyName;
+        }
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public struct SetMyNameResult
+    {
+        public ushort ErrorCode { get; set; }
+    }
+    public class SetMyNameResultPacket : ReplyPacket
+    {
+        public SetMyNameResult Data { get; set; }
+        public override void SetPacketType()
+        {
+            Type = PacketType.SetMyNameResult;
         }
     }
 

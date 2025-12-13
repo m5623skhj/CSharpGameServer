@@ -42,10 +42,18 @@ Packet:
     Fields:
       - Name: Message
         Type: string
-  - Type: RequestPacket
-    PacketName: GetRoomList
   - Type: ReplyPacket
     PacketName: RoomListUpdate
     Fields:
       - Name: Rooms
         Type: string[]
+  - Type: RequestPacket
+    PacketName: SetMyName
+    Fields:
+      - Name: Name
+        Type: string
+  - Type: ReplyPacket
+    PacketName: SetMyNameResult
+    Fields:
+      - Name: ErrorCode
+        Type: ushort

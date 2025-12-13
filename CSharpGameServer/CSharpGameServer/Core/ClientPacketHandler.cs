@@ -9,6 +9,6 @@ namespace CSharpGameServer.Core
         public virtual void HandleJoinRoom(JoinRoomPacket joinroompacket) { }
         public virtual void HandleLeaveRoom(LeaveRoomPacket leaveroompacket) { }
         public virtual void HandleSendChat(SendChatPacket sendchatpacket) { }
-        public virtual void HandleGetRoomList(GetRoomListPacket getroomlistpacket) { }
+        public virtual void HandleSetMyName(SetMyNamePacket setmynamepacket) { }
     }
 }

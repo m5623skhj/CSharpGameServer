@@ -20,8 +20,8 @@ namespace CSharpGameServer.PacketBase
 
         public bool RegisterPacket()
         {
-            return PacketFactory.Instance != null && (PacketFactory.Instance.RegisterPacket(Type, GetType()) || 
-                                                      PacketHandlerManager.Instance.RegisterPacketHandler(Type, GetHandler()));
+            return (PacketFactory.Instance.RegisterPacket(Type, GetType()) || 
+                    PacketHandlerManager.Instance.RegisterPacketHandler(Type, GetHandler()));
         }
     }
 

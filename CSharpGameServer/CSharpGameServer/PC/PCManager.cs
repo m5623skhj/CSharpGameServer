@@ -9,7 +9,7 @@ namespace CSharpGameServer.PC
         private static PcManager? _instance;
         private readonly Dictionary<ulong, Pc> pcIdToPcDict = new();
 
-        private readonly object pcIdToPcDictLock = new();
+        private readonly Lock pcIdToPcDictLock = new();
 
         public static PcManager Instance => _instance ??= new PcManager();
 

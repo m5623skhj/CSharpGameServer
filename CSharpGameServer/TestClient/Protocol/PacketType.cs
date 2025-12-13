@@ -13,7 +13,8 @@ namespace CSharpGameServer
         RoomLeft,
         SendChat,
         ChatMessage,
-        GetRoomList,
         RoomListUpdate,
+        SetMyName,
+        SetMyNameResult,
     }
 }
