@@ -7,3 +7,5 @@ CSharpGameServer/DBMigrator/Migrator/obj/
 CSharpGameServer/DBMigrator/Migrator/bin/
 CSharpGameServer/DBMigrator/Migrator/__pycache__/
 CSharpGameServer/.vs/
+CSharpGameServer/ServerUnitTest/obj/
+CSharpGameServer/ServerUnitTest/bin/Debug/
