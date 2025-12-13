@@ -1,4 +1,5 @@
 ﻿using System.Net.Sockets;
+using System.Runtime.InteropServices;
 using CSharpGameServer;
 using CSharpGameServer.Core;
 
@@ -115,11 +116,10 @@ namespace TestClient.Client
                     return;
                 }
 
-                ringBuffer.EraseData(HeaderSize);
-                var data = ringBuffer.PopData((uint)packetLength);
+                var data = ringBuffer.PopData((uint)packetLength + HeaderSize);
                 if (data != null)
                 {
-                    ProcessReceivedData(packetType, data, packetLength);
+                    ProcessReceivedData(packetType, data);
                 }
             }
         }
@@ -161,6 +161,26 @@ namespace TestClient.Client
             Buffer.BlockCopy(data, 0, packet, HeaderSize, data.Length);
 
             return packet;
+        }
+
+        private static T DeserializePacket<T>(byte[] data) where T : struct
+        {
+            var size = Marshal.SizeOf(typeof(T));
+            if (data.Length < size)
+            {
+                throw new ArgumentException("Data length is less than the size of the structure.");
+            }
+
+            var ptr = Marshal.AllocHGlobal(size);
+            try
+            {
+                Marshal.Copy(data, 0, ptr, size);
+                return Marshal.PtrToStructure<T>(ptr)!;
+            }
+            finally
+            {
+                Marshal.FreeHGlobal(ptr);
+            }
         }
     }
 }

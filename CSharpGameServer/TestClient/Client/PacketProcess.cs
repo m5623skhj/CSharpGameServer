@@ -9,43 +9,43 @@ namespace TestClient.Client
 {
     partial class ChattingClient
     {
-        private void ProcessReceivedData(short packetType, byte[] buffer, int length)
+        private void ProcessReceivedData(short packetType, byte[] buffer)
         {
             switch ((PacketType)packetType)
             {
                 case PacketType.Pong:
                 {
-                    OnPong();
+                    OnPong(buffer);
                     break;
                 }
                 case PacketType.RoomCreated:
                 {
-                    OnRoomCreated();
+                    OnRoomCreated(buffer);
                     break;
                 }
                 case PacketType.RoomJoined:
                 {
-                    OnRoomJoined();
+                    OnRoomJoined(buffer);
                     break;
                 }
                 case PacketType.RoomLeft:
                 {
-                    OnRoomLeft();
+                    OnRoomLeft(buffer);
                     break;
                 }
                 case PacketType.ChatMessage:
                 {
-                    OnChatMessage();
+                    OnChatMessage(buffer);
                     break;
                 }
                 case PacketType.RoomListUpdate:
                 {
-                    OnRoomListUpdate();
+                    OnRoomListUpdate(buffer);
                     break;
                 }
                 case PacketType.SetMyNameResult:
                 {
-                    OnSetMyNameResult();
+                    OnSetMyNameResult(buffer);
                     break;
                 }
                 default:
@@ -56,32 +56,39 @@ namespace TestClient.Client
             }
         }
 
-        private void OnPong()
+        private void OnPong(byte[] buffer)
         {
+            var pong = DeserializePacket<PongPacket>(buffer);
         }
 
-        private void OnRoomCreated()
+        private void OnRoomCreated(byte[] buffer)
         {
+            var onRoomCreated = DeserializePacket<RoomCreatedPacket>(buffer);
         }
 
-        private void OnRoomJoined()
+        private void OnRoomJoined(byte[] buffer)
         {
+            var onRoomJoined = DeserializePacket<RoomJoinedPacket>(buffer);
         }
 
-        private void OnRoomLeft()
+        private void OnRoomLeft(byte[] buffer)
         {
+            var onRoomLeft = DeserializePacket<RoomLeftPacket>(buffer);
         }
 
-        private void OnChatMessage()
+        private void OnChatMessage(byte[] buffer)
         {
+            var onChatMessage = DeserializePacket<ChatMessagePacket>(buffer);
         }
 
-        private void OnRoomListUpdate()
+        private void OnRoomListUpdate(byte[] buffer)
         {
+            var onRoomListUpdate = DeserializePacket<RoomListUpdatePacket>(buffer);
         }
 
-        private void OnSetMyNameResult()
+        private void OnSetMyNameResult(byte[] buffer)
         {
+            var onSetMyNameResult = DeserializePacket<SetMyNameResultPacket>(buffer);
         }
     }
 }
