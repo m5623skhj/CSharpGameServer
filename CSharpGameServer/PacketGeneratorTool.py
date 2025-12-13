@@ -66,20 +66,29 @@ def GenerateProtocolOverride(values, namespace, isServer=True):
         fields = value.get("Fields", [])
         packetName = value['PacketName']
         
-        generateCode += "    [StructLayout(LayoutKind.Sequential, Pack = 1)]\n"
-        
-        if isServer:
-            generateCode += f"    public class {packetName} : {packetType}\n"
+        if fields:
+            generateCode += "    [StructLayout(LayoutKind.Sequential, Pack = 1)]\n"
+            generateCode += f"    public struct {packetName}\n"
             generateCode += "    {\n"
-            generateCode += "        public override void SetPacketType()\n"
-            generateCode += "        {\n"
-            generateCode += f"            Type = PacketType.{packetName};\n"
-            generateCode += "        }\n"
-
+            
             for field in fields:
                 fieldName = field["Name"]
                 fieldType = field["Type"]
                 generateCode += f"        public {fieldType} {fieldName} {{ get; set; }}\n"
+            
+            generateCode += "    }\n"
+        
+        if isServer:
+            generateCode += f"    public class {packetName}Packet : {packetType}\n"
+            generateCode += "    {\n"
+            
+            if fields:
+                generateCode += f"        public {packetName} Data {{ get; set; }}\n"
+            
+            generateCode += "        public override void SetPacketType()\n"
+            generateCode += "        {\n"
+            generateCode += f"            Type = PacketType.{packetName};\n"
+            generateCode += "        }\n"
 
             if packetType == 'RequestPacket':
                 generateCode += "        protected override Action<Client, RequestPacket> GetHandler()\n"
@@ -89,12 +98,12 @@ def GenerateProtocolOverride(values, namespace, isServer=True):
 
             generateCode += "    }\n\n"
         else:
-            generateCode += f"    public struct {packetName}\n"
+            generateCode += f"    public struct {packetName}Packet\n"
             generateCode += "    {\n"
             generateCode += "        public PacketHeader Header;\n"
 
             for field in fields:
-                code += f"        public {field['Type']} {field['Name']};\n"
+                generateCode += f"        public {field['Type']} {field['Name']};\n"
 
             generateCode += "    }\n\n"
 
@@ -114,11 +123,11 @@ def GeneratePacketHandler(values):
         packetName = value['PacketName']
         generateCode += f"        public static void Handle{packetName}(Client client, RequestPacket packet)\n"
         generateCode += "        {\n"
-        generateCode += f"            if (packet is not {packetName} {packetName.lower()})\n"
+        generateCode += f"            if (packet is not {packetName}Packet {packetName.lower()}packet)\n"
         generateCode += "            {\n"
         generateCode += "                return;\n"
         generateCode += "            }\n\n"
-        generateCode += f"            client.Handle{packetName}({packetName.lower()});\n"
+        generateCode += f"            client.Handle{packetName}({packetName.lower()}packet);\n"
         generateCode += "        }\n\n"
 
     generateCode += "    }\n}"
@@ -135,7 +144,7 @@ def GenerateClientPacketHandler(values):
             continue
         
         packetName = value['PacketName']
-        generateCode += f"        public virtual void Handle{packetName}({packetName} {packetName.lower()}) {{ }}\n"
+        generateCode += f"        public virtual void Handle{packetName}({packetName}Packet {packetName.lower()}packet) {{ }}\n"
 
     generateCode += "    }\n"
     generateCode += "}"
@@ -173,7 +182,7 @@ def GenerateClientProtocol(values, namespace):
         packetName = value['PacketName']
         
         code += "    [StructLayout(LayoutKind.Sequential, Pack = 1)]\n"
-        code += f"    public struct {packetName}\n"
+        code += f"    public struct {packetName}Packet\n"
         code += "    {\n"
         code += "        public PacketHeader Header;\n"
         for field in fields:
