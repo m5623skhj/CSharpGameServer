@@ -1,15 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.Sockets;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Net.Sockets;
 using CSharpGameServer;
 using CSharpGameServer.Core;
 
 namespace TestClient.Client
 {
-    public class ChattingClient
+    partial class ChattingClient
     {
         private TcpClient? client;
         private NetworkStream? stream;
@@ -20,7 +15,7 @@ namespace TestClient.Client
         private bool isRunning;
 
         private const int HeaderSize = 6;
-        private StreamRingBuffer ringBuffer = new();
+        private readonly StreamRingBuffer ringBuffer = new();
 
         public ChattingClient(string ip, int port)
         {
@@ -120,58 +115,11 @@ namespace TestClient.Client
                     return;
                 }
 
-                var data = ringBuffer.PopData((uint)packetLength + HeaderSize);
+                ringBuffer.EraseData(HeaderSize);
+                var data = ringBuffer.PopData((uint)packetLength);
                 if (data != null)
                 {
-                    ProcessReceivedData(data, packetLength);
-                }
-            }
-        }
-
-        private void ProcessReceivedData(byte[] buffer, int length)
-        {
-            if (length < HeaderSize)
-            {
-                return;
-            }
-
-            var packetType = BitConverter.ToInt16(buffer, 0);
-            var packetLength = BitConverter.ToInt32(buffer, 2);
-
-            switch ((PacketType)packetType)
-            {
-                case PacketType.Pong:
-                {
-                    break;
-                }
-                case PacketType.RoomCreated:
-                {
-                    break;
-                }
-                case PacketType.RoomJoined:
-                {
-                    break;
-                }
-                case PacketType.RoomLeft:
-                {
-                    break;
-                }
-                case PacketType.ChatMessage:
-                {
-                    break;
-                }
-                case PacketType.RoomListUpdate:
-                {
-                    break;
-                }
-                case PacketType.SetMyNameResult:
-                {
-                    break;
-                }
-                default:
-                {
-                    Console.WriteLine("Invalid packet type {}", packetType);
-                    break;
+                    ProcessReceivedData(packetType, data, packetLength);
                 }
             }
         }

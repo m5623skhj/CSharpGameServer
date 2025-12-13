@@ -15,8 +15,10 @@ namespace TestClient.Main
         private static void Main(string[] args)
         {
             client = new ChattingClient(ip, port);
-
-
+            if (!client.Connect())
+            {
+                return;
+            }
         }
     }
 }
