@@ -14,27 +14,12 @@ namespace CSharpGameServer.GameServer
 
         protected override void ProcessAccept(SocketAsyncEventArgs acceptEventArgs)
         {
-            var clientSocket = acceptEventArgs.AcceptSocket;
-            if (clientSocket == null)
-            {
-                return;
-            }
+            base.ProcessAccept(acceptEventArgs);
+        }
 
-            var newSessionId = Interlocked.Increment(ref AtomicSessionId);
-            var newPc = new Pc(this, clientSocket, newSessionId);
-
-            ThreadPool.QueueUserWorkItem(StartReceive, newPc);
-
-            ClientManager.Instance.InsertSessionIdToClient(newSessionId, newPc);
-            acceptEventArgs.Completed += (sender, args) =>
-            {
-                if (args.SocketError != SocketError.Success)
-                {
-                    CloseClient(newSessionId);
-                }
-            };
-
-            acceptEventArgs.AcceptSocket = null;
+        protected override Client MakeClient(Socket clientSocket)
+        {
+            return new Pc(this, clientSocket, MakeSessionId());
         }
     }
 }

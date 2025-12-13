@@ -5,6 +5,7 @@ using System.Net.Sockets;
 using System.Runtime.InteropServices;
 using CSharpGameServer.Packet;
 using CSharpGameServer.PacketBase;
+using MySqlX.XDevAPI;
 
 
 namespace CSharpGameServer.Core
@@ -51,6 +52,16 @@ namespace CSharpGameServer.Core
             return true;
         }
 
+        protected ulong MakeSessionId()
+        {
+            return Interlocked.Increment(ref AtomicSessionId);
+        }
+
+        protected virtual Client MakeClient(Socket socket)
+        {
+            return new Client(this, socket, MakeSessionId());
+        }
+
         public void Run()
         {
             running = true;
@@ -81,13 +92,13 @@ namespace CSharpGameServer.Core
 
         private void StartAccept()
         {
-            var acceptEventArgs = new SocketAsyncEventArgs();
-            acceptEventArgs.Completed += AcceptCompleted;
-
             if (listenSocket == null || running == false)
             {
                 return;
             }
+
+            var acceptEventArgs = new SocketAsyncEventArgs();
+            acceptEventArgs.Completed += AcceptCompleted;
 
             if (listenSocket.AcceptAsync(acceptEventArgs) == false)
             {
@@ -97,33 +108,34 @@ namespace CSharpGameServer.Core
 
         protected virtual void ProcessAccept(SocketAsyncEventArgs acceptEventArgs)
         {
-            var clientSocket = acceptEventArgs.AcceptSocket;
-            if (clientSocket == null)
+            if (acceptEventArgs.SocketError != SocketError.Success)
             {
+                LoggerManager.Instance.WriteLogError("Accept failed with {socketError}", acceptEventArgs.SocketError);
+                StartAccept();
                 return;
             }
 
-            var newSessionId = Interlocked.Increment(ref AtomicSessionId);
-            var newClient = new Client(this, clientSocket, newSessionId);
+            var clientSocket = acceptEventArgs.AcceptSocket;
+            if (clientSocket == null)
+            {
+                StartAccept();
+                return;
+            }
 
-            ThreadPool.QueueUserWorkItem(StartReceive, newClient);
+            var newSessionId = MakeSessionId();
+            var newClient = MakeClient(clientSocket);
 
             ClientManager.Instance.InsertSessionIdToClient(newSessionId, newClient);
-            acceptEventArgs.Completed += (sender, args) =>
-            {
-                if (args.SocketError != SocketError.Success)
-                {
-                    CloseClient(newSessionId);
-                }
-            };
+            newClient.OnConnected();
+            ThreadPool.QueueUserWorkItem(StartReceive, newClient);
 
             acceptEventArgs.AcceptSocket = null;
+            StartAccept();
         }
 
         private void AcceptCompleted(object? sender, SocketAsyncEventArgs acceptEventArgs)
         {
             ProcessAccept(acceptEventArgs);
-            StartAccept();
         }
 
         protected void StartReceive(object? inClient)

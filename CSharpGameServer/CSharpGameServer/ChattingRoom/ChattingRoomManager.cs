@@ -196,6 +196,14 @@ namespace CSharpGameServer.ChattingRoom
             {
                 lobbyUsers.Add(id);
             }
+
+            PcManager.Instance.FindPc(id)?.Send(new RoomListUpdatePacket()
+            {
+                Data = new RoomListUpdate()
+                {
+                    Rooms = GetAllChattingRooms()
+                }
+            });
         }
 
         public void SendChat(ulong id, SendChatPacket packet)
