@@ -111,5 +111,27 @@ namespace ServerUnitTest
             ChattingRoomManager.Instance.LeaveChattingRoom(0);
             Assert.False(ChattingRoomManager.Instance.ExistsChattingRoom(roomName));
         }
+
+        [Fact]
+        public void GetAllChattingRoom_Test()
+        {
+            ChattingRoomManager.Instance.OnEnterUser(0);
+            ChattingRoomManager.Instance.OnEnterUser(1);
+
+            Assert.Equal(ErrorCode.Success, ChattingRoomManager.Instance.AddChattingRoom(0, "User0", "Room0"));
+            Assert.Equal(ErrorCode.Success, ChattingRoomManager.Instance.AddChattingRoom(1, "User1", "Room1"));
+
+            var roomList = ChattingRoomManager.Instance.GetAllChattingRooms();
+            Assert.Equal(2, roomList.Count());
+
+            Assert.Equal("Room0", roomList[0]);
+            Assert.Equal("Room1", roomList[1]);
+
+            ChattingRoomManager.Instance.LeaveChattingRoom(0);
+            ChattingRoomManager.Instance.LeaveChattingRoom(1);
+
+            roomList = ChattingRoomManager.Instance.GetAllChattingRooms();
+            Assert.Empty(roomList);
+        }
     }
 }
