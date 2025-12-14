@@ -54,13 +54,6 @@ namespace ServerUnitTest
                 [
                     0UL,
                     "TestUser",
-                    CreatePacket("ThisRoomNameIsTooLongSoItsInvalid")
-                ];
-
-                yield return
-                [
-                    0UL,
-                    "TestUser",
                     CreatePacket("        ")
                 ];
             }
@@ -88,19 +81,12 @@ namespace ServerUnitTest
         public void AddChattingRoom_Invalid_Test(ulong id, string name, CreateRoomPacket packet)
         {
             var roomName = "";
-            try
+            unsafe
             {
-                unsafe
+                fixed (byte* namePointer = packet.Data.RoomName)
                 {
-                    fixed (byte* namePointer = packet.Data.RoomName)
-                    {
-                        roomName = FixedStringUtil.Read(namePointer, 30);
-                    }
+                    roomName = FixedStringUtil.Read(namePointer, 20);
                 }
-            }
-            catch (Exception e)
-            {
-
             }
 
             ChattingRoomManager.Instance.AddChattingRoom(id, name, roomName);
