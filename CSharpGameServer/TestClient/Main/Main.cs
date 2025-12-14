@@ -4,16 +4,17 @@ namespace TestClient.Main
 {
     internal class Program
     {
-        private static ChattingClient? client;
+        private static ChattingClient? _client;
 
-        private static string ip = "127.0.0.1";
-        private static int port = 10001;
+        private const string Ip = "127.0.0.1";
+        private const int Port = 10001;
 
-        private static void Main(string[] args)
+        private static void Main(string[] _)
         {
-            client = new ChattingClient(ip, port);
+            _client = new ChattingClient(Ip, Port);
+            ShowMenu();
 
-            while (client.Connect())
+            while (_client.Connect())
             {
                 var input = Console.ReadLine();
 
@@ -23,34 +24,48 @@ namespace TestClient.Main
                     {
                         Console.Write("Enter your name: ");
                         var name = Console.ReadLine() ?? "";
-                        client.SetMyName(name);
+                        _client.SetMyName(name);
+
+                        ShowMenu();
+
                         break;
                     }
                     case "2":
                     {
                         Console.Write("Enter room name to create: ");
                         var roomName = Console.ReadLine() ?? "";
-                        client.CreateRoom(roomName);
+                        _client.CreateRoom(roomName);
                         break;
                     }
                     case "3":
                     {
                         Console.Write("Enter room name to join: ");
                         var roomName = Console.ReadLine() ?? "";
-                        client.JoinRoom(roomName);
+                        _client.JoinRoom(roomName);
+
+                        Console.Clear();
+
                         break;
                     }
                     case "4":
                     {
-                        client.LeaveRoom();
+                        _client.LeaveRoom();
+                        
+                        ShowMenu();
+
                         break;
                     }
                     case "5":
                     {
                         Console.Write("Enter message to send: ");
                         var message = Console.ReadLine() ?? "";
-                        client.SendChatMessage(message);
+                        _client.SendChatMessage(message);
                         break;
+                    }
+                    case "6":
+                    {
+                        _client.Disconnect();
+                        return;
                     }
                     default:
                     {
@@ -63,6 +78,8 @@ namespace TestClient.Main
 
         private static void ShowMenu()
         {
+            Console.Clear();
+
             Console.WriteLine("=== Chatting Client Menu ===");
             Console.WriteLine("1. Set Name");
             Console.WriteLine("2. Create Room");

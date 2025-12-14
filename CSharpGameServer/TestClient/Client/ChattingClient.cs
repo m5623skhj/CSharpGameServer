@@ -5,12 +5,10 @@ using CSharpGameServer.Core;
 
 namespace TestClient.Client
 {
-    partial class ChattingClient
+    internal partial class ChattingClient(string ip, int port)
     {
         private TcpClient? client;
         private NetworkStream? stream;
-        private readonly string serverIp;
-        private readonly int serverPort;
         private bool isConnected;
         private Thread? recvThread;
         private bool isRunning;
@@ -18,17 +16,11 @@ namespace TestClient.Client
         private const int HeaderSize = 6;
         private readonly StreamRingBuffer ringBuffer = new();
 
-        public ChattingClient(string ip, int port)
-        {
-            serverIp = ip;
-            serverPort = port;
-        }
-
         public bool Connect()
         {
             try
             {
-                client = new TcpClient(serverIp, serverPort);
+                client = new TcpClient(ip, port);
                 stream = client.GetStream();
                 isConnected = true;
                 isRunning = true;
@@ -179,12 +171,12 @@ namespace TestClient.Client
 
         private static byte[] SerializePacket<T>(T packet) where T : struct
         {
-            var size = System.Runtime.InteropServices.Marshal.SizeOf(packet);
+            var size = Marshal.SizeOf(packet);
             var buffer = new byte[size];
-            var ptr = System.Runtime.InteropServices.Marshal.AllocHGlobal(size);
-            System.Runtime.InteropServices.Marshal.StructureToPtr(packet, ptr, true);
-            System.Runtime.InteropServices.Marshal.Copy(ptr, buffer, 0, size);
-            System.Runtime.InteropServices.Marshal.FreeHGlobal(ptr);
+            var ptr = Marshal.AllocHGlobal(size);
+            Marshal.StructureToPtr(packet, ptr, true);
+            Marshal.Copy(ptr, buffer, 0, size);
+            Marshal.FreeHGlobal(ptr);
             return buffer;
         }
 
@@ -212,7 +204,7 @@ namespace TestClient.Client
             try
             {
                 Marshal.Copy(data, 0, ptr, size);
-                return Marshal.PtrToStructure<T>(ptr)!;
+                return Marshal.PtrToStructure<T>(ptr);
             }
             finally
             {
