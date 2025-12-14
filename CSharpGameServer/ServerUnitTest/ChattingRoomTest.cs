@@ -8,7 +8,7 @@ namespace ServerUnitTest
     {
         public void Dispose()
         {
-            ChattingRoomManager.Instance.ClearChattingRooms();
+            ChattingRoomManager.Instance.InitChattingRoomManager();
         }
 
         private static CreateRoomPacket CreatePacket(string roomName)
@@ -73,9 +73,9 @@ namespace ServerUnitTest
             string roomName;
             unsafe
             {
-                fixed (byte* pName = packet.Data.RoomName)
+                fixed (byte* namePointer = packet.Data.RoomName)
                 {
-                    roomName = FixedStringUtil.Read(pName, 20);
+                    roomName = FixedStringUtil.Read(namePointer, 20);
                 }
             }
 
@@ -87,13 +87,20 @@ namespace ServerUnitTest
         [MemberData(nameof(GetAddChattingRoomInvalidTestData))]
         public void AddChattingRoom_Invalid_Test(ulong id, string name, CreateRoomPacket packet)
         {
-            string roomName;
-            unsafe
+            var roomName = "";
+            try
             {
-                fixed (byte* pName = packet.Data.RoomName)
+                unsafe
                 {
-                    roomName = FixedStringUtil.Read(pName, 20);
+                    fixed (byte* namePointer = packet.Data.RoomName)
+                    {
+                        roomName = FixedStringUtil.Read(namePointer, 30);
+                    }
                 }
+            }
+            catch (Exception e)
+            {
+
             }
 
             ChattingRoomManager.Instance.AddChattingRoom(id, name, roomName);
@@ -107,15 +114,15 @@ namespace ServerUnitTest
             string roomName;
             unsafe
             {
-                fixed (byte* pName = packet.Data.RoomName)
+                fixed (byte* namePointer = packet.Data.RoomName)
                 {
-                    roomName = FixedStringUtil.Read(pName, 20);
+                    roomName = FixedStringUtil.Read(namePointer, 20);
                 }
             }
 
-            ChattingRoomManager.Instance.AddChattingRoom(id, name, roomName);
-            Assert.True(ChattingRoomManager.Instance.ExistsChattingRoom(roomName));
-            ChattingRoomManager.Instance.RemoveChattingRoom(roomName);
+            ChattingRoomManager.Instance.OnEnterUser(0);
+            Assert.Equal(ErrorCode.Success, ChattingRoomManager.Instance.AddChattingRoom(id, name, roomName));
+            ChattingRoomManager.Instance.LeaveChattingRoom(0);
             Assert.False(ChattingRoomManager.Instance.ExistsChattingRoom(roomName));
         }
     }

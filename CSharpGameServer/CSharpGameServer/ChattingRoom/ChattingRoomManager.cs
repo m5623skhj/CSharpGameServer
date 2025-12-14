@@ -137,11 +137,21 @@ namespace CSharpGameServer.ChattingRoom
             }
         }
 
-        public void ClearChattingRooms()
+        public void InitChattingRoomManager()
         {
             lock (chattingRoomsLock)
             {
                 chattingRooms.Clear();
+            }
+
+            lock (memberRoomMappingLock)
+            {
+                memberRoomMapping.Clear();
+            }
+
+            lock (lobbyUsersLock)
+            {
+                lobbyUsers.Clear();
             }
         }
 
