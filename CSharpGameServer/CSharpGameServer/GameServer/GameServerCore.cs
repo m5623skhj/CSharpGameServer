@@ -17,9 +17,9 @@ namespace CSharpGameServer.GameServer
             base.ProcessAccept(acceptEventArgs);
         }
 
-        protected override Client MakeClient(Socket clientSocket)
+        protected override Client MakeClient(Socket clientSocket, ulong sessionId)
         {
-            return new Pc(this, clientSocket, MakeSessionId());
+            return new Pc(this, clientSocket, sessionId);
         }
     }
 }

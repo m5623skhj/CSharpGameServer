@@ -1,5 +1,4 @@
-﻿using System.Diagnostics.CodeAnalysis;
-using System.Runtime.InteropServices;
+using System.Diagnostics.CodeAnalysis;
 using CSharpGameServer.Core;
 using CSharpGameServer.Logger;
 using CSharpGameServer.PacketBase;
@@ -22,16 +21,14 @@ namespace CSharpGameServer.Packet
             PacketLength = inPacketSize;
         }
 
-        public readonly RequestPacket? Packet = null;
-        public readonly PacketResultType ResultType = PacketResultType.Success;
-        public readonly ushort PacketLength = 0;
+        public readonly RequestPacket? Packet;
+        public readonly PacketResultType ResultType;
+        public readonly ushort PacketLength;
     }
 
     public class PacketFactory
     {
-        // Packet header : PacketType(4) + PacketSize(2)
         private const int HeaderSize = 6;
-
         private readonly Dictionary<PacketType, Type> packetTypeDict = new();
 
         [field: AllowNull, MaybeNull]
@@ -49,7 +46,7 @@ namespace CSharpGameServer.Packet
 
                 return field;
             }
-        } = null!;
+        }
 
         public bool RegisterPacket(PacketType packetType, Type packetObjectType)
         {
@@ -64,7 +61,7 @@ namespace CSharpGameServer.Packet
                 LoggerManager.Instance.WriteLogFatal("Invalid packet object type {packetObjectType}", packetObjectType);
                 return false;
             }
-            
+
             if (packetTypeDict.TryAdd(packetType, packetObjectType))
             {
                 return true;
@@ -101,6 +98,7 @@ namespace CSharpGameServer.Packet
             }
 
             var packet = (RequestPacket)Activator.CreateInstance(packetObjectType)!;
+            packet.LoadFromBytes(buffer, offset, packetLength);
             return new RequestPacketResult(packet, PacketResultType.Success, packetLength);
         }
     }

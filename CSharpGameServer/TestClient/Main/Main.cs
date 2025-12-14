@@ -12,12 +12,12 @@ namespace TestClient.Main
         private static void Main(string[] _)
         {
             _client = new ChattingClient(Ip, Port);
+            _client.Connect();
             ShowMenu();
 
-            while (_client.Connect())
+            while (_client.isConnected)
             {
                 var input = Console.ReadLine();
-
                 switch (input)
                 {
                     case "1":
@@ -42,15 +42,11 @@ namespace TestClient.Main
                         Console.Write("Enter room name to join: ");
                         var roomName = Console.ReadLine() ?? "";
                         _client.JoinRoom(roomName);
-
-                        Console.Clear();
-
                         break;
                     }
                     case "4":
                     {
                         _client.LeaveRoom();
-                        
                         ShowMenu();
 
                         break;
@@ -63,6 +59,11 @@ namespace TestClient.Main
                         break;
                     }
                     case "6":
+                    {
+                        _client.SendRequestRoomList();
+                        break;
+                    }
+                    case "0":
                     {
                         _client.Disconnect();
                         return;

@@ -5,7 +5,6 @@ using System.Net.Sockets;
 using System.Runtime.InteropServices;
 using CSharpGameServer.Packet;
 using CSharpGameServer.PacketBase;
-using MySqlX.XDevAPI;
 
 
 namespace CSharpGameServer.Core
@@ -57,9 +56,9 @@ namespace CSharpGameServer.Core
             return Interlocked.Increment(ref AtomicSessionId);
         }
 
-        protected virtual Client MakeClient(Socket socket)
+        protected virtual Client MakeClient(Socket socket, ulong sessionId)
         {
-            return new Client(this, socket, MakeSessionId());
+            return new Client(this, socket, sessionId);
         }
 
         public void Run()
@@ -123,7 +122,7 @@ namespace CSharpGameServer.Core
             }
 
             var newSessionId = MakeSessionId();
-            var newClient = MakeClient(clientSocket);
+            var newClient = MakeClient(clientSocket, newSessionId);
 
             ClientManager.Instance.InsertSessionIdToClient(newSessionId, newClient);
             newClient.OnConnected();
@@ -150,7 +149,10 @@ namespace CSharpGameServer.Core
             receiveEventArgs.Completed += ReceiveCompleted;
             receiveEventArgs.UserToken = client;
 
-            client.Socket.ReceiveAsync(receiveEventArgs);
+            if (!client.Socket.ReceiveAsync(receiveEventArgs))
+            {
+                ReceiveCompleted(client.Socket, receiveEventArgs);
+            }
         }
 
         private void ReceiveCompleted(object? sender, SocketAsyncEventArgs receiveEventArgs)
@@ -252,7 +254,7 @@ namespace CSharpGameServer.Core
 
         public void SendPacket(Client client, ReplyPacket packet)
         {
-            SendStream(client, ReplyPacketToStream(packet));
+            SendStream(client, packet.ToBytes());
         }
 
         private static void SendCompleted(object? sender, SocketAsyncEventArgs sendEventArgs)
@@ -265,26 +267,17 @@ namespace CSharpGameServer.Core
             client.OnSend();
         }
 
-        private static byte[] ReplyPacketToStream(ReplyPacket packet)
-        {
-            var packetSize = Marshal.SizeOf(packet);
-            var stream = new byte[packetSize];
-            var pointer = Marshal.AllocHGlobal(packetSize);
-            Marshal.StructureToPtr(packet, pointer, false);
-            Marshal.Copy(pointer, stream, 0, packetSize);
-            Marshal.FreeHGlobal(pointer);
-
-            return stream;
-        }
-
         private static void SendStream(Client client, byte[] inData)
         {
             var sendEventArgs = new SocketAsyncEventArgs();
             sendEventArgs.SetBuffer(inData, 0, inData.Length);
-            sendEventArgs.Completed += SendCompleted;
             sendEventArgs.UserToken = client;
+            sendEventArgs.Completed += SendCompleted;
 
-            client.Socket.SendAsync(sendEventArgs);
+            if (!client.Socket.SendAsync(sendEventArgs))
+            {
+                SendCompleted(client.Socket, sendEventArgs);
+            }
         }
 
         public void CloseClient(ulong closedClientSessionId)

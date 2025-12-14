@@ -1,0 +1,17 @@
+[
+  {
+    "Name": "Run",
+    "Projects": [
+      {
+        "Path": "CSharpGameServer\\CSharpGameServer.csproj",
+        "Action": "Start",
+        "DebugTarget": "CSharpGameServer"
+      },
+      {
+        "Path": "TestClient\\TestClient.csproj",
+        "Action": "Start",
+        "DebugTarget": "TestClient"
+      }
+    ]
+  }
+]

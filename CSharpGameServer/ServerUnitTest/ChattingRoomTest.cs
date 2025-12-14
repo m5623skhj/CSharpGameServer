@@ -1,5 +1,6 @@
 ﻿using CSharpGameServer.ChattingRoom;
 using CSharpGameServer.Packet;
+using CSharpGameServer.etc;
 
 namespace ServerUnitTest
 {
@@ -10,6 +11,21 @@ namespace ServerUnitTest
             ChattingRoomManager.Instance.ClearChattingRooms();
         }
 
+        private static CreateRoomPacket CreatePacket(string roomName)
+        {
+            CreateRoomPacket packet = new();
+
+            unsafe
+            {
+                fixed (byte* pName = packet.Data.RoomName)
+                {
+                    FixedStringUtil.Write(roomName, pName, 20);
+                }
+            }
+
+            return packet;
+        }
+
         public static IEnumerable<object[]> GetAddChattingRoomTestData
         {
             get
@@ -18,13 +34,7 @@ namespace ServerUnitTest
                 [
                     0UL,
                     "TestUser",
-                    new CreateRoomPacket
-                    {
-                        Data = new CreateRoom
-                        {
-                            RoomName = "TestRoomName"
-                        }
-                    }
+                    CreatePacket("TestRoomName")
                 ];
             }
         }
@@ -37,39 +47,21 @@ namespace ServerUnitTest
                 [
                     0UL,
                     "TestUser",
-                    new CreateRoomPacket
-                    {
-                        Data = new CreateRoom
-                        {
-                            RoomName = string.Empty
-                        }
-                    }
+                    CreatePacket(string.Empty)
                 ];
 
                 yield return
                 [
                     0UL,
                     "TestUser",
-                    new CreateRoomPacket
-                    {
-                        Data = new CreateRoom
-                        {
-                            RoomName = "ThisRoomNameIsTooLongSoItsInvalid"
-                        }
-                    }
+                    CreatePacket("ThisRoomNameIsTooLongSoItsInvalid")
                 ];
 
                 yield return
                 [
                     0UL,
                     "TestUser",
-                    new CreateRoomPacket
-                    {
-                        Data = new CreateRoom
-                        {
-                            RoomName = "        "
-                        }
-                    }
+                    CreatePacket("        ")
                 ];
             }
         }
@@ -78,26 +70,53 @@ namespace ServerUnitTest
         [MemberData(nameof(GetAddChattingRoomTestData))]
         public void AddChattingRoom_Test(ulong id, string name, CreateRoomPacket packet)
         {
-            ChattingRoomManager.Instance.AddChattingRoom(id, name, packet);
-            Assert.True(ChattingRoomManager.Instance.ExistsChattingRoom(packet.Data.RoomName));
+            string roomName;
+            unsafe
+            {
+                fixed (byte* pName = packet.Data.RoomName)
+                {
+                    roomName = FixedStringUtil.Read(pName, 20);
+                }
+            }
+
+            ChattingRoomManager.Instance.AddChattingRoom(id, name, roomName);
+            Assert.True(ChattingRoomManager.Instance.ExistsChattingRoom(roomName));
         }
 
         [Theory]
         [MemberData(nameof(GetAddChattingRoomInvalidTestData))]
         public void AddChattingRoom_Invalid_Test(ulong id, string name, CreateRoomPacket packet)
         {
-            ChattingRoomManager.Instance.AddChattingRoom(id, name, packet);
-            Assert.False(ChattingRoomManager.Instance.ExistsChattingRoom(packet.Data.RoomName));
+            string roomName;
+            unsafe
+            {
+                fixed (byte* pName = packet.Data.RoomName)
+                {
+                    roomName = FixedStringUtil.Read(pName, 20);
+                }
+            }
+
+            ChattingRoomManager.Instance.AddChattingRoom(id, name, roomName);
+            Assert.False(ChattingRoomManager.Instance.ExistsChattingRoom(roomName));
         }
 
         [Theory]
         [MemberData(nameof(GetAddChattingRoomTestData))]
         public void RemoveChattingRoom_Test(ulong id, string name, CreateRoomPacket packet)
         {
-            ChattingRoomManager.Instance.AddChattingRoom(id, name, packet);
-            Assert.True(ChattingRoomManager.Instance.ExistsChattingRoom(packet.Data.RoomName));
-            ChattingRoomManager.Instance.RemoveChattingRoom(packet.Data.RoomName);
-            Assert.False(ChattingRoomManager.Instance.ExistsChattingRoom(packet.Data.RoomName));
+            string roomName;
+            unsafe
+            {
+                fixed (byte* pName = packet.Data.RoomName)
+                {
+                    roomName = FixedStringUtil.Read(pName, 20);
+                }
+            }
+
+            ChattingRoomManager.Instance.AddChattingRoom(id, name, roomName);
+            Assert.True(ChattingRoomManager.Instance.ExistsChattingRoom(roomName));
+            ChattingRoomManager.Instance.RemoveChattingRoom(roomName);
+            Assert.False(ChattingRoomManager.Instance.ExistsChattingRoom(roomName));
         }
     }
 }

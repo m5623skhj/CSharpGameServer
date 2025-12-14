@@ -1,4 +1,5 @@
-﻿using CSharpGameServer.Packet;
+﻿using CSharpGameServer.etc;
+using CSharpGameServer.Packet;
 using CSharpGameServer.PacketBase;
 using CSharpGameServer.PC;
 
@@ -27,13 +28,15 @@ namespace CSharpGameServer.ChattingRoom
 
         public void SendMessage(string message)
         {
-            ChatMessagePacket packet = new()
+            ChatMessagePacket packet = new();
+
+            unsafe
             {
-                Data = new ChatMessage()
+                fixed (byte* pMessage = packet.Data.Message)
                 {
-                    Message = message
+                    FixedStringUtil.Write(message, pMessage, 30);
                 }
-            };
+            }
 
             RoomBroadcast(packet);
         }

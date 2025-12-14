@@ -66,45 +66,83 @@ def GenerateProtocolOverride(values, namespace, isServer=True):
         fields = value.get("Fields", [])
         packetName = value['PacketName']
         
-        if fields:
-            generateCode += "    [StructLayout(LayoutKind.Sequential, Pack = 1)]\n"
-            generateCode += f"    public struct {packetName}\n"
-            generateCode += "    {\n"
+        generateCode += "    [StructLayout(LayoutKind.Sequential, Pack = 1)]\n"
+        generateCode += f"    public struct {packetName}Data\n"
+        generateCode += "    {\n"
+        generateCode += "        public int PacketType;\n"
+        generateCode += "        public ushort PacketSize;\n"
+        
+        for field in fields:
+            fieldName = field["Name"]
+            fieldType = field["Type"]
+            arraySize = field.get("ArraySize")
             
-            for field in fields:
-                fieldName = field["Name"]
-                fieldType = field["Type"]
-                generateCode += f"        public {fieldType} {fieldName} {{ get; set; }}\n"
-            
-            generateCode += "    }\n"
+            if arraySize:
+                generateCode += f"        public unsafe fixed {fieldType} {fieldName}[{arraySize}];\n"
+            else:
+                generateCode += f"        public {fieldType} {fieldName};\n"
+        
+        generateCode += "    }\n\n"
         
         if isServer:
             generateCode += f"    public class {packetName}Packet : {packetType}\n"
             generateCode += "    {\n"
-            
-            if fields:
-                generateCode += f"        public {packetName} Data {{ get; set; }}\n"
+            generateCode += f"        public {packetName}Data Data;\n\n"
             
             generateCode += "        public override void SetPacketType()\n"
             generateCode += "        {\n"
             generateCode += f"            Type = PacketType.{packetName};\n"
-            generateCode += "        }\n"
+            generateCode += "        }\n\n"
 
             if packetType == 'RequestPacket':
                 generateCode += "        protected override Action<Client, RequestPacket> GetHandler()\n"
                 generateCode += "        {\n"
                 generateCode += f"            return PacketHandlerManager.Handle{packetName};\n"
-                generateCode += "        }\n"
+                generateCode += "        }\n\n"
 
-            generateCode += "    }\n\n"
-        else:
-            generateCode += f"    public struct {packetName}Packet\n"
-            generateCode += "    {\n"
-            generateCode += "        public PacketHeader Header;\n"
-
-            for field in fields:
-                generateCode += f"        public {field['Type']} {field['Name']};\n"
-
+            generateCode += "        public override void LoadFromBytes(byte[] buffer, int offset, ushort length)\n"
+            generateCode += "        {\n"
+            generateCode += f"            var size = Marshal.SizeOf<{packetName}Data>();\n"
+            generateCode += "            if (length < size)\n"
+            generateCode += "            {\n"
+            generateCode += f"                Logger.LoggerManager.Instance.WriteLogError(\"{packetName} packet length {{length}} < struct size {{size}}\", length, size);\n"
+            generateCode += "                return;\n"
+            generateCode += "            }\n\n"
+            generateCode += "            if (offset + size > buffer.Length)\n"
+            generateCode += "            {\n"
+            generateCode += f"                Logger.LoggerManager.Instance.WriteLogError(\"{packetName} buffer overflow: offset={{offset}}, size={{size}}, bufferLength={{bufferLength}}\", offset, size, buffer.Length);\n"
+            generateCode += "                return;\n"
+            generateCode += "            }\n\n"
+            generateCode += "            var ptr = Marshal.AllocHGlobal(size);\n"
+            generateCode += "            try\n"
+            generateCode += "            {\n"
+            generateCode += "                Marshal.Copy(buffer, offset, ptr, size);\n"
+            generateCode += f"                Data = Marshal.PtrToStructure<{packetName}Data>(ptr);\n"
+            generateCode += "            }\n"
+            generateCode += "            finally\n"
+            generateCode += "            {\n"
+            generateCode += "                Marshal.FreeHGlobal(ptr);\n"
+            generateCode += "            }\n"
+            generateCode += "        }\n"
+            
+            generateCode += "\n        public override byte[] ToBytes()\n"
+            generateCode += "        {\n"
+            generateCode += f"            var size = Marshal.SizeOf<{packetName}Data>();\n"
+            generateCode += f"            Data.PacketType = (int)PacketType.{packetName};\n"
+            generateCode += "            Data.PacketSize = (ushort)size;\n\n"
+            generateCode += "            var buffer = new byte[size];\n"
+            generateCode += "            var ptr = Marshal.AllocHGlobal(size);\n"
+            generateCode += "            try\n"
+            generateCode += "            {\n"
+            generateCode += "                Marshal.StructureToPtr(Data, ptr, false);\n"
+            generateCode += "                Marshal.Copy(ptr, buffer, 0, size);\n"
+            generateCode += "            }\n"
+            generateCode += "            finally\n"
+            generateCode += "            {\n"
+            generateCode += "                Marshal.FreeHGlobal(ptr);\n"
+            generateCode += "            }\n"
+            generateCode += "            return buffer;\n"
+            generateCode += "        }\n"
             generateCode += "    }\n\n"
 
     generateCode += "}"
@@ -185,8 +223,17 @@ def GenerateClientProtocol(values, namespace):
         code += f"    public struct {packetName}Packet\n"
         code += "    {\n"
         code += "        public PacketHeader Header;\n"
+        
         for field in fields:
-            code += f"        public {field['Type']} {field['Name']};\n"
+            fieldName = field["Name"]
+            fieldType = field["Type"]
+            arraySize = field.get("ArraySize")
+            
+            if arraySize:
+                code += f"        public unsafe fixed {fieldType} {fieldName}[{arraySize}];\n"
+            else:
+                code += f"        public {fieldType} {fieldName};\n"
+        
         code += "    }\n\n"
     
     code += "}"

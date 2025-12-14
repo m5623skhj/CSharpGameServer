@@ -2,6 +2,7 @@
 using System.Runtime.InteropServices;
 using CSharpGameServer;
 using CSharpGameServer.Core;
+using CSharpGameServer.etc;
 
 namespace TestClient.Client
 {
@@ -9,9 +10,10 @@ namespace TestClient.Client
     {
         private TcpClient? client;
         private NetworkStream? stream;
-        private bool isConnected;
+        public bool isConnected { get; private set; }
         private Thread? recvThread;
         private bool isRunning;
+        public bool isRoomJoined { get; private set; }
 
         private const int HeaderSize = 6;
         private readonly StreamRingBuffer ringBuffer = new();
@@ -60,11 +62,6 @@ namespace TestClient.Client
             {
                 try
                 {
-                    if (!stream.DataAvailable)
-                    {
-                        continue;
-                    }
-
                     var bytesRecv = stream.Read(buffer, 0, buffer.Length);
                     if (bytesRecv <= 0)
                     {
@@ -72,7 +69,7 @@ namespace TestClient.Client
                         break;
                     }
 
-                    if (ringBuffer.PushData(buffer))
+                    if (ringBuffer.PushData(buffer, (uint)bytesRecv))
                     {
                         ProcessPackets();
                         continue;
@@ -100,15 +97,15 @@ namespace TestClient.Client
                     return;
                 }
 
-                var packetType = BitConverter.ToInt16(availableData, 0);
-                var packetLength = BitConverter.ToInt32(availableData, 2);
+                var packetType = BitConverter.ToInt32(availableData, 0);
+                var packetLength = BitConverter.ToInt16(availableData, 4);
 
                 if (packetLength > ringBuffer.GetUseSize())
                 {
                     return;
                 }
 
-                var data = ringBuffer.PopData((uint)packetLength + HeaderSize);
+                var data = ringBuffer.PopData((uint)packetLength);
                 if (data != null)
                 {
                     ProcessReceivedData(packetType, data);
@@ -129,67 +126,89 @@ namespace TestClient.Client
                 return;
             }
 
-            Send(CreatePacket(PacketType.Ping, SerializePacket(new PingPacket())));
+            Send(CreatePacket(PacketType.Ping, new PingPacket()));
         }
 
         public void SetMyName(string name)
         {
-            Send(CreatePacket(PacketType.SetMyName, SerializePacket(new SetMyNamePacket
+            SetMyNamePacket packet = new();
+            unsafe
             {
-                Name = name
-            })));
+                var pName = packet.Name;
+                FixedStringUtil.Write(name, pName, 12);
+            }
+
+            Send(CreatePacket(PacketType.SetMyName, packet));
         }
 
         public void CreateRoom(string roomName)
         {
-            Send(CreatePacket(PacketType.CreateRoom, SerializePacket(new CreateRoomPacket
+            var packet = new CreateRoomPacket();
+            unsafe
             {
-                RoomName = roomName
-            })));
+                var roomNamePointer = packet.RoomName;
+                {
+                    FixedStringUtil.Write(roomName, roomNamePointer, 20);
+                }
+            }
+
+            Send(CreatePacket(PacketType.CreateRoom, packet));
         }
 
         public void JoinRoom(string roomName)
         {
-            Send(CreatePacket(PacketType.JoinRoom, SerializePacket(new JoinRoomPacket
+            var packet = new JoinRoomPacket();
+            unsafe
             {
-                RoomName = roomName
-            })));
+                var roomNamePointer = packet.RoomName;
+                {
+                    FixedStringUtil.Write(roomName, roomNamePointer, 20);
+                }
+            }
+
+            Send(CreatePacket(PacketType.JoinRoom, packet));
         }
 
         public void LeaveRoom()
         {
-            Send(CreatePacket(PacketType.LeaveRoom, SerializePacket(new LeaveRoomPacket())));
+            Send(CreatePacket(PacketType.LeaveRoom, new LeaveRoomPacket()));
         }
 
         public void SendChatMessage(string message)
         {
-            Send(CreatePacket(PacketType.SendChat, SerializePacket(new SendChatPacket
+            var packet = new SendChatPacket();
+            unsafe
             {
-                Message = message
-            })));
+                var messagePointer = packet.Message;
+                {
+                    FixedStringUtil.Write(message, messagePointer, 20);
+                }
+            }
+
+            Send(CreatePacket(PacketType.SendChat, packet));
         }
 
-        private static byte[] SerializePacket<T>(T packet) where T : struct
+        public void SendRequestRoomList()
+        {
+            var packet = new RoomListRequestPacket();
+            Send(CreatePacket(PacketType.RoomListRequest, packet));
+        }
+
+        private static byte[] CreatePacket<T>(PacketType packetType, T packet) where T : struct
         {
             var size = Marshal.SizeOf(packet);
             var buffer = new byte[size];
             var ptr = Marshal.AllocHGlobal(size);
-            Marshal.StructureToPtr(packet, ptr, true);
+            Marshal.StructureToPtr(packet, ptr, false);
             Marshal.Copy(ptr, buffer, 0, size);
             Marshal.FreeHGlobal(ptr);
+
+            var packetTypeBytes = BitConverter.GetBytes((int)packetType);
+            var packetLengthBytes = BitConverter.GetBytes((short)(buffer.Length));
+            Buffer.BlockCopy(packetTypeBytes, 0, buffer, 0, packetTypeBytes.Length);
+            Buffer.BlockCopy(packetLengthBytes, 0, buffer, packetTypeBytes.Length, packetLengthBytes.Length);
+
             return buffer;
-        }
-
-        private static byte[] CreatePacket(PacketType packetType, byte[] data)
-        {
-            var packetTypeBytes = BitConverter.GetBytes((short)packetType);
-            var packetLengthBytes = BitConverter.GetBytes(data.Length + HeaderSize);
-            var packet = new byte[HeaderSize + data.Length];
-            Buffer.BlockCopy(packetTypeBytes, 0, packet, 0, packetTypeBytes.Length);
-            Buffer.BlockCopy(packetLengthBytes, 0, packet, packetTypeBytes.Length, packetLengthBytes.Length);
-            Buffer.BlockCopy(data, 0, packet, HeaderSize, data.Length);
-
-            return packet;
         }
 
         private static T DeserializePacket<T>(byte[] data) where T : struct

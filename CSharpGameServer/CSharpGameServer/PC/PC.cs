@@ -11,12 +11,14 @@ namespace CSharpGameServer.PC
 
         public override void OnConnected()
         {
+            PcManager.Instance.InsertPc(this, ClientSessionId);
             ChattingRoomManager.Instance.OnEnterUser(ClientSessionId);
         }
 
         public override void OnClosed() 
         {
             ChattingRoomManager.Instance.OnLeaveUser(ClientSessionId);
+            PcManager.Instance.RemovePc(ClientSessionId);
         }
 
         public override void OnSend()

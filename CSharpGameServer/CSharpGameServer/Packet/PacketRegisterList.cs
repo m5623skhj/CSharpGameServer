@@ -14,6 +14,7 @@ namespace CSharpGameServer.Packet
             result &= RegisterPacket(new LeaveRoomPacket());
             result &= RegisterPacket(new SendChatPacket());
             result &= RegisterPacket(new SetMyNamePacket());
+            result &= RegisterPacket(new RoomListRequestPacket());
 
             return result;
         }

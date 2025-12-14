@@ -55,6 +55,16 @@ namespace CSharpGameServer.Packet
             client.HandleSendChat(sendchatpacket);
         }
 
+        public static void HandleRoomListRequest(Client client, RequestPacket packet)
+        {
+            if (packet is not RoomListRequestPacket roomlistrequestpacket)
+            {
+                return;
+            }
+
+            client.HandleRoomListRequest(roomlistrequestpacket);
+        }
+
         public static void HandleSetMyName(Client client, RequestPacket packet)
         {
             if (packet is not SetMyNamePacket setmynamepacket)

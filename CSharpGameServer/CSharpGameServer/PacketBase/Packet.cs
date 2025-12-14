@@ -1,5 +1,7 @@
 ﻿using CSharpGameServer.Core;
 using CSharpGameServer.Packet;
+using System.Runtime.InteropServices;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace CSharpGameServer.PacketBase
 {
@@ -12,6 +14,12 @@ namespace CSharpGameServer.PacketBase
 
         public PacketType Type = PacketType.InvalidPacketType;
         public abstract void SetPacketType();
+
+        public virtual void LoadFromBytes(byte[] buffer, int offset, ushort length)
+        {
+        }
+
+        public abstract byte[] ToBytes();
     }
 
     public abstract class RequestPacket : PacketBase
@@ -20,7 +28,7 @@ namespace CSharpGameServer.PacketBase
 
         public bool RegisterPacket()
         {
-            return (PacketFactory.Instance.RegisterPacket(Type, GetType()) || 
+            return (PacketFactory.Instance.RegisterPacket(Type, GetType()) && 
                     PacketHandlerManager.Instance.RegisterPacketHandler(Type, GetHandler()));
         }
     }

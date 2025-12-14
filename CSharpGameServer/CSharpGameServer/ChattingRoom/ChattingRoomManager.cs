@@ -1,4 +1,5 @@
-﻿using CSharpGameServer.Packet;
+﻿using CSharpGameServer.etc;
+using CSharpGameServer.Packet;
 using CSharpGameServer.PacketBase;
 using CSharpGameServer.PC;
 
@@ -66,37 +67,42 @@ namespace CSharpGameServer.ChattingRoom
                 return;
             }
 
-            var packet = new RoomListUpdatePacket()
-            {
-                Data = new RoomListUpdate()
-                {
-                    Rooms = GetAllChattingRooms()
-                }
-            };
-            SendToAllLobbyUsers(packet);
+            // TODO: Notify all lobby users about room list update
+            //var rooms = GetAllChattingRooms();
+            //var packet = new RoomListUpdatePacket();
+            //unsafe
+            //{
+            //    fixed (byte* roomsPointer = packet.Data.Rooms)
+            //    {
+            //        FixedStringUtil.Write();
+            //    }
+            //}
+
+            //SendToAllLobbyUsers(packet);
         }
 
-        public void AddChattingRoom(ulong id, string name, CreateRoomPacket packet)
+        public ErrorCode AddChattingRoom(ulong id, string name, string roomName)
         {
-            if (string.IsNullOrWhiteSpace(packet.Data.RoomName) || packet.Data.RoomName.Length > RoomNameLengthMax)
+            if (string.IsNullOrWhiteSpace(roomName) || roomName.Length > RoomNameLengthMax)
             {
-                return;
+                return ErrorCode.InvalidRoomName;
             }
 
             lock (memberRoomMappingLock)
             {
-                if (memberRoomMapping.ContainsKey(id))
+                if (!memberRoomMapping.TryAdd(id, roomName))
                 {
-                    return;
+                    return ErrorCode.AlreadyInRoom;
                 }
-                memberRoomMapping.Add(id, packet.Data.RoomName);
 
                 lock (chattingRoomsLock)
                 {
-                    chattingRooms.Add(packet.Data.RoomName, new ChattingRoom());
-                    chattingRooms[packet.Data.RoomName].AddMember(id, name);
+                    chattingRooms.Add(roomName, new ChattingRoom());
+                    chattingRooms[roomName].AddMember(id, name);
                 }
             }
+
+            return ErrorCode.Success;
         }
 
         public void RemoveChattingRoom(string roomName)
@@ -139,20 +145,20 @@ namespace CSharpGameServer.ChattingRoom
             }
         }
 
-        public void JoinChattingRoom(ulong id, string name)
+        public ErrorCode JoinChattingRoom(ulong id, string name)
         {
             lock (memberRoomMappingLock)
             {
                 if (memberRoomMapping.ContainsKey(id))
                 {
-                    return;
+                    return ErrorCode.AlreadyInRoom;
                 }
 
                 lock (chattingRoomsLock)
                 {
                     if (!chattingRooms.TryGetValue(name, out var room))
                     {
-                        return;
+                        return ErrorCode.InvalidChatRoom;
                     }
 
                     if (room.AddMember(id, name))
@@ -166,6 +172,8 @@ namespace CSharpGameServer.ChattingRoom
             {
                 lobbyUsers.Remove(id);
             }
+
+            return ErrorCode.Success;
         }
 
         public void LeaveChattingRoom(ulong id)
@@ -197,16 +205,16 @@ namespace CSharpGameServer.ChattingRoom
                 lobbyUsers.Add(id);
             }
 
-            PcManager.Instance.FindPc(id)?.Send(new RoomListUpdatePacket()
-            {
-                Data = new RoomListUpdate()
-                {
-                    Rooms = GetAllChattingRooms()
-                }
-            });
+            //PcManager.Instance.FindPc(id)?.Send(new RoomListUpdatePacket()
+            //{
+            //    Data = new RoomListUpdateData()
+            //    {
+            //        Rooms = GetAllChattingRooms()
+            //    }
+            //});
         }
 
-        public void SendChat(ulong id, SendChatPacket packet)
+        public void SendChat(ulong id, string message)
         {
             lock (memberRoomMappingLock)
             {
@@ -219,7 +227,7 @@ namespace CSharpGameServer.ChattingRoom
                 {
                     if (roomName != null && chattingRooms.TryGetValue(roomName, out var room))
                     {
-                        room.SendMessage(packet.Data.Message);
+                        room.SendMessage(message);
                     }
                 }
             }

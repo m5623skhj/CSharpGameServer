@@ -139,7 +139,7 @@
             var data = new byte[dataSize];
             if (head < tail)
             {
-                Array.Copy(buffer, head, data, 0, head + dataSize);
+                Array.Copy(buffer, head, data, 0, dataSize);
             }
             else
             {

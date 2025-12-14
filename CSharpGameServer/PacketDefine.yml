@@ -9,7 +9,8 @@ Packet:
     PacketName: CreateRoom
     Fields:
       - Name: RoomName
-        Type: string
+        Type: byte
+        ArraySize: 20
   - Type: ReplyPacket
     PacketName: RoomCreated
     Fields:
@@ -19,7 +20,8 @@ Packet:
     PacketName: JoinRoom
     Fields:
       - Name: RoomName
-        Type: string
+        Type: byte
+        ArraySize: 20
   - Type: ReplyPacket
     PacketName: RoomJoined
     Fields:
@@ -36,22 +38,28 @@ Packet:
     PacketName: SendChat
     Fields:
       - Name: Message
-        Type: string
+        Type: byte
+        ArraySize: 30
   - Type: ReplyPacket
     PacketName: ChatMessage
     Fields:
       - Name: Message
-        Type: string
+        Type: byte
+        ArraySize: 30
+  - Type: RequestPacket
+    PacketName: RoomListRequest
   - Type: ReplyPacket
     PacketName: RoomListUpdate
     Fields:
       - Name: Rooms
-        Type: string[]
+        Type: byte
+        ArraySize: 200
   - Type: RequestPacket
     PacketName: SetMyName
     Fields:
       - Name: Name
-        Type: string
+        Type: byte
+        ArraySize: 12
   - Type: ReplyPacket
     PacketName: SetMyNameResult
     Fields:

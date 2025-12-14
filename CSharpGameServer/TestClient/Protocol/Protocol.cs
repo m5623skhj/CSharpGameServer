@@ -25,7 +25,7 @@ namespace CSharpGameServer
     public struct CreateRoomPacket
     {
         public PacketHeader Header;
-        public string RoomName;
+        public unsafe fixed byte RoomName[20];
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
@@ -39,7 +39,7 @@ namespace CSharpGameServer
     public struct JoinRoomPacket
     {
         public PacketHeader Header;
-        public string RoomName;
+        public unsafe fixed byte RoomName[20];
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
@@ -66,28 +66,34 @@ namespace CSharpGameServer
     public struct SendChatPacket
     {
         public PacketHeader Header;
-        public string Message;
+        public unsafe fixed byte Message[30];
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
     public struct ChatMessagePacket
     {
         public PacketHeader Header;
-        public string Message;
+        public unsafe fixed byte Message[30];
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public struct RoomListRequestPacket
+    {
+        public PacketHeader Header;
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
     public struct RoomListUpdatePacket
     {
         public PacketHeader Header;
-        public string[] Rooms;
+        public unsafe fixed byte Rooms[200];
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
     public struct SetMyNamePacket
     {
         public PacketHeader Header;
-        public string Name;
+        public unsafe fixed byte Name[12];
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]

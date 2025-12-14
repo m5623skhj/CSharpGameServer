@@ -28,9 +28,8 @@
             buffer = new byte[inBufferSize];
         }
 
-        public bool PushData(byte[] inputData)
+        public bool PushData(byte[] inputData, uint inputSize)
         {
-            var inputSize = (uint)inputData.Length;
             if (inputSize > GetFreeSize() || inputSize == 0)
             {
                 return false;
@@ -139,7 +138,7 @@
             var data = new byte[dataSize];
             if (head < tail)
             {
-                Array.Copy(buffer, head, data, 0, head + dataSize);
+                Array.Copy(buffer, head, data, 0, dataSize);
             }
             else
             {

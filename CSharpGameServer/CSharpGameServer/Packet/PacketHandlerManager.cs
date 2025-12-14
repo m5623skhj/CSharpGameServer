@@ -1,4 +1,4 @@
-﻿using System.Diagnostics.CodeAnalysis;
+using System.Diagnostics.CodeAnalysis;
 using CSharpGameServer.Core;
 using CSharpGameServer.Logger;
 using CSharpGameServer.PacketBase;
@@ -41,14 +41,12 @@ namespace CSharpGameServer.Packet
 
             LoggerManager.Instance.WriteLogError("Duplicated packet type {packetType} / {handler.Method.Name}", packetType, handler.Method.Name);
             return false;
-
         }
 
         public void CallHandler(Client client, RequestPacket packet)
         {
             if (packetHandlerDict.TryGetValue(packet.Type, out var action) == false)
             {
-                // add client info
                 LoggerManager.Instance.WriteLogError("Invalid packet type {client.clientSessionId} / {packet.type}", client.ClientSessionId, packet.Type);
                 return;
             }
