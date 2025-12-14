@@ -37,7 +37,6 @@ namespace CSharpGameServer.ChattingRoom
                 }
             }
 
-            var roomRemoved = false;
             lock (memberRoomMappingLock)
             {
                 if (!memberRoomMapping.TryGetValue(id, out var roomName))
@@ -57,28 +56,9 @@ namespace CSharpGameServer.ChattingRoom
                     if (room.IsEmptyRoom())
                     {
                         chattingRooms.Remove(roomName);
-                        roomRemoved = true;
                     }
                 }
             }
-
-            if (!roomRemoved)
-            {
-                return;
-            }
-
-            // TODO: Notify all lobby users about room list update
-            //var rooms = GetAllChattingRooms();
-            //var packet = new RoomListUpdatePacket();
-            //unsafe
-            //{
-            //    fixed (byte* roomsPointer = packet.Data.Rooms)
-            //    {
-            //        FixedStringUtil.Write();
-            //    }
-            //}
-
-            //SendToAllLobbyUsers(packet);
         }
 
         public ErrorCode AddChattingRoom(ulong id, string name, string roomName)
