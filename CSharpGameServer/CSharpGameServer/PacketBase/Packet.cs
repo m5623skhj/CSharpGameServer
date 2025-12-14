@@ -5,13 +5,19 @@ namespace CSharpGameServer.PacketBase
 {
     public abstract class PacketBase
     {
-        protected PacketBase() 
+        protected PacketBase()
         {
             SetPacketType();
         }
 
         public PacketType Type = PacketType.InvalidPacketType;
         public abstract void SetPacketType();
+
+        public virtual void LoadFromBytes(byte[] buffer, int offset, ushort length)
+        {
+        }
+
+        public abstract byte[] ToBytes();
     }
 
     public abstract class RequestPacket : PacketBase
@@ -20,8 +26,8 @@ namespace CSharpGameServer.PacketBase
 
         public bool RegisterPacket()
         {
-            return PacketFactory.Instance != null && (PacketFactory.Instance.RegisterPacket(Type, GetType()) || 
-                                                      PacketHandlerManager.Instance.RegisterPacketHandler(Type, GetHandler()));
+            return (PacketFactory.Instance.RegisterPacket(Type, GetType()) &&
+                    PacketHandlerManager.Instance.RegisterPacketHandler(Type, GetHandler()));
         }
     }
 

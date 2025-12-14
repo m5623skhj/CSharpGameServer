@@ -4,6 +4,6 @@ namespace CSharpGameServer.Core
 {
     public partial class Client
     {
-        public virtual void HandlePing(Ping ping) { }
+        public virtual void HandlePing(PingPacket pingpacket) { }
     }
 }

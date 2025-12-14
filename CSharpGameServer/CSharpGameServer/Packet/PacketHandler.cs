@@ -7,12 +7,12 @@ namespace CSharpGameServer.Packet
     {
         public static void HandlePing(Client client, RequestPacket packet)
         {
-            if (packet is not Ping ping)
+            if (packet is not PingPacket pingpacket)
             {
                 return;
             }
 
-            client.HandlePing(ping);
+            client.HandlePing(pingpacket);
         }
 
     }

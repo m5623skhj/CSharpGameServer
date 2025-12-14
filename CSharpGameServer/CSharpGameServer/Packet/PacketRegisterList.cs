@@ -8,7 +8,7 @@ namespace CSharpGameServer.Packet
         {
             var result = true;
 
-            result &= RegisterPacket(new Ping());
+            result &= RegisterPacket(new PingPacket());
 
             return result;
         }

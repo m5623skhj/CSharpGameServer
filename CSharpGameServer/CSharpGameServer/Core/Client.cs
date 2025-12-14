@@ -9,16 +9,20 @@ namespace CSharpGameServer.Core
         private const ulong InvalidSessionId = ulong.MaxValue;
 
         public Socket Socket { get; } = inSocket;
-        public ulong ClientSessionId = inClientSessionId;
+        public ulong ClientSessionId { get; private set; } = inClientSessionId;
         private readonly StreamRingBuffer streamRingBuffer = new();
         public DateTime LastReceivedTime { get; private set; } = DateTime.Now;
 
-        public virtual void OnClosed() 
+        public virtual void OnConnected()
+        {
+        }
+
+        public virtual void OnClosed()
         {
             ClientSessionId = InvalidSessionId;
         }
 
-        public virtual void OnSend() {}
+        public virtual void OnSend() { }
 
         public void CloseSession()
         {

@@ -10,13 +10,13 @@ namespace CSharpGameServer
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    public struct Ping
+    public struct PingPacket
     {
         public PacketHeader Header;
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    public struct Pong
+    public struct PongPacket
     {
         public PacketHeader Header;
     }
