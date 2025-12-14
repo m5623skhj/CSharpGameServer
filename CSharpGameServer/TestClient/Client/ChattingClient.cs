@@ -140,6 +140,43 @@ namespace TestClient.Client
             Send(CreatePacket(PacketType.Ping, SerializePacket(new PingPacket())));
         }
 
+        public void SetMyName(string name)
+        {
+            Send(CreatePacket(PacketType.SetMyName, SerializePacket(new SetMyNamePacket
+            {
+                Name = name
+            })));
+        }
+
+        public void CreateRoom(string roomName)
+        {
+            Send(CreatePacket(PacketType.CreateRoom, SerializePacket(new CreateRoomPacket
+            {
+                RoomName = roomName
+            })));
+        }
+
+        public void JoinRoom(string roomName)
+        {
+            Send(CreatePacket(PacketType.JoinRoom, SerializePacket(new JoinRoomPacket
+            {
+                RoomName = roomName
+            })));
+        }
+
+        public void LeaveRoom()
+        {
+            Send(CreatePacket(PacketType.LeaveRoom, SerializePacket(new LeaveRoomPacket())));
+        }
+
+        public void SendChatMessage(string message)
+        {
+            Send(CreatePacket(PacketType.SendChat, SerializePacket(new SendChatPacket
+            {
+                Message = message
+            })));
+        }
+
         private static byte[] SerializePacket<T>(T packet) where T : struct
         {
             var size = System.Runtime.InteropServices.Marshal.SizeOf(packet);
