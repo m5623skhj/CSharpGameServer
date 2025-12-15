@@ -8,7 +8,7 @@
 
 1. 개요
 
-C#으로 간단한 게임 서버 프레임워크를 제작해보고자 시작한 프로젝트 입니다.
+C#으로 간단한 프레임워크를 제작 및 채팅 서버를 만들어 보고자 진행한 프로젝트 입니다.
 
 
 ---
@@ -25,10 +25,14 @@ C#으로 간단한 게임 서버 프레임워크를 제작해보고자 시작한
 
 위 파일을 실행하면, PacketDefine.yml 파일에 기술 되어 있는 패킷 타입들로 아래 파일들을 새로 생성합니다.
 
-* PacketType.cs
-* Protocol.cs
-* PacketHandler.cs
-* ClientPacketHandler.cs
+* Server
+  * PacketType.cs
+  * Protocol.cs
+  * PacketHandler.cs
+  * ClientPacketHandler.cs
+* Client
+  * PacketType.cs
+  * Protocol.cs
 
 위의 실행을 완료하면, yml 파일에 정의했던 PacketName으로 PCPacketHandler.cs에 아래의 형식으로 정의해야 합니다(RequestPacket만 해당).
 
@@ -59,20 +63,3 @@ public override void HandlePacketName(PacketName inParameter) { 함수 정의 ..
  
 ---
 
-3. Migrator
-
-프로그램 실행시, [마이그레이터](https://github.com/m5623skhj/DBMigrator)가 실행되며, 마이그레이션이 실패할 경우, 프로그램은 자동으로 종료하게 됩니다.
-
-4 를 참조하여 DB 설정들을 자신의 상황에 맞게 수정해야 합니다.
-
----
-
-4. config
-
-config.json에 정의된 사용자 정의 옵션들을 읽어오게 하고 싶으면, Config.cs에 있는 ConfigItem 구조체에 변수를 추가해야 합니다.
-
-단, 구조체의 변수 이름과 config.json 내의 변수 이름이 같아야 정상적으로 파싱이 됩니다.
-
-![image](https://github.com/user-attachments/assets/60ad74f1-eacb-4280-a33f-565dce58cb16) ![image](https://github.com/user-attachments/assets/0959ed2c-1fed-478b-ac53-0bb070a00ec2)
-
----
