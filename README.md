@@ -1,4 +1,4 @@
-# CSharpGameServer
+# CSharpChattingServer
 
 ## 제작 기간 : 2024.03.23 ~ 진행중
 
