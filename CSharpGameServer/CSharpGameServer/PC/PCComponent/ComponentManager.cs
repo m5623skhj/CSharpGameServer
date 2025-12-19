@@ -9,7 +9,7 @@ namespace CSharpGameServer.PC.PCComponent
 
     public class ComponentManager
     {
-        private Dictionary<ComponentType, ComponentBase> components = new();
+        private readonly Dictionary<ComponentType, ComponentBase> components = new();
 
         private void AddComponentListForInitialize()
         {

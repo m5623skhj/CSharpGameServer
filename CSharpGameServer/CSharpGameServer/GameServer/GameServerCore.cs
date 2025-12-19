@@ -26,7 +26,7 @@ namespace CSharpGameServer.GameServer
             ThreadPool.QueueUserWorkItem(StartReceive, newPc);
 
             ClientManager.Instance.InsertSessionIdToClient(newSessionId, newPc);
-            acceptEventArgs.Completed += (sender, args) =>
+            acceptEventArgs.Completed += (_, args) =>
             {
                 if (args.SocketError != SocketError.Success)
                 {

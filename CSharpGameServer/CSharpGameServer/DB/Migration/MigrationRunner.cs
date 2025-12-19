@@ -33,7 +33,7 @@ namespace CSharpGameServer.DB.Migration
             }
             catch (Exception e)
             {
-                Logger.LoggerManager.Instance.WriteLogFatal("Migration failed with {exception}", e.Message);
+                Logger.LoggerManager.WriteLogFatal("Migration failed with {exception}", e.Message);
                 return migrationResult;
             }
 

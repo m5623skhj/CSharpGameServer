@@ -55,13 +55,13 @@ namespace CSharpGameServer.Packet
         {
             if (packetType == PacketType.InvalidPacketType)
             {
-                LoggerManager.Instance.WriteLogFatal("Invalid packet type {packetType}", packetObjectType);
+                LoggerManager.WriteLogFatal("Invalid packet type {packetType}", packetObjectType);
                 return false;
             }
 
             if (!typeof(RequestPacket).IsAssignableFrom(packetObjectType))
             {
-                LoggerManager.Instance.WriteLogFatal("Invalid packet object type {packetObjectType}", packetObjectType);
+                LoggerManager.WriteLogFatal("Invalid packet object type {packetObjectType}", packetObjectType);
                 return false;
             }
             
@@ -70,7 +70,7 @@ namespace CSharpGameServer.Packet
                 return true;
             }
 
-            LoggerManager.Instance.WriteLogFatal("Duplicated packet type {packetType} / {packetObjectType}", packetType, packetObjectType);
+            LoggerManager.WriteLogFatal("Duplicated packet type {packetType} / {packetObjectType}", packetType, packetObjectType);
             return false;
         }
 
