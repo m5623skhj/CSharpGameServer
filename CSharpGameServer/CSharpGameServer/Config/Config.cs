@@ -16,6 +16,7 @@ namespace CSharpGameServer.Config
         public string DbSchemaName = "";
         public string DbUserId = "";
         public string DbUserPassword = "";
+        public string MigratorFilePath = "";
     }
 
     public class Config

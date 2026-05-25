@@ -1,33 +1,38 @@
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
-using System.IO;
 
 namespace CSharpGameServer.DB.Migration
 {
     public class MigrationRunner
     {
-        private const string MigratorFilePath = "";
-
         [field: AllowNull, MaybeNull]
         public static MigrationRunner Instance => field ??= new MigrationRunner();
 
         public bool RunMigration()
         {
-            if (string.IsNullOrWhiteSpace(MigratorFilePath))
+            var config = new Config.Config();
+            if (config.ReadConfig() == false)
+            {
+                Logger.LoggerManager.WriteLogFatal("Migration failed: config read failed");
+                return false;
+            }
+
+            var migratorFilePath = config.Conf.MigratorFilePath;
+            if (string.IsNullOrWhiteSpace(migratorFilePath))
             {
                 Logger.LoggerManager.WriteLogFatal("Migration failed: migrator file path is empty");
                 return false;
             }
 
-            if (File.Exists(MigratorFilePath) == false)
+            if (File.Exists(migratorFilePath) == false)
             {
-                Logger.LoggerManager.WriteLogFatal("Migration failed: migrator file does not exist {migratorFilePath}", MigratorFilePath);
+                Logger.LoggerManager.WriteLogFatal("Migration failed: migrator file does not exist {migratorFilePath}", migratorFilePath);
                 return false;
             }
 
             var startInfo = new ProcessStartInfo
             {
-                FileName = MigratorFilePath
+                FileName = migratorFilePath
             };
 
             try

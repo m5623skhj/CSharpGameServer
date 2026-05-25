@@ -56,10 +56,16 @@
             return connection;
         }
 
-        public void ReleaseConnection(DbConnection? connection)
+        public void ReleaseConnection(DbConnection? connection, bool isSuccess = true)
         {
             if (connection == null)
             {
+                return;
+            }
+
+            if (isSuccess == false)
+            {
+                connection.CloseConnection();
                 return;
             }
 

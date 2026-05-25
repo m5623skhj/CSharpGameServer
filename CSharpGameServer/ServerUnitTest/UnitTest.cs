@@ -1,7 +1,9 @@
 using CSharpGameServer.Core;
 using CSharpGameServer.Config;
+using CSharpGameServer.DB.SPObjects;
 using CSharpGameServer.Packet;
 using CSharpGameServer.PacketBase;
+using MySql.Data.MySqlClient;
 using System.Text.Json.Serialization;
 
 namespace ServerUnitTest
@@ -27,6 +29,24 @@ namespace ServerUnitTest
         {
             return [];
         }
+    }
+
+    internal class ParameterizedSpObject : SpBase
+    {
+        public ParameterizedSpObject()
+        {
+            Query = "SELECT * FROM tbl WHERE id = @Id AND name = @Name";
+        }
+
+        public void SetValues(int inId, string inName)
+        {
+            ClearParameters();
+            AddParameter("@Id", inId);
+            AddParameter("@Name", inName);
+        }
+
+        public override void OnCommit() { }
+        public override void OnRollback() { }
     }
 
     public class UnitTest
@@ -181,7 +201,8 @@ namespace ServerUnitTest
               "DBServerIP": "127.0.0.1",
               "DBSchemaName": "test_schema",
               "DBUserId": "test",
-              "DBUserPassword": "dbPassword"
+              "DBUserPassword": "dbPassword",
+              "MigratorFilePath": "migrator.exe"
             }
             """;
 
@@ -198,6 +219,22 @@ namespace ServerUnitTest
             Assert.Equal("test_schema", config.DbSchemaName);
             Assert.Equal("test", config.DbUserId);
             Assert.Equal("dbPassword", config.DbUserPassword);
+            Assert.Equal("migrator.exe", config.MigratorFilePath);
+        }
+
+        [Fact]
+        public void SpBase_CreateCommand_BindsNamedParameters()
+        {
+            var spObject = new ParameterizedSpObject();
+            spObject.SetValues(10, "tester");
+
+            using var connection = new MySqlConnection();
+            using var command = spObject.CreateCommand(connection);
+
+            Assert.Equal("SELECT * FROM tbl WHERE id = @Id AND name = @Name", command.CommandText);
+            Assert.Equal(2, command.Parameters.Count);
+            Assert.Equal(10, command.Parameters["@Id"].Value);
+            Assert.Equal("tester", command.Parameters["@Name"].Value);
         }
     }
 }

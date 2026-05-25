@@ -1,4 +1,4 @@
-﻿using CSharpGameServer.Logger;
+using CSharpGameServer.Logger;
 
 namespace CSharpGameServer.DB.SPObjects
 {
@@ -18,14 +18,22 @@ namespace CSharpGameServer.DB.SPObjects
             var connection = DbConnectionManager.Instance.GetConnection();
             if (connection != null)
             {
-                return connection.ExecuteBatch(batchSpObjects);
+                var isSuccess = false;
+                try
+                {
+                    isSuccess = connection.ExecuteBatch(batchSpObjects);
+                    return isSuccess;
+                }
+                finally
+                {
+                    DbConnectionManager.Instance.ReleaseConnection(connection, isSuccess);
+                }
             }
 
             LoggerManager.Instance.WriteLogError("BatchSPObject failed, connection is null",
                 string.Join(", ", batchSpObjects.Select(sp => sp.GetQueryString())));
 
             return false;
-
         }
     }
 }

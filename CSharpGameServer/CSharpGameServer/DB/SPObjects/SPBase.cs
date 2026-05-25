@@ -1,47 +1,60 @@
-﻿using CSharpGameServer.Logger;
+using CSharpGameServer.Logger;
+using MySql.Data.MySqlClient;
 using System.Data.Common;
-using System.Reflection;
 
 namespace CSharpGameServer.DB.SPObjects
 {
+    public readonly record struct QueryParameter(string Name, object Value);
+
     public abstract class SpBase
     {
         protected string? Query;
+        private readonly List<QueryParameter> parameters = [];
 
-        public bool SetParams(object paramObject)
+        protected void ClearParameters()
         {
-            var paramType = paramObject.GetType();
-            var properties = paramType.GetProperties();
-            var values = new object[properties.Length];
-
-            for (var i = 0; i < properties.Length; i++)
-            {
-                var value = properties[i].GetValue(paramObject);
-                if (value == null)
-                {
-                    return false;
-                }
-
-                values[i] = value;
-            }
-
-            return GenerateSpQuery(values);
+            parameters.Clear();
         }
 
-        public bool GenerateSpQuery(params object[] values)
+        protected void AddParameter(string name, object? value)
         {
-            if (Query == null)
+            if (value == null)
             {
-                return false;
+                throw new ArgumentNullException(nameof(value));
             }
 
-            Query = string.Format(Query, values);
-            return true;
+            parameters.Add(new QueryParameter(name, value));
         }
 
         public string? GetQueryString()
         {
             return Query;
+        }
+
+        public IReadOnlyList<QueryParameter> GetParameters()
+        {
+            return parameters;
+        }
+
+        public MySqlCommand CreateCommand(MySqlConnection connection)
+        {
+            var queryString = GetQueryString();
+            if (queryString == null)
+            {
+                throw new InvalidOperationException("Query string is null");
+            }
+
+            var command = new MySqlCommand(queryString, connection)
+            {
+                CommandType = System.Data.CommandType.Text
+            };
+
+            foreach (var parameter in parameters)
+            {
+                command.Parameters.AddWithValue(parameter.Name, parameter.Value);
+            }
+
+            return command;
         }
 
         public abstract void OnCommit();

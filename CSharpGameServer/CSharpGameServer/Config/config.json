@@ -3,5 +3,6 @@
   "DBServerIP": "127.0.0.1",
   "DBSchemaName": "test_schema",
   "DBUserId": "test",
-  "DBUserPassword": "dbPassword"
+  "DBUserPassword": "dbPassword",
+  "MigratorFilePath": ""
 }

@@ -1,4 +1,4 @@
-﻿using CSharpGameServer.DB.SPObjects;
+using CSharpGameServer.DB.SPObjects;
 using CSharpGameServer.Logger;
 using MySql.Data.MySqlClient;
 using System.Data.Common;
@@ -31,11 +31,6 @@ namespace CSharpGameServer.DB
             connection = null;
         }
 
-        public MySqlCommand MakeQueryCommand(string query)
-        {
-            return new MySqlCommand(query, connection);
-        }
-
         public bool Execute(SpBase spObject)
         {
             if (connection == null)
@@ -43,22 +38,15 @@ namespace CSharpGameServer.DB
                 return false;
             }
 
-            var query = spObject.GetQueryString();
-            if (query == null)
-            {
-                return false;
-            }
-
             try
             {
-                using var command = new MySqlCommand(query, connection);
-                command.CommandType = System.Data.CommandType.Text;
+                using var command = spObject.CreateCommand(connection);
                 command.ExecuteNonQuery();
             }
             catch (Exception ex)
             {
                 LoggerManager.Instance.WriteLogError("Query error {0} / {1}",
-                    query, ex.Message);
+                    spObject.GetQueryString() ?? "<null>", ex.Message);
 
                 spObject.OnRollback();
                 return false;
@@ -75,23 +63,16 @@ namespace CSharpGameServer.DB
                 return false;
             }
 
-            var queryString = spObject.GetQueryString();
-            if (queryString == null)
-            {
-                return false;
-            }
-
             try
             {
-                using var command = new MySqlCommand(queryString, connection);
-                command.CommandType = System.Data.CommandType.Text;
+                using var command = spObject.CreateCommand(connection);
                 using var reader = command.ExecuteReader();
                 spObject.AddResultRows(reader);
             }
             catch (Exception ex)
             {
                 LoggerManager.Instance.WriteLogError("Query error {0} / {1}",
-                    queryString, ex.Message);
+                    spObject.GetQueryString() ?? "<null>", ex.Message);
 
                 spObject.OnRollback();
                 return false;
@@ -119,6 +100,7 @@ namespace CSharpGameServer.DB
                 {
                     try
                     {
+                        batch.Transaction = transaction;
                         batch.ExecuteNonQuery();
                         transaction.Commit();
                     }
@@ -162,6 +144,7 @@ namespace CSharpGameServer.DB
                 {
                     try
                     {
+                        batch.Transaction = transaction;
                         using (var reader = batch.ExecuteReader())
                         {
                             var spListIndex = 0;
@@ -198,8 +181,9 @@ namespace CSharpGameServer.DB
 
         private static bool MakeBatchCommand(List<SpBase> batchSpObjects, DbBatch batch)
         {
-            foreach (var queryString in batchSpObjects.Select(spObject => spObject.GetQueryString()))
+            foreach (var spObject in batchSpObjects)
             {
+                var queryString = spObject.GetQueryString();
                 if (queryString == null)
                 {
                     return false;
@@ -208,6 +192,14 @@ namespace CSharpGameServer.DB
                 var batchCommand = batch.CreateBatchCommand();
                 batchCommand.CommandType = System.Data.CommandType.Text;
                 batchCommand.CommandText = queryString;
+
+                foreach (var parameter in spObject.GetParameters())
+                {
+                    var dbParameter = batchCommand.CreateParameter();
+                    dbParameter.ParameterName = parameter.Name;
+                    dbParameter.Value = parameter.Value;
+                    batchCommand.Parameters.Add(dbParameter);
+                }
 
                 batch.BatchCommands.Add(batchCommand);
             }

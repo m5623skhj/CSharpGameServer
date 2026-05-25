@@ -1,6 +1,6 @@
-﻿using CSharpGameServer;
+using CSharpGameServer;
 using System.Net.Sockets;
-using System.Text;
+using System.Runtime.InteropServices;
 
 namespace TestClient.Main
 {
@@ -11,29 +11,67 @@ namespace TestClient.Main
             const string ip = "127.0.0.1";
             const int port = 10001;
 
-            var client = new TcpClient(ip, port);
+            using var client = new TcpClient(ip, port);
             using var stream = client.GetStream();
 
-            const PacketType packetType = PacketType.Ping;
-            var sendData = Encoding.ASCII.GetBytes(packetType.ToString());
+            var pingPacket = new PingPacket
+            {
+                Header = new PacketHeader
+                {
+                    PacketType = (int)PacketType.Ping,
+                    PacketSize = (ushort)Marshal.SizeOf<PingPacket>()
+                }
+            };
 
+            var sendData = StructToBytes(pingPacket);
             stream.Write(sendData, 0, sendData.Length);
 
-            var recvData = new byte[512];
+            var recvData = new byte[Marshal.SizeOf<PongPacket>()];
             var recvBytes = stream.Read(recvData, 0, recvData.Length);
-            var packet = Encoding.ASCII.GetString(recvData, 0, recvBytes);
-
-            if (Enum.TryParse(packet, out PacketType receivedPacketType))
+            if (recvBytes < Marshal.SizeOf<PongPacket>())
             {
-                Console.WriteLine("Received Packet Type : " + receivedPacketType);
-            }
-            else
-            {
-                Console.WriteLine("Failed to parse received packet type");
+                Console.WriteLine("Failed to receive a full pong packet");
+                return;
             }
 
-            stream.Close();
-            client.Close();
+            var pongPacket = BytesToStruct<PongPacket>(recvData);
+            var receivedPacketType = (PacketType)pongPacket.Header.PacketType;
+
+            Console.WriteLine("Received Packet Type : " + receivedPacketType);
+        }
+
+        private static byte[] StructToBytes<T>(T packet) where T : struct
+        {
+            var size = Marshal.SizeOf<T>();
+            var buffer = new byte[size];
+            var pointer = Marshal.AllocHGlobal(size);
+
+            try
+            {
+                Marshal.StructureToPtr(packet, pointer, false);
+                Marshal.Copy(pointer, buffer, 0, size);
+                return buffer;
+            }
+            finally
+            {
+                Marshal.FreeHGlobal(pointer);
+            }
+        }
+
+        private static T BytesToStruct<T>(byte[] buffer) where T : struct
+        {
+            var size = Marshal.SizeOf<T>();
+            var pointer = Marshal.AllocHGlobal(size);
+
+            try
+            {
+                Marshal.Copy(buffer, 0, pointer, size);
+                return Marshal.PtrToStructure<T>(pointer);
+            }
+            finally
+            {
+                Marshal.FreeHGlobal(pointer);
+            }
         }
     }
 }

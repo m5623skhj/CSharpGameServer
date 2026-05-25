@@ -1,4 +1,4 @@
-﻿using System.Diagnostics.CodeAnalysis;
+using System.Diagnostics.CodeAnalysis;
 using Serilog;
 using Serilog.Core;
 using Serilog.Events;
@@ -33,51 +33,26 @@ namespace CSharpGameServer.Logger
 
         public void WriteLogVerb(string log, params object[] objects)
         {
-            if (loggerLevel.MinimumLevel < LogEventLevel.Verbose)
-            {
-                return;
-            }
-
             Log.Verbose(log, objects);
         }
 
         public void WriteLogDebug(string log, params object[] objects)
         {
-            if (loggerLevel.MinimumLevel < LogEventLevel.Debug)
-            {
-                return;
-            }
-
             Log.Debug(log, objects);
         }
 
         public void WriteLogInfo(string log, params object[] objects)
         {
-            if (loggerLevel.MinimumLevel < LogEventLevel.Information)
-            {
-                return;
-            }
-
             Log.Information(log, objects);
         }
 
         public void WriteLogWarn(string log, params object[] objects)
         {
-            if (loggerLevel.MinimumLevel < LogEventLevel.Warning)
-            {
-                return;
-            }
-
             Log.Warning(log, objects);
         }
 
         public void WriteLogError(string log, params object[] objects)
         {
-            if (loggerLevel.MinimumLevel < LogEventLevel.Error)
-            {
-                return;
-            }
-
             Log.Error(log, objects);
         }
 

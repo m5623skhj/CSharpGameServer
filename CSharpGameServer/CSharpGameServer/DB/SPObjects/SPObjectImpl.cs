@@ -1,4 +1,4 @@
-﻿namespace CSharpGameServer.DB.SPObjects
+namespace CSharpGameServer.DB.SPObjects
 {
     public abstract class PcOwnerSpObject(PC.Pc inOwner) : SpBase
     {
@@ -7,15 +7,17 @@
 
     public class TestSpObject : PcOwnerSpObject
     {
-        private int? id;
-        private string? name;
-
-        public TestSpObject(PC.Pc inOwner) 
+        public TestSpObject(PC.Pc inOwner)
             : base(inOwner)
         {
-            id = null;
-            name = null;
-            Query = "SELECT * FROM tbl WHERE id = {0} AND name = \"{1}\"";
+            Query = "SELECT * FROM tbl WHERE id = @Id AND name = @Name";
+        }
+
+        public void SetTestParams(int inId, string inName)
+        {
+            ClearParameters();
+            AddParameter("@Id", inId);
+            AddParameter("@Name", inName);
         }
 
         public override void OnCommit()

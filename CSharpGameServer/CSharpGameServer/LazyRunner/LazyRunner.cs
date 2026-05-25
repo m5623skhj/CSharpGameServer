@@ -1,4 +1,4 @@
-﻿using CSharpGameServer.DB;
+using CSharpGameServer.DB;
 using CSharpGameServer.DB.SPObjects;
 
 namespace CSharpGameServer.LazyRunner
@@ -31,21 +31,48 @@ namespace CSharpGameServer.LazyRunner
     public class SpLazyRunner(int inDelayMilliSeconds, SpBase spObject) : LazyRunner(() =>
     {
         var connection = DbConnectionManager.Instance.GetConnection();
-        if (connection == null || connection.Execute(spObject))
+        if (connection == null)
         {
             return;
         }
 
-        var queryString = spObject.GetQueryString();
-        if (queryString != null)
+        var isSuccess = false;
+        try
         {
-            Logger.LoggerManager.Instance.WriteLogError("SPLazyRunner {0} failed", queryString);
+            isSuccess = connection.Execute(spObject);
+            if (isSuccess)
+            {
+                return;
+            }
+
+            var queryString = spObject.GetQueryString();
+            if (queryString != null)
+            {
+                Logger.LoggerManager.Instance.WriteLogError("SPLazyRunner {0} failed", queryString);
+            }
+        }
+        finally
+        {
+            DbConnectionManager.Instance.ReleaseConnection(connection, isSuccess);
         }
     }, inDelayMilliSeconds);
 
     public class BatchSpLazyRunner(int inDelayMilliSeconds, BatchSpObject batchSpObject) : LazyRunner(() =>
     {
         var connection = DbConnectionManager.Instance.GetConnection();
-        connection?.ExecuteBatch(batchSpObject.GetSpList());
+        if (connection == null)
+        {
+            return;
+        }
+
+        var isSuccess = false;
+        try
+        {
+            isSuccess = connection.ExecuteBatch(batchSpObject.GetSpList());
+        }
+        finally
+        {
+            DbConnectionManager.Instance.ReleaseConnection(connection, isSuccess);
+        }
     }, inDelayMilliSeconds);
 }
