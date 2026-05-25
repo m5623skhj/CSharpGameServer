@@ -90,6 +90,11 @@ namespace CSharpGameServer.Packet
             }
 
             var packetLength = BitConverter.ToUInt16(buffer, offset + 4);
+            if (packetLength < HeaderSize)
+            {
+                return new RequestPacketResult(null, PacketResultType.InvalidReceivedData);
+            }
+
             if (packetLength > remainingSize)
             {
                 return new RequestPacketResult(null, PacketResultType.IncompleteReceived);
@@ -101,6 +106,11 @@ namespace CSharpGameServer.Packet
             }
 
             var packet = (RequestPacket)Activator.CreateInstance(packetObjectType)!;
+            if (packet.LoadFromBytes(buffer, offset, packetLength) == false)
+            {
+                return new RequestPacketResult(null, PacketResultType.InvalidReceivedData);
+            }
+
             return new RequestPacketResult(packet, PacketResultType.Success, packetLength);
         }
     }

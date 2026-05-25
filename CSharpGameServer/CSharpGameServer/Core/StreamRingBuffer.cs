@@ -26,6 +26,8 @@
         {
             bufferSize = inBufferSize;
             buffer = new byte[inBufferSize];
+            head = 0;
+            tail = 0;
         }
 
         public bool PushData(byte[] inputData)
@@ -67,15 +69,7 @@
                 return data;
             }
 
-            var headToBufferEnd = bufferSize - head;
-            if (headToBufferEnd < popSize)
-            {
-                head = popSize - headToBufferEnd;
-            }
-            else
-            {
-                head += popSize;
-            }
+            head = (head + popSize) % bufferSize;
 
             return data;
         }
@@ -97,14 +91,7 @@
                 return false;
             }
 
-            if (head > tail)
-            {
-                head = head + eraseSize - bufferSize;
-            }
-            else
-            {
-                head += eraseSize;
-            }
+            head = (head + eraseSize) % bufferSize;
 
             return true;
         }
@@ -137,21 +124,26 @@
         private byte[] GetData(uint dataSize)
         {
             var data = new byte[dataSize];
+            if (dataSize == 0)
+            {
+                return data;
+            }
+
             if (head < tail)
             {
-                Array.Copy(buffer, head, data, 0, head + dataSize);
+                Array.Copy(buffer, head, data, 0, dataSize);
             }
             else
             {
-                var tailToEndSize = bufferSize - tail;
-                if (tailToEndSize >= dataSize)
+                var headToEndSize = bufferSize - head;
+                if (headToEndSize >= dataSize)
                 {
-                    Array.Copy(buffer, tail, data, 0, dataSize);
+                    Array.Copy(buffer, head, data, 0, dataSize);
                 }
                 else
                 {
-                    Array.Copy(buffer, tail, data, 0, tailToEndSize);
-                    Array.Copy(buffer, tail, data, tailToEndSize, dataSize - tailToEndSize);
+                    Array.Copy(buffer, head, data, 0, headToEndSize);
+                    Array.Copy(buffer, 0, data, headToEndSize, dataSize - headToEndSize);
                 }
             }
 

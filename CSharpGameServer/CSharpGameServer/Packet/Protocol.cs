@@ -27,19 +27,19 @@ namespace CSharpGameServer.Packet
             return PacketHandlerManager.HandlePing;
         }
 
-        public override void LoadFromBytes(byte[] buffer, int offset, ushort length)
+        public override bool LoadFromBytes(byte[] buffer, int offset, ushort length)
         {
             var size = Marshal.SizeOf<PingData>();
             if (length < size)
             {
                 Logger.LoggerManager.Instance.WriteLogError("Ping packet length {length} < struct size {size}", length, size);
-                return;
+                return false;
             }
 
             if (offset + size > buffer.Length)
             {
                 Logger.LoggerManager.Instance.WriteLogError("Ping buffer overflow: offset={offset}, size={size}, bufferLength={bufferLength}", offset, size, buffer.Length);
-                return;
+                return false;
             }
 
             var ptr = Marshal.AllocHGlobal(size);
@@ -52,6 +52,8 @@ namespace CSharpGameServer.Packet
             {
                 Marshal.FreeHGlobal(ptr);
             }
+
+            return true;
         }
 
         public override byte[] ToBytes()
@@ -91,19 +93,19 @@ namespace CSharpGameServer.Packet
             Type = PacketType.Pong;
         }
 
-        public override void LoadFromBytes(byte[] buffer, int offset, ushort length)
+        public override bool LoadFromBytes(byte[] buffer, int offset, ushort length)
         {
             var size = Marshal.SizeOf<PongData>();
             if (length < size)
             {
                 Logger.LoggerManager.Instance.WriteLogError("Pong packet length {length} < struct size {size}", length, size);
-                return;
+                return false;
             }
 
             if (offset + size > buffer.Length)
             {
                 Logger.LoggerManager.Instance.WriteLogError("Pong buffer overflow: offset={offset}, size={size}, bufferLength={bufferLength}", offset, size, buffer.Length);
-                return;
+                return false;
             }
 
             var ptr = Marshal.AllocHGlobal(size);
@@ -116,6 +118,8 @@ namespace CSharpGameServer.Packet
             {
                 Marshal.FreeHGlobal(ptr);
             }
+
+            return true;
         }
 
         public override byte[] ToBytes()

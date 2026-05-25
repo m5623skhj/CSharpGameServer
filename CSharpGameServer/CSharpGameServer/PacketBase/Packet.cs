@@ -13,8 +13,9 @@ namespace CSharpGameServer.PacketBase
         public PacketType Type = PacketType.InvalidPacketType;
         public abstract void SetPacketType();
 
-        public virtual void LoadFromBytes(byte[] buffer, int offset, ushort length)
+        public virtual bool LoadFromBytes(byte[] buffer, int offset, ushort length)
         {
+            return true;
         }
 
         public abstract byte[] ToBytes();

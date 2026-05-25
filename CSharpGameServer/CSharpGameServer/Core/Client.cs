@@ -49,9 +49,9 @@ namespace CSharpGameServer.Core
             return streamRingBuffer.PeekAllData();
         }
 
-        public void RemoveStreamData(uint removeSize)
+        public bool RemoveStreamData(uint removeSize)
         {
-            streamRingBuffer.EraseData(removeSize);
+            return streamRingBuffer.EraseData(removeSize);
         }
     }
 }

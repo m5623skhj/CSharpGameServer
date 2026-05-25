@@ -1,5 +1,6 @@
-﻿using System.Diagnostics;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using System.IO;
 
 namespace CSharpGameServer.DB.Migration
 {
@@ -10,9 +11,20 @@ namespace CSharpGameServer.DB.Migration
         [field: AllowNull, MaybeNull]
         public static MigrationRunner Instance => field ??= new MigrationRunner();
 
-        public int RunMigration()
+        public bool RunMigration()
         {
-            var migrationResult = 0;
+            if (string.IsNullOrWhiteSpace(MigratorFilePath))
+            {
+                Logger.LoggerManager.WriteLogFatal("Migration failed: migrator file path is empty");
+                return false;
+            }
+
+            if (File.Exists(MigratorFilePath) == false)
+            {
+                Logger.LoggerManager.WriteLogFatal("Migration failed: migrator file does not exist {migratorFilePath}", MigratorFilePath);
+                return false;
+            }
+
             var startInfo = new ProcessStartInfo
             {
                 FileName = MigratorFilePath
@@ -21,23 +33,27 @@ namespace CSharpGameServer.DB.Migration
             try
             {
                 var process = Process.Start(startInfo);
-                if(process == null)
+                if (process == null)
                 {
-                    return migrationResult;
+                    Logger.LoggerManager.WriteLogFatal("Migration failed: process start returned null");
+                    return false;
                 }
 
                 process.WaitForExit();
-                migrationResult = process.ExitCode;
+                if (process.ExitCode != 0)
+                {
+                    Logger.LoggerManager.WriteLogFatal("Migration failed with exit code {exitCode}", process.ExitCode);
+                    return false;
+                }
 
                 Logger.LoggerManager.Instance.WriteLogInfo("Migration succeeded");
+                return true;
             }
             catch (Exception e)
             {
                 Logger.LoggerManager.WriteLogFatal("Migration failed with {exception}", e.Message);
-                return migrationResult;
+                return false;
             }
-
-            return migrationResult;
         }
     }
 }

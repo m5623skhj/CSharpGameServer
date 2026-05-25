@@ -1,5 +1,6 @@
-﻿using Serilog.Events;
+using Serilog.Events;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace CSharpGameServer.Config
 {
@@ -10,7 +11,7 @@ namespace CSharpGameServer.Config
         }
 
         public LogEventLevel LogLevel = 0;
-        
+
         public string DbServerIp = "";
         public string DbSchemaName = "";
         public string DbUserId = "";
@@ -19,6 +20,13 @@ namespace CSharpGameServer.Config
 
     public class Config
     {
+        private static readonly JsonSerializerOptions JsonOptions = new()
+        {
+            IncludeFields = true,
+            PropertyNameCaseInsensitive = true,
+            Converters = { new JsonStringEnumConverter() }
+        };
+
         public ConfigItem Conf { get; private set; }
 
         public bool ReadConfig()
@@ -26,7 +34,8 @@ namespace CSharpGameServer.Config
             try
             {
                 var configJson = File.ReadAllText("Config/config.json");
-                Conf = JsonSerializer.Deserialize<ConfigItem>(configJson);
+                var config = JsonSerializer.Deserialize<ConfigItem>(configJson, JsonOptions);
+                Conf = config;
 
                 return true;
             }

@@ -6,7 +6,7 @@ namespace CSharpGameServer.Core.LogicWorkerThread
 {
     internal class LogicWorker
     {
-        private readonly ManualResetEvent doWorkThreadEvent = new(false);
+        private readonly AutoResetEvent doWorkThreadEvent = new(false);
         private readonly ManualResetEvent stopThreadEvent = new(false);
         private readonly Thread? thread;
         private readonly int threadId;

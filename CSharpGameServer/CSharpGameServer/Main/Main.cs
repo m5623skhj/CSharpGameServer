@@ -5,7 +5,10 @@
         private static void Main(string[] args)
         {
             var gameServer = new GameServer.GameServer();
-            gameServer.Run();
+            if (gameServer.Run() == false)
+            {
+                Environment.ExitCode = 1;
+            }
         }
     }
 }

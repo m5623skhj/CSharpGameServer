@@ -6,14 +6,24 @@ namespace CSharpGameServer.GameServer
 {
     public class GameServerCore : ServerCore
     {
-        public override void Initialize()
+        public override bool Initialize()
         {
-            base.Initialize();
+            if (base.Initialize() == false)
+            {
+                return false;
+            }
+
             PcManager.Instance.SetServerCore(this);
+            return true;
         }
 
         protected override void ProcessAccept(SocketAsyncEventArgs acceptEventArgs)
         {
+            if (acceptEventArgs.SocketError != SocketError.Success)
+            {
+                return;
+            }
+
             var clientSocket = acceptEventArgs.AcceptSocket;
             if (clientSocket == null)
             {
@@ -26,14 +36,6 @@ namespace CSharpGameServer.GameServer
             ThreadPool.QueueUserWorkItem(StartReceive, newPc);
 
             ClientManager.Instance.InsertSessionIdToClient(newSessionId, newPc);
-            acceptEventArgs.Completed += (_, args) =>
-            {
-                if (args.SocketError != SocketError.Success)
-                {
-                    CloseClient(newSessionId);
-                }
-            };
-
             acceptEventArgs.AcceptSocket = null;
         }
     }

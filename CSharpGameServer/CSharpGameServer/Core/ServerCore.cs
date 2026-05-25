@@ -3,7 +3,6 @@ using CSharpGameServer.DB;
 using CSharpGameServer.Logger;
 using System.Net;
 using System.Net.Sockets;
-using System.Runtime.InteropServices;
 using CSharpGameServer.Packet;
 using CSharpGameServer.PacketBase;
 
@@ -24,21 +23,22 @@ namespace CSharpGameServer.Core
         private const int LogicThreadSize = 16;
         private readonly Config.Config config = new();
 
-        public virtual void Initialize()
+        public virtual bool Initialize()
         {
             if (InitializeByConfig() == false)
             {
-                return;
+                return false;
             }
             if (PacketRegisterList.RegisterAllPacket() == false)
             {
                 LoggerManager.Instance.WriteLogError("RegisterAllPacket failed");
-                return;
+                return false;
             }
 
             ClientManager.Instance.SetServerCore(this);
 
             logicWorkerThreadManager.MakeThreads(LogicThreadSize);
+            return true;
         }
 
         private bool InitializeByConfig()
@@ -88,22 +88,32 @@ namespace CSharpGameServer.Core
 
         private void StartAccept()
         {
-            var acceptEventArgs = new SocketAsyncEventArgs();
-            acceptEventArgs.Completed += AcceptCompleted;
-
             if (listenSocket == null || running == false)
             {
                 return;
             }
 
-            if (listenSocket.AcceptAsync(acceptEventArgs) == false)
+            while (running && listenSocket != null)
             {
-                ProcessAccept(acceptEventArgs);
+                var acceptEventArgs = new SocketAsyncEventArgs();
+                acceptEventArgs.Completed += AcceptCompleted;
+
+                if (listenSocket.AcceptAsync(acceptEventArgs))
+                {
+                    return;
+                }
+
+                CompleteAccept(acceptEventArgs);
             }
         }
 
         protected virtual void ProcessAccept(SocketAsyncEventArgs acceptEventArgs)
         {
+            if (acceptEventArgs.SocketError != SocketError.Success)
+            {
+                return;
+            }
+
             var clientSocket = acceptEventArgs.AcceptSocket;
             if (clientSocket == null)
             {
@@ -116,20 +126,12 @@ namespace CSharpGameServer.Core
             ThreadPool.QueueUserWorkItem(StartReceive, newClient);
 
             ClientManager.Instance.InsertSessionIdToClient(newSessionId, newClient);
-            acceptEventArgs.Completed += (sender, args) =>
-            {
-                if (args.SocketError != SocketError.Success)
-                {
-                    CloseClient(newSessionId);
-                }
-            };
-
             acceptEventArgs.AcceptSocket = null;
         }
 
         private void AcceptCompleted(object? sender, SocketAsyncEventArgs acceptEventArgs)
         {
-            ProcessAccept(acceptEventArgs);
+            CompleteAccept(acceptEventArgs);
             StartAccept();
         }
 
@@ -140,24 +142,40 @@ namespace CSharpGameServer.Core
                 return;
             }
 
-            var receiveEventArgs = new SocketAsyncEventArgs();
-            receiveEventArgs.SetBuffer(new byte[BufferSize], 0, BufferSize);
-            receiveEventArgs.Completed += ReceiveCompleted;
-            receiveEventArgs.UserToken = client;
+            while (true)
+            {
+                var receiveEventArgs = new SocketAsyncEventArgs();
+                receiveEventArgs.SetBuffer(new byte[BufferSize], 0, BufferSize);
+                receiveEventArgs.Completed += ReceiveCompleted;
+                receiveEventArgs.UserToken = client;
 
-            client.Socket.ReceiveAsync(receiveEventArgs);
+                if (client.Socket.ReceiveAsync(receiveEventArgs))
+                {
+                    return;
+                }
+
+                var shouldContinue = ProcessReceive(receiveEventArgs);
+                receiveEventArgs.Dispose();
+                if (shouldContinue == false)
+                {
+                    return;
+                }
+            }
         }
 
         private void ReceiveCompleted(object? sender, SocketAsyncEventArgs receiveEventArgs)
         {
-            if (receiveEventArgs.UserToken == null)
+            if (receiveEventArgs.UserToken is not Client client)
             {
+                receiveEventArgs.Dispose();
                 return;
             }
 
-            if (ProcessReceive(receiveEventArgs))
+            var shouldContinue = ProcessReceive(receiveEventArgs);
+            receiveEventArgs.Dispose();
+            if (shouldContinue)
             {
-                StartReceive((Client)receiveEventArgs.UserToken);
+                StartReceive(client);
             }
         }
 
@@ -196,13 +214,15 @@ namespace CSharpGameServer.Core
                 return false;
             }
 
-            var storedStream = receivedClient.PeekAllStreamData();
-            var storedSize = storedStream.Length;
-            ushort bufferStartPoint = 0;
-
-            while (storedSize > 0)
+            while (true)
             {
-                var requestPacketResult = GetPacketFromReceivedData(receivedData, bufferStartPoint);
+                var storedStream = receivedClient.PeekAllStreamData();
+                if (storedStream.Length == 0)
+                {
+                    return true;
+                }
+
+                var requestPacketResult = GetPacketFromReceivedData(storedStream, 0);
                 switch (requestPacketResult.ResultType) 
                 {
                     case PacketResultType.InvalidReceivedData:
@@ -215,9 +235,10 @@ namespace CSharpGameServer.Core
                     }
                     case PacketResultType.Success:
                     {
-                        storedSize -= requestPacketResult.PacketLength;
-                        bufferStartPoint += requestPacketResult.PacketLength;
-                        receivedClient.RemoveStreamData(requestPacketResult.PacketLength);
+                        if (receivedClient.RemoveStreamData(requestPacketResult.PacketLength) == false)
+                        {
+                            return false;
+                        }
 
                         // Since the null check is already performed in GetPacketFromReceivedData(),
                         // it is not rechecked here.
@@ -237,7 +258,6 @@ namespace CSharpGameServer.Core
                 }
             }
 
-            return true;
         }
 
         private static RequestPacketResult GetPacketFromReceivedData(byte[] buffer, ushort bufferStartPoint)
@@ -247,29 +267,24 @@ namespace CSharpGameServer.Core
 
         public void SendPacket(Client client, ReplyPacket packet)
         {
-            SendStream(client, ReplyPacketToStream(packet));
+            SendStream(client, packet.ToBytes());
         }
 
         private static void SendCompleted(object? sender, SocketAsyncEventArgs sendEventArgs)
         {
-            if (sendEventArgs.UserToken is not Client client)
+            try
             {
-                return;
+                if (sendEventArgs.UserToken is not Client client)
+                {
+                    return;
+                }
+
+                client.OnSend();
             }
-
-            client.OnSend();
-        }
-
-        private static byte[] ReplyPacketToStream(ReplyPacket packet)
-        {
-            var packetSize = Marshal.SizeOf(packet);
-            var stream = new byte[packetSize];
-            var pointer = Marshal.AllocHGlobal(packetSize);
-            Marshal.StructureToPtr(packet, pointer, false);
-            Marshal.Copy(pointer, stream, 0, packetSize);
-            Marshal.FreeHGlobal(pointer);
-
-            return stream;
+            finally
+            {
+                sendEventArgs.Dispose();
+            }
         }
 
         private static void SendStream(Client client, byte[] inData)
@@ -279,7 +294,22 @@ namespace CSharpGameServer.Core
             sendEventArgs.Completed += SendCompleted;
             sendEventArgs.UserToken = client;
 
-            client.Socket.SendAsync(sendEventArgs);
+            if (client.Socket.SendAsync(sendEventArgs) == false)
+            {
+                SendCompleted(null, sendEventArgs);
+            }
+        }
+
+        private void CompleteAccept(SocketAsyncEventArgs acceptEventArgs)
+        {
+            try
+            {
+                ProcessAccept(acceptEventArgs);
+            }
+            finally
+            {
+                acceptEventArgs.Dispose();
+            }
         }
 
         public void CloseClient(ulong closedClientSessionId)
