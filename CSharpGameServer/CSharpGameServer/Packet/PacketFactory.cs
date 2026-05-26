@@ -64,7 +64,18 @@ namespace CSharpGameServer.Packet
                 LoggerManager.WriteLogFatal("Invalid packet object type {packetObjectType}", packetObjectType);
                 return false;
             }
-            
+
+            if (packetTypeDict.TryGetValue(packetType, out var registeredPacketType))
+            {
+                if (registeredPacketType == packetObjectType)
+                {
+                    return true;
+                }
+
+                LoggerManager.WriteLogFatal("Duplicated packet type {packetType} / {packetObjectType}", packetType, packetObjectType);
+                return false;
+            }
+
             if (packetTypeDict.TryAdd(packetType, packetObjectType))
             {
                 return true;

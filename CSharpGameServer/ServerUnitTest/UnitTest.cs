@@ -51,6 +51,17 @@ namespace ServerUnitTest
 
     public class UnitTest
     {
+        private static string CreateTempConfigFile(string configJson)
+        {
+            var tempDirectory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
+            Directory.CreateDirectory(tempDirectory);
+
+            var configPath = Path.Combine(tempDirectory, "config.json");
+            File.WriteAllText(configPath, configJson);
+
+            return configPath;
+        }
+
         [Fact]
         public void StreamRingBuffer_PeekAllData_ReturnsWrappedDataInOrder()
         {
@@ -223,6 +234,60 @@ namespace ServerUnitTest
         }
 
         [Fact]
+        public void Config_ReadConfig_ReturnsFalseWhenRequiredValueIsEmpty()
+        {
+            var configJson = """
+            {
+              "LogLevel": "Debug",
+              "DBServerIP": "127.0.0.1",
+              "DBSchemaName": "test_schema",
+              "DBUserId": "test",
+              "DBUserPassword": "dbPassword",
+              "MigratorFilePath": ""
+            }
+            """;
+
+            var configPath = CreateTempConfigFile(configJson);
+            try
+            {
+                var config = new Config();
+
+                Assert.False(config.ReadConfig(configPath));
+            }
+            finally
+            {
+                Directory.Delete(Path.GetDirectoryName(configPath)!, true);
+            }
+        }
+
+        [Fact]
+        public void Config_ReadConfig_ReturnsTrueWhenRequiredValuesExist()
+        {
+            var configJson = """
+            {
+              "LogLevel": "Debug",
+              "DBServerIP": "127.0.0.1",
+              "DBSchemaName": "test_schema",
+              "DBUserId": "test",
+              "DBUserPassword": "dbPassword",
+              "MigratorFilePath": "migrator.exe"
+            }
+            """;
+
+            var configPath = CreateTempConfigFile(configJson);
+            try
+            {
+                var config = new Config();
+
+                Assert.True(config.ReadConfig(configPath));
+            }
+            finally
+            {
+                Directory.Delete(Path.GetDirectoryName(configPath)!, true);
+            }
+        }
+
+        [Fact]
         public void SpBase_CreateCommand_BindsNamedParameters()
         {
             var spObject = new ParameterizedSpObject();
@@ -235,6 +300,25 @@ namespace ServerUnitTest
             Assert.Equal(2, command.Parameters.Count);
             Assert.Equal(10, command.Parameters["@Id"].Value);
             Assert.Equal("tester", command.Parameters["@Name"].Value);
+        }
+
+        [Fact]
+        public void PacketFactory_RegisterPacket_ReturnsTrueWhenSameTypeIsRegisteredAgain()
+        {
+            var packetFactory = new PacketFactory();
+
+            Assert.True(packetFactory.RegisterPacket(PacketType.Ping, typeof(PingPacket)));
+            Assert.True(packetFactory.RegisterPacket(PacketType.Ping, typeof(PingPacket)));
+        }
+
+        [Fact]
+        public void PacketHandlerManager_RegisterPacketHandler_ReturnsTrueWhenSameHandlerIsRegisteredAgain()
+        {
+            var packetHandlerManager = new PacketHandlerManager();
+            Action<Client, RequestPacket> handler = (_, _) => { };
+
+            Assert.True(packetHandlerManager.RegisterPacketHandler(PacketType.Ping, handler));
+            Assert.True(packetHandlerManager.RegisterPacketHandler(PacketType.Ping, handler));
         }
     }
 }

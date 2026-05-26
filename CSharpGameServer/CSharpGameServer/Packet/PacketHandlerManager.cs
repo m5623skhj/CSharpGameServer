@@ -34,6 +34,17 @@ namespace CSharpGameServer.Packet
                 return false;
             }
 
+            if (packetHandlerDict.TryGetValue(packetType, out var registeredHandler))
+            {
+                if (registeredHandler == handler)
+                {
+                    return true;
+                }
+
+                LoggerManager.Instance.WriteLogError("Duplicated packet type {packetType} / {handler.Method.Name}", packetType, handler.Method.Name);
+                return false;
+            }
+
             if (packetHandlerDict.TryAdd(packetType, handler))
             {
                 return true;

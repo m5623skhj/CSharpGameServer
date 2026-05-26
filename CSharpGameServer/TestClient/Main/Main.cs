@@ -27,8 +27,7 @@ namespace TestClient.Main
             stream.Write(sendData, 0, sendData.Length);
 
             var recvData = new byte[Marshal.SizeOf<PongPacket>()];
-            var recvBytes = stream.Read(recvData, 0, recvData.Length);
-            if (recvBytes < Marshal.SizeOf<PongPacket>())
+            if (ReadExact(stream, recvData, recvData.Length) == false)
             {
                 Console.WriteLine("Failed to receive a full pong packet");
                 return;
@@ -72,6 +71,23 @@ namespace TestClient.Main
             {
                 Marshal.FreeHGlobal(pointer);
             }
+        }
+
+        private static bool ReadExact(NetworkStream stream, byte[] buffer, int size)
+        {
+            var receivedSize = 0;
+            while (receivedSize < size)
+            {
+                var readBytes = stream.Read(buffer, receivedSize, size - receivedSize);
+                if (readBytes <= 0)
+                {
+                    return false;
+                }
+
+                receivedSize += readBytes;
+            }
+
+            return true;
         }
     }
 }
